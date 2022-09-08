@@ -15217,6 +15217,7 @@
     "xpack.infra.homePage.toolbar.showingLastOneMinuteDataText": "选定时间过去 {duration}的数据",
     "xpack.infra.infrastructureMetricsExplorerPage.documentTitle": "{previousTitle} | 指标浏览器",
     "xpack.infra.infrastructureSnapshotPage.documentTitle": "{previousTitle} | 库存",
+    "xpack.infra.infrastructureSettingsPage.documentTitle": "{previousTitle} | 设置",
     "xpack.infra.inventoryTimeline.header": "平均值 {metricLabel}",
     "xpack.infra.kibanaMetrics.cloudIdMissingErrorMessage": "{metricId} 的模型需要云 ID，但没有为 {nodeId} 提供。",
     "xpack.infra.kibanaMetrics.invalidInfraMetricErrorMessage": "{id} 不是有效的 InfraMetric",

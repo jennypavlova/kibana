@@ -15200,6 +15200,7 @@
     "xpack.infra.homePage.toolbar.showingLastOneMinuteDataText": "指定期間のデータの最後の{duration}",
     "xpack.infra.infrastructureMetricsExplorerPage.documentTitle": "{previousTitle} | メトリックエクスプローラー",
     "xpack.infra.infrastructureSnapshotPage.documentTitle": "{previousTitle} | インベントリ",
+    "xpack.infra.infrastructureSettingsPage.documentTitle": "{previousTitle} | 設定",
     "xpack.infra.inventoryTimeline.header": "平均{metricLabel}",
     "xpack.infra.kibanaMetrics.cloudIdMissingErrorMessage": "{metricId} のモデルには cloudId が必要ですが、{nodeId} に cloudId が指定されていません。",
     "xpack.infra.kibanaMetrics.invalidInfraMetricErrorMessage": "{id} は有効な InfraMetric ではありません",

@@ -15212,6 +15212,7 @@
     "xpack.infra.homePage.toolbar.showingLastOneMinuteDataText": "Dernières {duration} de données pour l'heure sélectionnée",
     "xpack.infra.infrastructureMetricsExplorerPage.documentTitle": "{previousTitle} | Metrics Explorer",
     "xpack.infra.infrastructureSnapshotPage.documentTitle": "{previousTitle} | Inventory",
+    "xpack.infra.infrastructureSettingsPage.documentTitle": "{previousTitle} | Paramètres",
     "xpack.infra.inventoryTimeline.header": "{metricLabel} moyen",
     "xpack.infra.kibanaMetrics.cloudIdMissingErrorMessage": "Le modèle de {metricId} nécessite un cloudId, mais aucun n'a été attribué à {nodeId}.",
     "xpack.infra.kibanaMetrics.invalidInfraMetricErrorMessage": "{id} n'est pas une valeur inframétrique valide",

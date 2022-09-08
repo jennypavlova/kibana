@@ -94,6 +94,9 @@ export const SourceConfigurationSettings = ({
       pageHeader={{
         pageTitle: settingsTitle,
       }}
+      pageBodyProps={{
+        id: 'start-of-content',
+      }}
       data-test-subj="sourceConfigurationContent"
       restrictWidth
     >

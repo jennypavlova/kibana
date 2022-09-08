@@ -14,7 +14,7 @@ import { EuiErrorBoundary, EuiHeaderLinks, EuiHeaderLink } from '@elastic/eui';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { HeaderMenuPortal } from '@kbn/observability-plugin/public';
 import { useLinkProps } from '@kbn/observability-plugin/public';
-import { EuiScreenReaderLive } from '@elastic/eui';
+import { EuiScreenReaderLive, EuiSkipLink } from '@elastic/eui';
 import { MetricsSourceConfigurationProperties } from '../../../common/metrics_sources';
 import { DocumentTitle } from '../../components/document_title';
 import { HelpCenterContent } from '../../components/help_center_content';
@@ -82,6 +82,14 @@ export const InfrastructurePage = ({ match }: RouteComponentProps) => {
                   <EuiScreenReaderLive focusRegionOnTextChange>
                     {document.title}
                   </EuiScreenReaderLive>
+                  <EuiSkipLink
+                    color="ghost"
+                    destinationId="start-of-content"
+                    position="fixed"
+                    overrideLinkBehavior
+                  >
+                    Skip to content
+                  </EuiSkipLink>
 
                   <HelpCenterContent
                     feedbackLink="https://discuss.elastic.co/c/metrics"

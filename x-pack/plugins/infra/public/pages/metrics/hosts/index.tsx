@@ -64,6 +64,7 @@ export const HostsPage = () => {
               }}
               pageBodyProps={{
                 paddingSize: 'none',
+                id: 'start-of-content',
               }}
             >
               <MetricsDataViewProvider metricAlias={source.configuration.metricAlias}>

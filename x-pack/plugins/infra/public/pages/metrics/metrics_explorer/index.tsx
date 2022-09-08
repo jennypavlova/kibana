@@ -98,6 +98,9 @@ export const MetricsExplorerPage = ({ source, derivedIndexPattern }: MetricsExpl
             />,
           ],
         }}
+        pageBodyProps={{
+          id: 'start-of-content',
+        }}
       >
         <MetricsExplorerToolbar
           derivedIndexPattern={derivedIndexPattern}

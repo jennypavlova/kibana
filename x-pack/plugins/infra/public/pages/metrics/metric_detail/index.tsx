@@ -86,7 +86,12 @@ export const MetricDetail = withMetricPageProviders(
 
     if (metadataLoading && !filteredRequiredMetrics.length) {
       return (
-        <MetricsPageTemplate hasData={metricIndicesExist}>
+        <MetricsPageTemplate
+          pageBodyProps={{
+            id: 'start-of-content',
+          }}
+          hasData={metricIndicesExist}
+        >
           <InfraLoadingPanel
             height="100vh"
             width="100%"

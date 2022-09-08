@@ -77,6 +77,7 @@ export const SnapshotPage = () => {
                 }}
                 pageBodyProps={{
                   paddingSize: 'none',
+                  id: 'start-of-content',
                 }}
               >
                 <SnapshotContainer

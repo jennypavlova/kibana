@@ -97,6 +97,9 @@ export const NodeDetailsPage = (props: Props) => {
           />,
         ],
       }}
+      pageBodyProps={{
+        id: 'start-of-content',
+      }}
     >
       <EuiFlexGroup>
         <EuiFlexItem grow={false}>

@@ -68,6 +68,15 @@ export const InfrastructurePage = ({ match }: RouteComponentProps) => {
 
   return (
     <EuiErrorBoundary>
+      <EuiScreenReaderLive focusRegionOnTextChange>{document.title}</EuiScreenReaderLive>
+      <EuiSkipLink
+        color="ghost"
+        destinationId="start-of-content"
+        position="fixed"
+        overrideLinkBehavior
+      >
+        Skip to content
+      </EuiSkipLink>
       <SourceProvider sourceId="default">
         <AlertPrefillProvider>
           <WaffleOptionsProvider>
@@ -79,17 +88,6 @@ export const InfrastructurePage = ({ match }: RouteComponentProps) => {
                       defaultMessage: 'Metrics',
                     })}
                   />
-                  <EuiScreenReaderLive focusRegionOnTextChange>
-                    {document.title}
-                  </EuiScreenReaderLive>
-                  <EuiSkipLink
-                    color="ghost"
-                    destinationId="start-of-content"
-                    position="fixed"
-                    overrideLinkBehavior
-                  >
-                    Skip to content
-                  </EuiSkipLink>
 
                   <HelpCenterContent
                     feedbackLink="https://discuss.elastic.co/c/metrics"

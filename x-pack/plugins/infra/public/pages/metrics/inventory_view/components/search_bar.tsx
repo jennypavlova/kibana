@@ -34,7 +34,6 @@ export const SearchBar = () => {
           })}
           suggestions={suggestions}
           value={filterQueryDraft ? filterQueryDraft : ''}
-          autoFocus={true}
         />
       )}
     </WithKueryAutocompletion>

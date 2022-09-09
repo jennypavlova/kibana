@@ -50,6 +50,8 @@ const ADD_DATA_LABEL = i18n.translate('xpack.infra.metricsHeaderAddDataButtonLab
 });
 
 export const InfrastructurePage = ({ match }: RouteComponentProps) => {
+  const [title, setTitle] = React.useState('');
+
   const uiCapabilities = useKibana().services.application?.capabilities;
   const { setHeaderActionMenu, theme$ } = useContext(HeaderActionMenuContext);
 
@@ -66,15 +68,16 @@ export const InfrastructurePage = ({ match }: RouteComponentProps) => {
     pathname: 'settings',
   });
 
+  React.useEffect(() => {
+    if (document.title !== title) {
+      setTitle(document.title);
+    }
+  }, [title]);
+
   return (
     <EuiErrorBoundary>
-      <EuiScreenReaderLive focusRegionOnTextChange>{document.title}</EuiScreenReaderLive>
-      <EuiSkipLink
-        color="ghost"
-        destinationId="start-of-content"
-        position="fixed"
-        overrideLinkBehavior
-      >
+      <EuiScreenReaderLive focusRegionOnTextChange>{title}</EuiScreenReaderLive>
+      <EuiSkipLink color="ghost" destinationId="start-of-content" overrideLinkBehavior>
         Skip to content
       </EuiSkipLink>
       <SourceProvider sourceId="default">

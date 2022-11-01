@@ -19,8 +19,8 @@ import { MetricsDataViewProvider } from './hooks/use_data_view';
 import { fullHeightContentStyles } from '../../../page_template.styles';
 import { UnifiedSearchProvider } from './hooks/use_unified_search';
 import { HostContainer } from './components/hosts_container';
-import { HostsQueryProvider } from './hooks/use_host_query';
-import { HostFiltersProvider } from './hooks/use_host_filters';
+// import { HostsQueryProvider } from './hooks/use_host_query';
+// import { HostFiltersProvider } from './hooks/use_host_filters';
 
 export const HostsPage = () => {
   const {
@@ -58,13 +58,13 @@ export const HostsPage = () => {
               }}
             >
               <MetricsDataViewProvider metricAlias={source.configuration.metricAlias}>
-                <HostFiltersProvider>
-                  <HostsQueryProvider>
-                    <UnifiedSearchProvider>
-                      <HostContainer />
-                    </UnifiedSearchProvider>
-                  </HostsQueryProvider>
-                </HostFiltersProvider>
+                {/* <HostFiltersProvider> */}
+                {/* <HostsQueryProvider> */}
+                <UnifiedSearchProvider>
+                  <HostContainer />
+                </UnifiedSearchProvider>
+                {/* </HostsQueryProvider> */}
+                {/* </HostFiltersProvider> */}
               </MetricsDataViewProvider>
             </MetricsPageTemplate>
           </div>

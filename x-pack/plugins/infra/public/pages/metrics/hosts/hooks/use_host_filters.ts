@@ -17,7 +17,7 @@ import { FilterStateStore } from '@kbn/es-query';
 import type { InfraClientStartDeps } from '../../../../types';
 import { useUrlState } from '../../../../utils/use_url_state';
 
-export const DEFAULT_HOSTS_FILTERS_STATE = [];
+export const DEFAULT_HOSTS_FILTERS_STATE: HostsFilters = [];
 
 export const useHostFilters = () => {
   const { services } = useKibana<InfraClientStartDeps>();

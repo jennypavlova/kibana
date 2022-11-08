@@ -57,14 +57,16 @@ type Action =
 const reducer = (state: HostsState, action: Action): HostsState => {
   switch (action.type) {
     case 'setFilter':
-      return { ...state, filters: action.payload };
+      return { ...state, filters: [...action.payload] };
     case 'setQuery':
-      const { filters, ...payload } = action.payload;
+      const { filters, query, ...payload } = action.payload;
       const newFilters = !filters ? state.filters : filters;
+      const newQuery = !query ? state.query : query;
       return {
         ...state,
         ...payload,
         filters: [...newFilters],
+        query: { ...newQuery },
       };
     default:
       throw new Error();
@@ -94,7 +96,7 @@ export const useUnifiedSearch = () => {
     to: state.dateRange.to,
   });
 
-  const { queryString, filterManager } = queryManager;
+  const { filterManager } = queryManager;
 
   const getRangeInTimestamp = useCallback(({ from, to }: TimeRange) => {
     const fromTS = DateMath.parse(from)?.valueOf() ?? 0;
@@ -112,9 +114,6 @@ export const useUnifiedSearch = () => {
     }
   }, [setUrlState, state, urlState]);
 
-  const queryToString = (query?: Query) =>
-    (typeof query?.query !== 'string' ? JSON.stringify(query?.query) : query?.query) ?? '';
-
   const onSubmit = useCallback(
     (query?: Query, dateRange?: TimeRange, filters?: Filter[]) => {
       if (query || dateRange || filters) {
@@ -127,7 +126,7 @@ export const useUnifiedSearch = () => {
 
         // Having only one setter, decreases the possiblity of rerendering too many times.
         // I especially had more problems with dateRangeTimestamp, because it needs to be converted - and this conversion caused more rerenders
-        // Another advantage of managing the Unified Search state in this hooks is that we don't need an extra useEffect to
+        // Another advantage of managing the Unified Search state in this event is that we don't need an extra useEffect to
         // get the state from the url into Unified Search state through queryString and filterManager
         dispatch({
           type: 'setQuery',
@@ -145,7 +144,7 @@ export const useUnifiedSearch = () => {
 
   // This won't prevent onSubmit from being fired when `clear filters` is clicked,
   // that happens because both onQuerySubmit and onFiltersUpdated are internally triggered on same event by SearchBar.
-  // This justs delays potential duplicate onSubmit calls
+  // This just delays potential duplicate onSubmit calls
   // eslint-disable-next-line react-hooks/exhaustive-deps
   const debounceOnSubmit = useCallback(debounce(onSubmit, 100), [onSubmit]);
 
@@ -187,7 +186,7 @@ export const useUnifiedSearch = () => {
     onSubmit: debounceOnSubmit,
     saveQuery,
     clearSavedQUery,
-    // we'll use the hooks state instad of unified searchs's
+    // we'll use the hooks state instad of unified search's
     unifiedSearchQuery: state.query,
     unifiedSearchDateRange: getTime(),
     unifiedSearchFilters: state.filters,

@@ -25,11 +25,6 @@ export default {
   ],
   parameters: {
     layout: 'padded',
-    xstate: true,
-    // this option is passed to the inspect function
-    // xstateInspectOptions: {
-    //   serialize: null,
-    // },
   },
   args: {
     startTimestamp,
@@ -48,19 +43,6 @@ export const BasicDateRange = LogStreamStoryTemplate.bind({});
 export const CenteredOnLogEntry = LogStreamStoryTemplate.bind({});
 CenteredOnLogEntry.args = {
   center: { time: 1595146275000, tiebreaker: 150 },
-};
-
-CenteredOnLogEntry.parameters = {
-  xstate: {
-    height: '1080px',
-    LogView: { events: [] },
-  },
-  xstateInspectOptions: {
-    serialize: (key: string, value: unknown) => {
-      if (key === 'excludeValue') return '<<omitted>>';
-      return value;
-    },
-  },
 };
 
 export const HighlightedLogEntry = LogStreamStoryTemplate.bind({});

@@ -13,9 +13,12 @@ import type { SavedQuery } from '@kbn/data-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { EuiFlexGrid } from '@elastic/eui';
 import deepEqual from 'fast-deep-equal';
+import { InPortal } from 'react-reverse-portal';
+import { EuiPanel } from '@elastic/eui';
 import type { InfraClientStartDeps } from '../../../../types';
 import { useUnifiedSearchContext } from '../hooks/use_unified_search';
 import { ControlsContent } from './controls_content';
+import { useGlobalHeaderPortal } from '../hooks/use_global_header_portal';
 
 interface Props {
   dataView: DataView;
@@ -65,33 +68,38 @@ export const UnifiedSearchBar = ({ dataView }: Props) => {
   }) => {
     onSubmit({ query: payload?.query, dateRange: payload?.dateRange, panelFilters });
   };
+  const { globalKQLHeaderPortalNode } = useGlobalHeaderPortal();
 
   return (
     <EuiFlexGrid gutterSize="s">
-      <SearchBar
-        appName={'Infra Hosts'}
-        placeholder={i18n.translate('xpack.infra.hosts.searchPlaceholder', {
-          defaultMessage: 'Search hosts (E.g. cloud.provider:gcp AND system.load.1 > 0.5)',
-        })}
-        indexPatterns={[dataView]}
-        query={unifiedSearchQuery}
-        dateRangeFrom={unifiedSearchDateRange.from}
-        dateRangeTo={unifiedSearchDateRange.to}
-        onQuerySubmit={onQuerySubmit}
-        onSaved={onQuerySave}
-        onSavedQueryUpdated={onQuerySave}
-        onClearSavedQuery={onClearSavedQuery}
-        showSaveQuery={Boolean(application?.capabilities?.visualize?.saveQuery)}
-        showQueryInput
-        displayStyle="inPage"
-      />
-      <ControlsContent
-        timeRange={unifiedSearchDateRange}
-        dataView={dataView}
-        query={unifiedSearchQuery}
-        filters={unifiedSearchFilters}
-        onFilterChange={onPanelFiltersChange}
-      />
+      <InPortal node={globalKQLHeaderPortalNode}>
+        <EuiPanel borderRadius="none" color="subdued" paddingSize="none">
+          <SearchBar
+            appName={'Infra Hosts'}
+            placeholder={i18n.translate('xpack.infra.hosts.searchPlaceholder', {
+              defaultMessage: 'Search hosts (E.g. cloud.provider:gcp AND system.load.1 > 0.5)',
+            })}
+            indexPatterns={[dataView]}
+            query={unifiedSearchQuery}
+            dateRangeFrom={unifiedSearchDateRange.from}
+            dateRangeTo={unifiedSearchDateRange.to}
+            onQuerySubmit={onQuerySubmit}
+            onSaved={onQuerySave}
+            onSavedQueryUpdated={onQuerySave}
+            onClearSavedQuery={onClearSavedQuery}
+            showSaveQuery={Boolean(application?.capabilities?.visualize?.saveQuery)}
+            showQueryInput
+            displayStyle="inPage"
+          />
+          <ControlsContent
+            timeRange={unifiedSearchDateRange}
+            dataView={dataView}
+            query={unifiedSearchQuery}
+            filters={unifiedSearchFilters}
+            onFilterChange={onPanelFiltersChange}
+          />
+        </EuiPanel>
+      </InPortal>
     </EuiFlexGrid>
   );
 };

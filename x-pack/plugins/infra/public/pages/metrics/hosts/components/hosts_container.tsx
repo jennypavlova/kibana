@@ -15,6 +15,7 @@ import { HostsTable } from './hosts_table';
 import { HostsViewProvider } from '../hooks/use_hosts_view';
 import { KPICharts } from './kpi_charts/kpi_charts';
 import { Tabs } from './tabs/tabs';
+import { GlobalKQLHeader } from './global_kql_header';
 
 export const HostContainer = () => {
   const { metricsDataView, isDataViewLoading, hasFailedLoadingDataView } =
@@ -35,6 +36,7 @@ export const HostContainer = () => {
   return hasFailedLoadingDataView || !metricsDataView ? null : (
     <>
       <UnifiedSearchBar dataView={metricsDataView} />
+      <GlobalKQLHeader />
       <EuiSpacer />
       <HostsViewProvider>
         <EuiFlexGroup direction="column">

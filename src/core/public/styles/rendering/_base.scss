@@ -39,6 +39,7 @@
   @include euiHeaderAffordForFixed($headerHeight);
 
   #securitySolutionStickyKQL,
+  #infraHostsStickyKQL,
   #app-fixed-viewport {
     top: $headerHeight;
   }

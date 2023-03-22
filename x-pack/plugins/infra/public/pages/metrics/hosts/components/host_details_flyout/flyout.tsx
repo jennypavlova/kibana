@@ -48,7 +48,12 @@ export const Flyout = ({ node, closeFlyout }: Props) => {
         <EuiSpacer size="s" />
         <EuiTabs style={{ marginBottom: '-25px' }} size="s">
           {tabs.map((tab, i) => (
-            <EuiTab key={tab.id} isSelected={i === selectedTab} onClick={() => setSelectedTab(i)}>
+            <EuiTab
+              data-test-subj={tab['data-test-subj']}
+              key={tab.id}
+              isSelected={i === selectedTab}
+              onClick={() => setSelectedTab(i)}
+            >
               {tab.name}
             </EuiTab>
           ))}

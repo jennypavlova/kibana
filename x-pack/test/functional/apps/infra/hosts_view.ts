@@ -175,6 +175,13 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         expect(hosts.length).to.equal(6);
       });
 
+      it('should open single host flyout', async () => {
+        await pageObjects.infraHostsView.clickTableOpenFlyoutButton();
+        const metadataTab = await pageObjects.infraHostsView.getMetadataTabName();
+        expect(metadataTab).to.contain('Metadata');
+        await pageObjects.infraHostsView.clickCloseFlyoutButton();
+      });
+
       describe('KPI tiles', () => {
         it('should render 5 metrics trend tiles', async () => {
           const hosts = await pageObjects.infraHostsView.getAllMetricsTrendTiles();

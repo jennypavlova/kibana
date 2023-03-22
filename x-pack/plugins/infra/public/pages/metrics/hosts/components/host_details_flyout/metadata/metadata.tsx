@@ -77,4 +77,5 @@ export const MetadataTab = {
     defaultMessage: 'Metadata',
   }),
   content: Metadata,
+  'data-test-subj': 'hostsView-flyout-tabs-metadata',
 };

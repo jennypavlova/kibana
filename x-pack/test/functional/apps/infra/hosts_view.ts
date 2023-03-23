@@ -203,6 +203,11 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       });
 
       describe('Metrics Tab', () => {
+        before(async () => {
+          browser.scrollTop();
+          await pageObjects.infraHostsView.visitMetricsTab();
+        });
+
         it('should load 8 lens metric charts', async () => {
           const metricCharts = await pageObjects.infraHostsView.getAllMetricsCharts();
           expect(metricCharts.length).to.equal(8);
@@ -224,6 +229,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         const COLUMNS = 5;
 
         before(async () => {
+          browser.scrollTop();
           await pageObjects.infraHostsView.visitAlertTab();
         });
 

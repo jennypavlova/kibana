@@ -104,6 +104,30 @@ describe('Metadata', () => {
     expect(result.queryByTestId('infraMetadataNoData')).toBeInTheDocument();
   });
 
+  it('should show metadata table if the metadata is available', async () => {
+    mockUseMetadata({
+      metadata: {
+        info: {
+          host: {
+            name: 'host-6',
+            hostname: 'host-6',
+            os: {
+              platform: 'illumos',
+              type: 'macos',
+              name: 'Ubuntu',
+            },
+          },
+          agent: {
+            version: '7.9.3',
+          },
+        },
+      },
+    });
+    const result = appMockRender.render(<Metadata {...metadataProps} />);
+
+    expect(result.queryByTestId('infraMetadataTable')).toBeInTheDocument();
+  });
+
   it('should return spinner if loading', async () => {
     mockUseMetadata({ loading: true });
     const result = appMockRender.render(<Metadata {...metadataProps} />);

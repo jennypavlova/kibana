@@ -52,7 +52,15 @@ export const Table = (props: Props) => {
     []
   );
 
-  return <EuiBasicTable tableLayout={'fixed'} responsive={false} columns={columns} items={rows} />;
+  return (
+    <EuiBasicTable
+      data-test-subj="infraMetadataTable"
+      tableLayout={'fixed'}
+      responsive={false}
+      columns={columns}
+      items={rows}
+    />
+  );
 };
 
 interface ExpandableContentProps {

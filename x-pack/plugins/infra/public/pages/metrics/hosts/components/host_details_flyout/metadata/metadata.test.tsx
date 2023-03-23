@@ -10,7 +10,7 @@ import { Metadata, TabProps } from './metadata';
 
 import { useMetadata } from '../../../../metric_detail/hooks/use_metadata';
 import { useSourceContext } from '../../../../../../containers/metrics_source';
-import { createAppMockRenderer } from '../../../../../../test_utils/appMockRenderer';
+import { createAppMockRenderer } from '../../../../../../test_utils/app_mock_renderer';
 
 jest.mock('../../../../../../containers/metrics_source');
 jest.mock('../../../../metric_detail/hooks/use_metadata');

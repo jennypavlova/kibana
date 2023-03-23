@@ -97,7 +97,7 @@ describe('Metadata', () => {
     expect(result.queryByTestId('infraMetadataErrorCallout')).toBeInTheDocument();
   });
 
-  it('should show an no data message if fetching the metadata returns error', async () => {
+  it('should show an no data message if fetching the metadata returns empty array', async () => {
     mockUseMetadata({ metadata: [] });
     const result = appMockRender.render(<Metadata {...metadataProps} />);
 

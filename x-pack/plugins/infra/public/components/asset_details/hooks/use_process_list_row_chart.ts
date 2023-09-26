@@ -12,9 +12,9 @@ import { useEffect, useState } from 'react';
 import {
   ProcessListAPIChartResponse,
   ProcessListAPIChartResponseRT,
-} from '../../../../../common/http_api';
-import { throwErrors, createPlainError } from '../../../../../common/runtime_types';
-import { useHTTPRequest } from '../../../../hooks/use_http_request';
+} from '../../../../common/http_api';
+import { throwErrors, createPlainError } from '../../../../common/runtime_types';
+import { useHTTPRequest } from '../../../hooks/use_http_request';
 import { useProcessListContext } from './use_process_list';
 
 export function useProcessListRowChart(command: string) {

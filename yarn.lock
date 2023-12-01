@@ -3103,6 +3103,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/asset_details_ui@link:packages/kbn-asset_details_ui":
+  version "0.0.0"
+  uid ""
+
 "@kbn/audit-log-plugin@link:x-pack/test/security_api_integration/plugins/audit_log":
   version "0.0.0"
   uid ""

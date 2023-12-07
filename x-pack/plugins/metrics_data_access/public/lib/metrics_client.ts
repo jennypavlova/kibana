@@ -6,6 +6,7 @@
  */
 
 import { HttpStart } from '@kbn/core/public';
+import type { InfraMetadata, InfraMetadataRequest } from '../../common/http_api/metadata';
 import {
   MetricsExplorerRequestBody,
   MetricsExplorerResponse,
@@ -16,6 +17,12 @@ export class MetricsDataClient {
 
   async metricsExplorer(body: MetricsExplorerRequestBody) {
     return this.http.post<MetricsExplorerResponse>('/api/infra/metrics_explorer', {
+      body: JSON.stringify(body),
+    });
+  }
+
+  async metadata(body: InfraMetadataRequest) {
+    return this.http.post<InfraMetadata>('/api/infra/metrics_explorer', {
       body: JSON.stringify(body),
     });
   }

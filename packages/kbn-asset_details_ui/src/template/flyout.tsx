@@ -6,19 +6,19 @@
  * Side Public License, v 1.
  */
 
-import { EuiFlyout, EuiFlyoutBody, EuiFlyoutHeader } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
+import { EuiFlyout, EuiFlyoutBody, EuiFlyoutHeader, EuiLoadingLogo } from '@elastic/eui';
+// import { i18n } from '@kbn/i18n';
 import React, { useCallback } from 'react';
-import useEffectOnce from 'react-use/lib/useEffectOnce';
-import { useKibanaContextForPlugin } from '../../../hooks/use_kibana';
-import { InfraLoadingPanel } from '../../loading';
+// import useEffectOnce from 'react-use/lib/useEffectOnce';
+// import { useKibanaContextForPlugin } from '../../../hooks/use_kibana';
+// import { InfraLoadingPanel } from '../../loading';
 import { ASSET_DETAILS_FLYOUT_COMPONENT_NAME } from '../constants';
 import { Content } from '../content/content';
-import { FlyoutHeader } from '../header/flyout_header';
-import { useAssetDetailsRenderPropsContext } from '../hooks_wip/use_asset_details_render_props';
-import { useAssetDetailsUrlState } from '../hooks_wip/use_asset_details_url_state';
-import { usePageHeader } from '../hooks_wip/use_page_header';
-import { useTabSwitcherContext } from '../hooks_wip/use_tab_switcher';
+// import { FlyoutHeader } from '../header/flyout_header';
+import { useAssetDetailsRenderPropsContext } from '../hooks/use_asset_details_render_props';
+// import { useAssetDetailsUrlState } from '../hooks_wip/use_asset_details_url_state';
+// import { usePageHeader } from '../hooks_wip/use_page_header';
+// import { useTabSwitcherContext } from '../hooks_wip/use_tab_switcher';
 import type { ContentTemplateProps } from '../types';
 
 export const Flyout = ({
@@ -26,26 +26,29 @@ export const Flyout = ({
   links = [],
   closeFlyout,
 }: ContentTemplateProps & { closeFlyout: () => void }) => {
-  const [, setUrlState] = useAssetDetailsUrlState();
+  // const [, setUrlState] = useAssetDetailsUrlState();
   const { asset, loading } = useAssetDetailsRenderPropsContext();
-  const { rightSideItems, tabEntries } = usePageHeader(tabs, links);
-  const { activeTabId } = useTabSwitcherContext();
-  const {
-    services: { telemetry },
-  } = useKibanaContextForPlugin();
+  console.log('asset',asset)
+  console.log('loading',loading)
+  // const { rightSideItems, tabEntries } = usePageHeader(tabs, links);
+  // const { activeTabId } = useTabSwitcherContext();
+  // const {
+  //   services: { telemetry },
+  // } = useKibanaContextForPlugin();
 
-  useEffectOnce(() => {
-    telemetry.reportAssetDetailsFlyoutViewed({
-      componentName: ASSET_DETAILS_FLYOUT_COMPONENT_NAME,
-      assetType: asset.type,
-      tabId: activeTabId,
-    });
-  });
+  // useEffectOnce(() => {
+  //   telemetry.reportAssetDetailsFlyoutViewed({
+  //     componentName: ASSET_DETAILS_FLYOUT_COMPONENT_NAME,
+  //     assetType: asset.type,
+  //     tabId: activeTabId,
+  //   });
+  // });
 
   const handleOnClose = useCallback(() => {
-    setUrlState(null);
+    // setUrlState(null);
     closeFlyout();
-  }, [closeFlyout, setUrlState]);
+  }, [closeFlyout]);
+  // }, [closeFlyout, setUrlState]);
 
   return (
     <EuiFlyout
@@ -55,18 +58,18 @@ export const Flyout = ({
       data-asset-type={asset.type}
     >
       {loading ? (
-        <InfraLoadingPanel
-          height="100%"
-          width="auto"
-          text={i18n.translate('xpack.infra.waffle.loadingDataText', {
-            defaultMessage: 'Loading data',
-          })}
+        <EuiLoadingLogo
+        // height="100%"
+        // width="auto"
+        // text={i18n.translate('xpack.infra.waffle.loadingDataText', {
+        //   defaultMessage: 'Loading data',
+        // })}
         />
       ) : (
         <>
-          <EuiFlyoutHeader hasBorder>
+          {/* <EuiFlyoutHeader hasBorder>
             <FlyoutHeader title={asset.name} tabs={tabEntries} rightSideItems={rightSideItems} />
-          </EuiFlyoutHeader>
+          </EuiFlyoutHeader> */}
           <EuiFlyoutBody>
             <Content />
           </EuiFlyoutBody>

@@ -15,8 +15,8 @@ import { useKibanaHeader } from '../../../hooks/use_kibana_header';
 import { InfraLoadingPanel } from '../../loading'; // TODO Move loading component?
 import { ASSET_DETAILS_PAGE_COMPONENT_NAME } from '../constants';
 import { Content } from '../content/content';
-import { useAssetDetailsRenderPropsContext } from '../hooks_wip/use_asset_details_render_props';
-import { useMetadataStateContext } from '../hooks_wip/use_metadata_state';
+import { useAssetDetailsRenderPropsContext } from '../hooks/use_asset_details_render_props';
+import { useMetadataStateContext } from '../hooks/use_metadata_state';
 import { usePageHeader } from '../hooks_wip/use_page_header';
 import { useTabSwitcherContext } from '../hooks_wip/use_tab_switcher';
 import { ContentTemplateProps } from '../types';

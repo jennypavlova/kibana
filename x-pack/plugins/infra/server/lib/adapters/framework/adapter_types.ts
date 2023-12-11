@@ -54,6 +54,7 @@ export interface InfraServerPluginStartDeps {
   dataViews: DataViewsPluginStart;
   logsShared: LogsSharedPluginStart;
   profilingDataAccess?: ProfilingDataAccessPluginStart;
+  metricsDataAccess: MetricsDataPluginSetup;
 }
 
 export interface CallWithRequestParams extends estypes.RequestBase {

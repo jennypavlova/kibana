@@ -5,6 +5,4 @@
  * 2.0.
  */
 
-export * from './metrics_explorer';
-export * from './metadata';
-export * from './metrics_api';
+export const CLOUD_METRICS_MODULES = ['aws'];

@@ -16,13 +16,15 @@ export class MetricsDataClient {
   constructor(private readonly http: HttpStart) {}
 
   async metricsExplorer(body: MetricsExplorerRequestBody) {
+    console.log('JSON.stringify(body)', JSON.stringify(body));
     return this.http.post<MetricsExplorerResponse>('/api/infra/metrics_explorer', {
       body: JSON.stringify(body),
     });
   }
 
   async metadata(body: InfraMetadataRequest) {
-    return this.http.post<InfraMetadata>('/api/infra/metrics_explorer', {
+    console.log('JSON.stringify(body)', JSON.stringify(body));
+    return this.http.post<InfraMetadata>('/api/infra/metadata', {
       body: JSON.stringify(body),
     });
   }

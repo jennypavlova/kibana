@@ -6,14 +6,13 @@
  * Side Public License, v 1.
  */
 
-import { useEffect, useState } from 'react';
-import { fold } from 'fp-ts/lib/Either';
-import { identity } from 'fp-ts/lib/function';
-import { pipe } from 'fp-ts/lib/pipeable';
+import { useEffect, useState, useMemo } from 'react';
 import type { InventoryItemType, InventoryMetric } from '@kbn/metrics-data-access-plugin/common';
 import { useTrackedPromise } from '@kbn/use-tracked-promise/use_tracked_promise';
-import { InfraMetadataRT, type InfraMetadata } from '@kbn/infra-plugin/common/http_api';
-import { createPlainError, throwErrors } from '@kbn/infra-plugin/common/runtime_types';
+import {
+  type InfraMetadata,
+} from '@kbn/metrics-data-access-plugin/common/http_api';
+// import { createPlainError, throwErrors } from '@kbn/infra-plugin/common/runtime_types';
 import { MetricsDataClient } from '@kbn/metrics-data-access-plugin/public/lib/metrics_client';
 import { getFilteredMetrics } from '../lib/get_filtered_metrics';
 
@@ -21,7 +20,6 @@ interface UseMetadataProps {
   assetId: string;
   assetType: InventoryItemType;
   requiredMetrics?: InventoryMetric[];
-  sourceId: string;
   timeRange: {
     from: number;
     to: number;
@@ -32,56 +30,100 @@ interface UseMetadataProps {
 interface MetadataRequestBody {
   nodeId: string;
   nodeType: InventoryItemType;
-  sourceId: string;
+  indexPattern: string;
   timeRange: {
     from: number;
     to: number;
   };
 }
 
+export const useMetricIndices = ({ metricsClient }: { metricsClient: MetricsDataClient }) => {
+  const [metricIndices, setMetricIndices] = useState<
+    { metricIndices: string; metricIndicesExist: boolean } | undefined
+  >(undefined);
+
+  const [metricIndicesRequest, getMetricIndices] = useTrackedPromise(
+    {
+      cancelPreviousOn: 'resolution',
+      createPromise: () => {
+        return metricsClient.metricsIndices();
+      },
+      onResolve: (response) => {
+        if (response) {
+          setMetricIndices(response);
+        }
+      },
+    },
+    [metricsClient]
+  );
+
+  useEffect(() => {
+    getMetricIndices();
+  }, [getMetricIndices, metricsClient]);
+
+  const hasFailedLoading = metricIndicesRequest.state === 'rejected';
+  const isUninitialized = metricIndicesRequest.state === 'uninitialized';
+  const isLoading = metricIndicesRequest.state === 'pending';
+
+  return {
+    isLoading,
+    isUninitialized,
+    errorMessage: hasFailedLoading ? `${metricIndicesRequest.value}` : undefined,
+    metricIndicesExist: metricIndices?.metricIndicesExist,
+    metricIndices: metricIndices?.metricIndices,
+  };
+};
+
 export function useMetadata({
   assetId,
   assetType,
-  sourceId,
   timeRange,
   requiredMetrics = [],
   metricsClient,
 }: UseMetadataProps) {
-  const decodeResponse = (response: any) => {
-    return pipe(InfraMetadataRT.decode(response), fold(throwErrors(createPlainError), identity));
-  };
-
   const [metadata, setMetadata] = useState<InfraMetadata | undefined>();
+  const {
+    metricIndices,
+    isLoading: metricIndicesLoading,
+    errorMessage: metricIndicesError,
+  } = useMetricIndices({ metricsClient });
 
   const [fetchMetadataRequest, fetchMetadata] = useTrackedPromise(
     {
       createPromise: async (): Promise<InfraMetadata> => {
+        if (!metricIndices) {
+          return Promise.resolve({ id: '', name: '', features: [] });
+        }
         const requestBody: MetadataRequestBody = {
           nodeId: assetId,
           nodeType: assetType,
-          sourceId,
           timeRange,
+          indexPattern: metricIndices, // change to be index pattern (like metrics explorer) and update the api
         };
-
         return metricsClient.metadata(requestBody);
       },
       onResolve: (response: InfraMetadata) => {
-        setMetadata(decodeResponse(response));
+        setMetadata(response);
       },
       cancelPreviousOn: 'creation',
     },
-    []
+    [metricIndices]
   );
 
   const isLoading =
-    fetchMetadataRequest.state === 'pending' || fetchMetadataRequest.state === 'uninitialized';
+    metricIndicesLoading ||
+    fetchMetadataRequest.state === 'pending' ||
+    fetchMetadataRequest.state === 'uninitialized';
 
-  const error =
-    fetchMetadataRequest.state === 'rejected'
-      ? fetchMetadataRequest.value instanceof Error
-        ? fetchMetadataRequest.value
-        : { error: { message: `${fetchMetadataRequest.value}` } }
-      : null;
+  const errors = useMemo<Error[]>(
+    () => [
+      ...(metricIndicesError ? [wrapAsError(metricIndicesError)] : []),
+      ...(fetchMetadataRequest.state === 'rejected'
+        ? [wrapAsError(fetchMetadataRequest.value)]
+        : []),
+    ],
+    [fetchMetadataRequest, metricIndicesError]
+  );
 
   useEffect(() => {
     fetchMetadata();
@@ -93,10 +135,12 @@ export function useMetadata({
       metadata && requiredMetrics.length > 0
         ? getFilteredMetrics(requiredMetrics, metadata.features)
         : [],
-    error,
+    error: errors.length > 0 ? errors : null,
     loading: isLoading,
     metadata,
     cloudId: metadata?.info?.cloud?.instance?.id || '',
     reload: fetchMetadata,
   };
 }
+
+const wrapAsError = (value: any): Error => (value instanceof Error ? value : new Error(`${value}`));

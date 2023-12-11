@@ -8,7 +8,7 @@
 
 import React from 'react';
 import { Metadata } from './metadata';
-import { useMetadata } from '../../hooks_wip/use_metadata';
+import { useMetadata } from '../../use_metadata';
 import { useSourceContext } from '../../../../containers/metrics_source';
 import { render } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';

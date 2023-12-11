@@ -6,10 +6,12 @@
  * Side Public License, v 1.
  */
 
-// export { Anomalies } from './anomalies/anomalies';
-export { Metadata } from './metadata/metadata';
-// export { Processes } from './processes/processes';
-// export { Profiling } from './profiling/profiling';
-// export { Osquery } from './osquery/osquery';
-// export { Logs } from './logs/logs';
-// export { Overview } from './overview/overview';
+import { useRef, MutableRefObject } from 'react';
+
+export const useLazyRef = <Type>(initializer: () => Type) => {
+  const ref = useRef<Type | null>(null);
+  if (ref.current === null) {
+    ref.current = initializer();
+  }
+  return ref as MutableRefObject<Type>;
+};

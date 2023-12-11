@@ -22,8 +22,8 @@ import type {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useCallback } from 'react';
-import { useDatePickerContext } from '../hooks_wip/use_date_picker';
-import { useLoadingStateContext } from '../hooks_wip/use_loading_state';
+import { useDatePickerContext } from '../hooks/use_date_picker';
+// import { useLoadingStateContext } from '../hooks/use_loading_state';
 import { Popover } from '../tabs/common/popover';
 
 const COMMONLY_USED_RANGES: DurationRange[] = [
@@ -67,7 +67,7 @@ const COMMONLY_USED_RANGES: DurationRange[] = [
 export const DatePicker = () => {
   const { dateRange, autoRefresh, setDateRange, setAutoRefresh, onAutoRefresh } =
     useDatePickerContext();
-  const { updateSearchSessionId } = useLoadingStateContext();
+  // const { updateSearchSessionId } = useLoadingStateContext();
 
   const handleRefresh = useCallback(
     ({ start, end }: OnRefreshProps) => {
@@ -100,7 +100,8 @@ export const DatePicker = () => {
     [dateRange.from, setAutoRefresh, setDateRange]
   );
 
-  const handleOnClick = useCallback(() => updateSearchSessionId(), [updateSearchSessionId]);
+  // const handleOnClick = useCallback(() => updateSearchSessionId(), [updateSearchSessionId]);
+  const handleOnClick = useCallback(() => {}, []);
 
   return (
     <EuiFlexGroup gutterSize="xs" responsive={false} direction="column">

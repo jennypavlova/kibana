@@ -10,7 +10,7 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiCallOut, EuiLink } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { useMetadataStateContext } from '../hooks_wip/use_metadata_state';
+import { useMetadataStateContext } from '../hooks/use_metadata_state';
 
 export const MetadataErrorCallout = () => {
   const { refresh } = useMetadataStateContext();

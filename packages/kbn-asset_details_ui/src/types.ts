@@ -10,6 +10,7 @@ import { TimeRange } from '@kbn/es-query';
 import { Search } from 'history';
 import type { InventoryItemType } from '@kbn/metrics-data-access-plugin/common';
 import type { InfraWaffleMapOptions } from '@kbn/infra-plugin/public/lib/lib';
+import type { MetricsDataClient } from '@kbn/metrics-data-access-plugin/public/lib/metrics_client';
 
 export type { AssetDetailsUrlState } from './hooks_wip/use_asset_details_url_state';
 
@@ -81,6 +82,7 @@ export interface AssetDetailsProps {
   // This is temporary. Once we start using the asset details in other plugins,
   // It will have to retrieve the metricAlias internally rather than receive it via props
   metricAlias: string;
+  metricsClient: MetricsDataClient;
 }
 
 export type TabsStateChangeFn = (state: TabState) => void;

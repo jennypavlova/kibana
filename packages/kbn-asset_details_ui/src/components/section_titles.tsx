@@ -10,9 +10,9 @@ import React, { type ReactNode } from 'react';
 
 import { EuiFlexItem, EuiTitle, EuiFlexGroup } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { HostMetricsExplanationContent } from '../../lens';
 import { Popover } from '../tabs/common/popover';
 import { AlertsTooltipContent } from './alerts_tooltip_content';
+import { HostMetricsExplanationContent } from './host_metrics_explanation_content';
 
 const SectionTitle = ({
   title,

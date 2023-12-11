@@ -9,8 +9,9 @@
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import React from 'react';
 import { DatePicker } from '../date_picker/date_picker';
-import { useTabSwitcherContext } from '../hooks_wip/use_tab_switcher';
-import { Anomalies, Metadata, Processes, Osquery, Logs, Overview, Profiling } from '../tabs';
+import { useTabSwitcherContext } from '../hooks/use_tab_switcher';
+// import { Anomalies, Metadata, Processes, Osquery, Logs, Overview, Profiling } from '../tabs';
+import { Metadata } from '../tabs';
 import { ContentTabIds } from '../types';
 
 export const Content = () => {
@@ -19,17 +20,17 @@ export const Content = () => {
       <EuiFlexItem grow={false}>
         <DatePickerWrapper
           visibleFor={[
-            ContentTabIds.OVERVIEW,
-            ContentTabIds.LOGS,
+            // ContentTabIds.OVERVIEW,
+            // ContentTabIds.LOGS,
             ContentTabIds.METADATA,
-            ContentTabIds.PROCESSES,
-            ContentTabIds.PROFILING,
-            ContentTabIds.ANOMALIES,
+            // ContentTabIds.PROCESSES,
+            // ContentTabIds.PROFILING,
+            // ContentTabIds.ANOMALIES,
           ]}
         />
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
-        <TabPanel activeWhen={ContentTabIds.ANOMALIES}>
+        {/* <TabPanel activeWhen={ContentTabIds.ANOMALIES}>
           <Anomalies />
         </TabPanel>
         <TabPanel activeWhen={ContentTabIds.OVERVIEW}>
@@ -37,11 +38,11 @@ export const Content = () => {
         </TabPanel>
         <TabPanel activeWhen={ContentTabIds.LOGS}>
           <Logs />
-        </TabPanel>
+        </TabPanel> */}
         <TabPanel activeWhen={ContentTabIds.METADATA}>
           <Metadata />
         </TabPanel>
-        <TabPanel activeWhen={ContentTabIds.OSQUERY}>
+        {/* <TabPanel activeWhen={ContentTabIds.OSQUERY}>
           <Osquery />
         </TabPanel>
         <TabPanel activeWhen={ContentTabIds.PROCESSES}>
@@ -49,7 +50,7 @@ export const Content = () => {
         </TabPanel>
         <TabPanel activeWhen={ContentTabIds.PROFILING}>
           <Profiling />
-        </TabPanel>
+        </TabPanel> */}
       </EuiFlexItem>
     </EuiFlexGroup>
   );

@@ -7,16 +7,16 @@
  */
 
 import React from 'react';
-import { AssetDetailsRenderPropsProvider } from './hooks_wip/use_asset_details_render_props';
-import { DatePickerProvider } from './hooks_wip/use_date_picker';
-import { LoadingStateProvider } from './hooks_wip/use_loading_state';
-import { MetadataStateProvider } from './hooks_wip/use_metadata_state';
+import { AssetDetailsRenderPropsProvider } from './hooks/use_asset_details_render_props';
+import { DatePickerProvider } from './hooks/use_date_picker';
+// import { LoadingStateProvider } from './hooks/use_loading_state';
+import { MetadataStateProvider } from './hooks/use_metadata_state';
 import { AssetDetailsProps } from './types';
 
 export const ContextProviders = ({
   children,
   ...props
-}: Omit<AssetDetailsProps, 'links' | 'tabs' | 'activeTabId' | 'metricAlias'> & {
+}: Omit<AssetDetailsProps, 'links' | 'tabs' | 'activeTabId'> & {
   children: React.ReactNode;
 }) => {
   const {
@@ -27,23 +27,30 @@ export const ContextProviders = ({
     overrides,
     assetType = 'host',
     renderMode,
+    // metricAlias,
+    metricsClient,
   } = props;
 
   return (
     <DatePickerProvider dateRange={dateRange} autoRefresh={autoRefresh}>
-      <LoadingStateProvider>
-        <MetadataStateProvider assetId={assetId} assetType={assetType}>
-          <AssetDetailsRenderPropsProvider
-            assetId={assetId}
-            assetName={assetName}
-            assetType={assetType}
-            overrides={overrides}
-            renderMode={renderMode}
-          >
-            {children}
-          </AssetDetailsRenderPropsProvider>
-        </MetadataStateProvider>
-      </LoadingStateProvider>
+      {/* <LoadingStateProvider> */}
+      <MetadataStateProvider
+        assetId={assetId}
+        assetType={assetType}
+        // metricAlias={metricAlias}
+        metricsClient={metricsClient}
+      >
+        <AssetDetailsRenderPropsProvider
+          assetId={assetId}
+          assetName={assetName}
+          assetType={assetType}
+          overrides={overrides}
+          renderMode={renderMode}
+        >
+          {children}
+        </AssetDetailsRenderPropsProvider>
+      </MetadataStateProvider>
+      {/* </LoadingStateProvider> */}
     </DatePickerProvider>
   );
 };

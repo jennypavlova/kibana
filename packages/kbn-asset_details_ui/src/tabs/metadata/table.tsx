@@ -18,7 +18,7 @@ import React, { useCallback, useMemo, useState } from 'react';
 import { debounce } from 'lodash';
 import { Query } from '@elastic/eui';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
-import { AddMetadataFilterButton } from './add_metadata_filter_button';
+// import { AddMetadataFilterButton } from './add_metadata_filter_button';
 import { ExpandableContent } from '../../components/expandable_content';
 import { type Field, getRowsWithPins } from './utils';
 import { AddMetadataPinToRow } from './add_pin_to_row';
@@ -162,7 +162,7 @@ export const Table = ({ loading, rows, onSearchChange, search, showActionsColumn
               showOnHover: true,
               align: 'center' as HorizontalAlignment,
               render: (_name: string, item: Field) => {
-                return <AddMetadataFilterButton item={item} />;
+                return <></>;
               },
             },
           ]

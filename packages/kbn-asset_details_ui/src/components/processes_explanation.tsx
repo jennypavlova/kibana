@@ -9,7 +9,7 @@
 import React from 'react';
 import { EuiText } from '@elastic/eui';
 import { FormattedDate, FormattedMessage, FormattedTime } from '@kbn/i18n-react';
-import { useDatePickerContext } from '../hooks_wip/use_date_picker';
+import { useDatePickerContext } from '../hooks/use_date_picker';
 
 export const ProcessesExplanationMessage = () => {
   const { getDateRangeInTimestamp } = useDatePickerContext();

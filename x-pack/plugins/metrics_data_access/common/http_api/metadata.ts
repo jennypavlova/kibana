@@ -11,7 +11,7 @@ import { ItemTypeRT } from '..';
 export const InfraMetadataRequestRT = rt.type({
   nodeId: rt.string,
   nodeType: ItemTypeRT,
-  sourceId: rt.string,
+  indexPattern: rt.string,
   timeRange: rt.type({
     from: rt.number,
     to: rt.number,

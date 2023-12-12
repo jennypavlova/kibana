@@ -12,7 +12,7 @@ import { MetricsDataClient } from '@kbn/metrics-data-access-plugin/public/lib/me
 import { useMetadata } from './use_metadata';
 import { AssetDetailsProps } from '../types';
 import { useDatePickerContext } from './use_date_picker';
-// import { useAssetDetailsUrlState } from './use_asset_details_url_state';
+import { useAssetDetailsUrlState } from './use_asset_details_url_state';
 
 export type AssetsProps = Pick<AssetDetailsProps, 'assetId' | 'assetType'>;
 export interface UseMetadataProviderProps extends AssetsProps {
@@ -24,7 +24,7 @@ export function useMetadataProvider({
   assetType,
   metricsClient,
 }: UseMetadataProviderProps) {
-  // const [, setUrlState] = useAssetDetailsUrlState();
+  const [, setUrlState] = useAssetDetailsUrlState();
   const { getDateRangeInTimestamp } = useDatePickerContext();
 
   const { loading, error, metadata, reload } = useMetadata({
@@ -38,11 +38,11 @@ export function useMetadataProvider({
     reload();
   }, [reload]);
 
-  // useEffect(() => {
-  //   if (metadata?.name) {
-  //     setUrlState({ name: metadata.name });
-  //   }
-  // }, [metadata?.name, setUrlState]);
+  useEffect(() => {
+    if (metadata?.name) {
+      setUrlState({ name: metadata.name });
+    }
+  }, [metadata?.name, setUrlState]);
 
   return {
     loading,

@@ -13,7 +13,7 @@ import { getAllFields } from './utils';
 import { useMetadataStateContext } from '../../hooks/use_metadata_state';
 import { MetadataExplanationMessage } from '../../components/metadata_explanation';
 import { useAssetDetailsRenderPropsContext } from '../../hooks/use_asset_details_render_props';
-// import { useAssetDetailsUrlState } from '../../hooks_wip/use_asset_details_url_state';
+import { useAssetDetailsUrlState } from '../../hooks/use_asset_details_url_state';
 import { MetadataErrorCallout } from '../../components/metadata_error_callout';
 
 export interface MetadataSearchUrlState {
@@ -22,7 +22,7 @@ export interface MetadataSearchUrlState {
 }
 
 export const Metadata = () => {
-  // const [urlState, setUrlState] = useAssetDetailsUrlState();
+  const [urlState, setUrlState] = useAssetDetailsUrlState();
   const { overrides } = useAssetDetailsRenderPropsContext();
   const {
     metadata,
@@ -33,13 +33,12 @@ export const Metadata = () => {
 
   const fields = useMemo(() => getAllFields(metadata ?? null), [metadata]);
 
-  const onSearchChange = () => {};
-  // const onSearchChange = useCallback(
-  //   (newQuery: string) => {
-  //     setUrlState({ metadataSearch: newQuery });
-  //   },
-  //   [setUrlState]
-  // );
+  const onSearchChange = useCallback(
+    (newQuery: string) => {
+      setUrlState({ metadataSearch: newQuery });
+    },
+    [setUrlState]
+  );
 
   if (fetchMetadataError && !metadataLoading) {
     return <MetadataErrorCallout />;
@@ -50,7 +49,7 @@ export const Metadata = () => {
       <MetadataExplanationMessage />
       <EuiHorizontalRule margin="m" />
       <Table
-        search={''}
+        search={urlState?.metadataSearch}
         onSearchChange={onSearchChange}
         showActionsColumn={showActionsColumn}
         rows={fields}

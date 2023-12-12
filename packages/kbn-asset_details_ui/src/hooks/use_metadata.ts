@@ -9,10 +9,7 @@
 import { useEffect, useState, useMemo } from 'react';
 import type { InventoryItemType, InventoryMetric } from '@kbn/metrics-data-access-plugin/common';
 import { useTrackedPromise } from '@kbn/use-tracked-promise/use_tracked_promise';
-import {
-  type InfraMetadata,
-} from '@kbn/metrics-data-access-plugin/common/http_api';
-// import { createPlainError, throwErrors } from '@kbn/infra-plugin/common/runtime_types';
+import { type InfraMetadata } from '@kbn/metrics-data-access-plugin/common/http_api';
 import { MetricsDataClient } from '@kbn/metrics-data-access-plugin/public/lib/metrics_client';
 import { getFilteredMetrics } from '../lib/get_filtered_metrics';
 
@@ -98,7 +95,7 @@ export function useMetadata({
           nodeId: assetId,
           nodeType: assetType,
           timeRange,
-          indexPattern: metricIndices, // change to be index pattern (like metrics explorer) and update the api
+          indexPattern: metricIndices,
         };
         return metricsClient.metadata(requestBody);
       },

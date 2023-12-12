@@ -28,8 +28,6 @@ export const Flyout = ({
 }: ContentTemplateProps & { closeFlyout: () => void }) => {
   // const [, setUrlState] = useAssetDetailsUrlState();
   const { asset, loading } = useAssetDetailsRenderPropsContext();
-  console.log('asset',asset)
-  console.log('loading',loading)
   // const { rightSideItems, tabEntries } = usePageHeader(tabs, links);
   // const { activeTabId } = useTabSwitcherContext();
   // const {

@@ -8,32 +8,32 @@
 
 import React from 'react';
 import { Metadata } from './metadata';
-import { useMetadata } from '../../use_metadata';
-import { useSourceContext } from '../../../../containers/metrics_source';
+import { useMetadata } from '../../hooks/use_metadata';
+// import { useSourceContext } from '../../../../containers/metrics_source';
 import { render } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
 import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
 import { ContextProviders } from '../../context_providers';
-import { coreMock } from '@kbn/core/public/mocks';
-import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
-import { useKibanaContextForPlugin } from '../../../../hooks/use_kibana';
+// import { coreMock } from '@kbn/core/public/mocks';
+// import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
+// import { useKibanaContextForPlugin } from '../../../../hooks/use_kibana';
 
-jest.mock('../../../../containers/metrics_source');
+// jest.mock('../../../../containers/metrics_source');
 jest.mock('../../hooks/use_metadata');
-jest.mock('../../../../hooks/use_kibana');
+// jest.mock('../../../../hooks/use_kibana');
 
-const useKibanaMock = useKibanaContextForPlugin as jest.MockedFunction<
-  typeof useKibanaContextForPlugin
->;
+// const useKibanaMock = useKibanaContextForPlugin as jest.MockedFunction<
+//   typeof useKibanaContextForPlugin
+// >;
 
-const mockUseKibana = () => {
-  useKibanaMock.mockReturnValue({
-    services: {
-      ...coreMock.createStart(),
-      data: dataPluginMock.createStartContract(),
-    },
-  } as unknown as ReturnType<typeof useKibanaContextForPlugin>);
-};
+// const mockUseKibana = () => {
+//   useKibanaMock.mockReturnValue({
+//     services: {
+//       ...coreMock.createStart(),
+//       data: dataPluginMock.createStartContract(),
+//     },
+//   } as unknown as ReturnType<typeof useKibanaContextForPlugin>);
+// };
 
 const renderHostMetadata = () =>
   render(
@@ -61,13 +61,13 @@ const renderHostMetadata = () =>
     { wrapper: EuiThemeProvider }
   );
 
-beforeEach(() => {
-  mockUseKibana();
-});
+// beforeEach(() => {
+//   mockUseKibana();
+// });
 
-afterEach(() => {
-  jest.clearAllMocks();
-});
+// afterEach(() => {
+//   jest.clearAllMocks();
+// });
 
 describe('Single Host Metadata (Hosts View)', () => {
   const mockUseMetadata = (props: any = {}) => {
@@ -80,14 +80,14 @@ describe('Single Host Metadata (Hosts View)', () => {
     });
   };
 
-  beforeAll(() => {
-    (useSourceContext as jest.Mock).mockReturnValue({ sourceId: '123' });
-    mockUseMetadata();
-  });
+  // beforeAll(() => {
+  //   (useSourceContext as jest.Mock).mockReturnValue({ sourceId: '123' });
+  //   mockUseMetadata();
+  // });
 
-  beforeEach(() => {
-    jest.clearAllMocks();
-  });
+  // beforeEach(() => {
+  //   jest.clearAllMocks();
+  // });
 
   it('should show an error if fetching the metadata returns error', async () => {
     mockUseMetadata({ error: 'Internal server error' });

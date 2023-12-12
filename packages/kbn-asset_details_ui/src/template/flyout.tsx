@@ -7,7 +7,7 @@
  */
 
 import { EuiFlyout, EuiFlyoutBody, EuiFlyoutHeader, EuiLoadingLogo } from '@elastic/eui';
-// import { i18n } from '@kbn/i18n';
+import { i18n } from '@kbn/i18n';
 import React, { useCallback } from 'react';
 // import useEffectOnce from 'react-use/lib/useEffectOnce';
 // import { useKibanaContextForPlugin } from '../../../hooks/use_kibana';
@@ -16,9 +16,10 @@ import { ASSET_DETAILS_FLYOUT_COMPONENT_NAME } from '../constants';
 import { Content } from '../content/content';
 // import { FlyoutHeader } from '../header/flyout_header';
 import { useAssetDetailsRenderPropsContext } from '../hooks/use_asset_details_render_props';
-// import { useAssetDetailsUrlState } from '../hooks_wip/use_asset_details_url_state';
-// import { usePageHeader } from '../hooks_wip/use_page_header';
-// import { useTabSwitcherContext } from '../hooks_wip/use_tab_switcher';
+import { useAssetDetailsUrlState } from '../hooks/use_asset_details_url_state';
+import { LoadingPanel } from '../components/loading_panel';
+// import { usePageHeader } from '../hooks/use_page_header';
+// import { useTabSwitcherContext } from '../hooks/use_tab_switcher';
 import type { ContentTemplateProps } from '../types';
 
 export const Flyout = ({
@@ -26,7 +27,7 @@ export const Flyout = ({
   links = [],
   closeFlyout,
 }: ContentTemplateProps & { closeFlyout: () => void }) => {
-  // const [, setUrlState] = useAssetDetailsUrlState();
+  const [, setUrlState] = useAssetDetailsUrlState();
   const { asset, loading } = useAssetDetailsRenderPropsContext();
   // const { rightSideItems, tabEntries } = usePageHeader(tabs, links);
   // const { activeTabId } = useTabSwitcherContext();
@@ -43,10 +44,9 @@ export const Flyout = ({
   // });
 
   const handleOnClose = useCallback(() => {
-    // setUrlState(null);
+    setUrlState(null);
     closeFlyout();
-  }, [closeFlyout]);
-  // }, [closeFlyout, setUrlState]);
+  }, [closeFlyout, setUrlState]);
 
   return (
     <EuiFlyout
@@ -56,12 +56,12 @@ export const Flyout = ({
       data-asset-type={asset.type}
     >
       {loading ? (
-        <EuiLoadingLogo
-        // height="100%"
-        // width="auto"
-        // text={i18n.translate('xpack.infra.waffle.loadingDataText', {
-        //   defaultMessage: 'Loading data',
-        // })}
+        <LoadingPanel
+          height="100%"
+          width="auto"
+          text={i18n.translate('xpack.infra.waffle.loadingDataText', {
+            defaultMessage: 'Loading data',
+          })}
         />
       ) : (
         <>

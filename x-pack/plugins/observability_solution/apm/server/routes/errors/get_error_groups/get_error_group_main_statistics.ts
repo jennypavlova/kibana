@@ -166,10 +166,10 @@ export async function getErrorGroupMainStatistics({
         name: getErrorName({ error: normalizedFields?.error } as APMError),
         lastSeen: new Date(normalizedFields?.['@timestamp'] as string).getTime(),
         occurrences: bucket.doc_count,
-        culprit: normalizedFields?.error?.culprit,
-        handled: normalizedFields?.error?.exception[0]?.handled,
-        type: normalizedFields?.error?.exception[0]?.type,
-        traceId: normalizedFields?.trace?.id,
+        culprit: normalizedFields?.error.culprit,
+        handled: normalizedFields?.error.exception[0].handled,
+        type: normalizedFields?.error.exception[0].type,
+        traceId: normalizedFields?.trace.id,
       };
     }) ?? [];
 

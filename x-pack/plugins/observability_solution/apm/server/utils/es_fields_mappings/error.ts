@@ -73,7 +73,6 @@ export const errorGroupMainStatisticsMapping = (fields: Fields) => {
       id: normalizeValue<string>(fields[TRACE_ID]),
     },
     error: {
-      id: normalizeValue<string>(fields[ERROR_ID]),
       log: {
         message: normalizeValue<string>(fields[ERROR_LOG_MESSAGE]),
       },
@@ -85,7 +84,6 @@ export const errorGroupMainStatisticsMapping = (fields: Fields) => {
         },
       ],
       culprit: normalizeValue<string>(fields[ERROR_CULPRIT]),
-      grouping_key: normalizeValue<string>(fields[ERROR_GROUP_ID]),
     },
     '@timestamp': normalizeValue<string>(fields[AT_TIMESTAMP]),
   };

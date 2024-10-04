@@ -17,6 +17,7 @@ import {
   ERROR_EXC_HANDLED,
   ERROR_EXC_TYPE,
   ERROR_CULPRIT,
+  ERROR_STACK_TRACE,
   AT_TIMESTAMP,
   APMError,
   OBSERVER_TYPE,
@@ -119,6 +120,7 @@ export const errorSampleDetailsMapping = (fields: Fields): APMError | undefined 
         },
       ],
       grouping_key: normalizeValue<string>(fields[ERROR_GROUP_ID]),
+      stack_trace: normalizeValue<string>(fields[ERROR_STACK_TRACE]),
     },
     processor: {
       name: normalizeValue<'error'>(fields[PROCESSOR_NAME]),

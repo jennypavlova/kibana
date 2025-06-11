@@ -256,7 +256,7 @@ export class Plugin
       const [coreStart, pluginsStart] = await coreSetup.getStartServices();
       const { ruleTypeRegistry, actionTypeRegistry } = pluginsStart.triggersActionsUi;
 
-      this.kubernetesDashboardIds = kubernetesDashboardIds || [];
+      // this.kubernetesDashboardIds = kubernetesDashboardIds || [];
 
       return renderApp({
         appMountParameters: params,

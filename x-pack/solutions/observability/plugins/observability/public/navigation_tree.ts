@@ -26,7 +26,7 @@ function createNavTree({
   kubernetesDashboardIds?: string[];
 }) {
   // TODO use kubernetesDashboardIds
-  console.log('kubernetesDashboardIds', kubernetesDashboardIds);
+  // console.log('kubernetesDashboardIds', kubernetesDashboardIds);
   const kubernetesDashboardIdsMock = [
     'kubernetes-0a672d50-bcb1-11ec-b64f-7dd6e8e82013',
     'kubernetes-21694370-bcb2-11ec-b64f-7dd6e8e82013',

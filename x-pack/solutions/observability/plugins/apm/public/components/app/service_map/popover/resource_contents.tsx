@@ -9,9 +9,9 @@ import { EuiDescriptionListDescription, EuiDescriptionListTitle } from '@elastic
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import styled from '@emotion/styled';
+import { NOT_AVAILABLE_LABEL } from '../../../../../common/i18n';
 import { isEdge, type ContentsProps } from './popover_content';
 import { isDependencyNodeData, type DependencyNodeData } from '../../../../../common/service_map';
-import { SPAN_SUBTYPE, SPAN_TYPE } from '../../../../../common/es_fields/apm';
 
 const ItemRow = styled.div`
   line-height: 2;
@@ -32,22 +32,19 @@ export function ResourceContents({ selection }: ContentsProps) {
     return null;
   }
   const data: DependencyNodeData = node.data;
-  // Support both camelCase and field-constant keys (data may come from different sources)
-  const subtype = data.spanSubtype ?? data[SPAN_SUBTYPE];
-  const type = data.spanType ?? data[SPAN_TYPE];
 
   const listItems = [
     {
       title: i18n.translate('xpack.apm.serviceMap.typePopoverStat', {
         defaultMessage: 'Type',
       }),
-      description: type,
+      description: data.spanType || NOT_AVAILABLE_LABEL,
     },
     {
       title: i18n.translate('xpack.apm.serviceMap.subtypePopoverStat', {
         defaultMessage: 'Subtype',
       }),
-      description: subtype,
+      description: data.spanSubtype || NOT_AVAILABLE_LABEL,
     },
   ];
 

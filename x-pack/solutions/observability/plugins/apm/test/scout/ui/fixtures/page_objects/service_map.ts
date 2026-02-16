@@ -135,13 +135,9 @@ export class ServiceMapPage {
 
   async clickNode(nodeId: string, options?: { force?: boolean }) {
     const node = this.getNodeById(nodeId);
-    const button = node.locator('[role="button"]');
+    await node.scrollIntoViewIfNeeded();
     const clickOptions = options?.force ? { force: true } : undefined;
-    if ((await button.count()) > 0) {
-      await button.click(clickOptions);
-    } else {
-      await node.click(clickOptions);
-    }
+    await node.click(clickOptions);
   }
 
   async clickEdge(edgeId: string) {

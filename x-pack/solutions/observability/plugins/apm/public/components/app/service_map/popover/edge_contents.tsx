@@ -35,7 +35,8 @@ export function EdgeContents({ selection, environment, start, end }: ContentsPro
     ? selection.data?.sourceData ?? { id: selection.source }
     : null;
   const resources = isEdgeSelection ? selection.data?.resources ?? [] : [];
-  const sourceServiceName = sourceData?.[SERVICE_NAME];
+  const sourceServiceName =
+    sourceData && SERVICE_NAME in sourceData ? sourceData[SERVICE_NAME] : undefined;
   const dependencies = resources;
 
   const { data = INITIAL_STATE, status } = useFetcher(

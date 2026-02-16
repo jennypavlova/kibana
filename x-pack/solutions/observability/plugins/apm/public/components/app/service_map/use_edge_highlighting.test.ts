@@ -261,8 +261,20 @@ describe('useEdgeHighlighting', () => {
             type: 'default',
             data: {
               isBidirectional: false,
-              sourceData: { id: 'a', label: 'A' },
-              targetData: { id: 'b', label: 'B' },
+              sourceData: {
+                id: 'a',
+                label: 'A',
+                [SPAN_DESTINATION_SERVICE_RESOURCE]: 'a',
+                [SPAN_TYPE]: 'external',
+                [SPAN_SUBTYPE]: 'http',
+              },
+              targetData: {
+                id: 'b',
+                label: 'B',
+                [SPAN_DESTINATION_SERVICE_RESOURCE]: 'b',
+                [SPAN_TYPE]: 'external',
+                [SPAN_SUBTYPE]: 'http',
+              },
               customField: 'customValue',
             },
           },

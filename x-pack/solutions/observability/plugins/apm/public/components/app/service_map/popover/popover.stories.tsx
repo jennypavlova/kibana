@@ -8,6 +8,7 @@
 import type { Meta, StoryObj } from '@storybook/react';
 import React from 'react';
 import { MarkerType } from '@xyflow/react';
+import { SPAN_DESTINATION_SERVICE_RESOURCE, SPAN_TYPE, SPAN_SUBTYPE } from '@kbn/apm-types';
 import { MockApmPluginStorybook } from '../../../../context/apm_plugin/mock_apm_plugin_storybook';
 import { PopoverContent } from './popover_content';
 import type { ServiceMapNode, ServiceMapEdge } from '../../../../../common/service_map';
@@ -148,8 +149,20 @@ const edgeSelection: ServiceMapEdge = {
   type: 'default',
   data: {
     isBidirectional: false,
-    sourceData: { id: 'svc-a' },
-    targetData: { id: 'svc-b' },
+    sourceData: {
+      id: 'svc-a',
+      [SPAN_DESTINATION_SERVICE_RESOURCE]: 'svc-a',
+      [SPAN_TYPE]: 'external',
+      [SPAN_SUBTYPE]: 'http',
+      label: 'svc-a',
+    },
+    targetData: {
+      id: 'svc-b',
+      [SPAN_DESTINATION_SERVICE_RESOURCE]: 'svc-b',
+      [SPAN_TYPE]: 'external',
+      [SPAN_SUBTYPE]: 'http',
+      label: 'svc-b',
+    },
     resources: ['svc-b'],
   },
   style: { stroke: '#000', strokeWidth: 1 },

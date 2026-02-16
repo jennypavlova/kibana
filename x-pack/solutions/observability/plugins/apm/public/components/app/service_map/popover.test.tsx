@@ -15,7 +15,7 @@ import type {
   DependencyNodeData,
   GroupedNodeData,
   ServiceMapEdge,
-} from '../../../common/service_map';
+} from '../../../../common/service_map';
 import { MarkerType } from '@xyflow/react';
 import { MOCK_DEFAULT_COLOR, MOCK_EUI_THEME } from './constants';
 

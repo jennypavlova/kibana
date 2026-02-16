@@ -24,7 +24,7 @@ const decorators: Meta['decorators'] = [
 ];
 
 const meta: Meta<typeof PopoverContent> = {
-  title: 'APM/Service Map/Popover',
+  title: 'app/ServiceMap/Popover',
   component: PopoverContent,
   decorators,
 };

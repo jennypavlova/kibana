@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { Node, Edge, MarkerType } from '@xyflow/react';
+import type { Node, Edge, EdgeMarker as ReactFlowEdgeMarker } from '@xyflow/react';
 import type { AgentName } from '@kbn/apm-types/src/es_schemas/ui/fields';
 import type { AGENT_NAME, SERVICE_ENVIRONMENT, SERVICE_NAME } from '@kbn/apm-types';
 import type { SPAN_DESTINATION_SERVICE_RESOURCE, SPAN_SUBTYPE, SPAN_TYPE } from '@kbn/apm-types';
@@ -221,8 +221,7 @@ export type ServiceMapNodeData = ServiceNodeData | DependencyNodeData | GroupedN
 
 export type ServiceMapNode = Node<ServiceMapNodeData>;
 
-export interface EdgeMarker {
-  type: MarkerType;
+export interface EdgeMarker extends ReactFlowEdgeMarker {
   width: number;
   height: number;
   color: string;

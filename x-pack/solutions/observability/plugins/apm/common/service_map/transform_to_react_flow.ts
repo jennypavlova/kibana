@@ -35,7 +35,7 @@ import type {
 } from './types';
 import { createEdgeMarker, toDisplayName } from './utils';
 import { getPaths } from './get_paths';
-import { groupReactFlowNodes } from './group_resource_nodes';
+import { groupResourceNodes } from './group_resource_nodes';
 import {
   addMessagingConnections,
   getAllNodes,
@@ -141,9 +141,7 @@ export function transformToReactFlow(
     }),
   ];
 
-  const reactFlowNodes = [...uniqueNodes.values()]
-    .filter((node) => !markedEdges.some((e) => e.isInverseEdge && e.target === node.id))
-    .map((node) => toReactFlowNode(node));
+  const reactFlowNodes = [...uniqueNodes.values()].map((node) => toReactFlowNode(node));
 
   const reactFlowEdges: ServiceMapEdge[] = [];
   for (const edge of markedEdges) {
@@ -152,7 +150,7 @@ export function transformToReactFlow(
     }
   }
 
-  const grouped = groupReactFlowNodes(reactFlowNodes, reactFlowEdges);
+  const grouped = groupResourceNodes(reactFlowNodes, reactFlowEdges);
 
   return {
     nodes: grouped.nodes,

@@ -6,7 +6,7 @@
  */
 
 import { MarkerType } from '@xyflow/react';
-import { groupReactFlowNodes } from './group_resource_nodes';
+import { groupResourceNodes } from './group_resource_nodes';
 import type { ServiceMapNode, ServiceMapEdge, DependencyNodeData, GroupedNodeData } from './types';
 import { DEFAULT_EDGE_COLOR, GROUPABLE_SPAN_SUBTYPE, GROUPABLE_SPAN_TYPE } from './constants';
 
@@ -55,7 +55,26 @@ function createEdge(source: string, target: string): ServiceMapEdge {
   };
 }
 
-describe('groupReactFlowNodes', () => {
+function createBidirectionalEdge(source: string, target: string): ServiceMapEdge {
+  const marker = {
+    type: MarkerType.ArrowClosed,
+    width: 12,
+    height: 12,
+    color: DEFAULT_EDGE_COLOR,
+  };
+  return {
+    id: `${source}->${target}`,
+    source,
+    target,
+    type: 'default',
+    style: { stroke: DEFAULT_EDGE_COLOR, strokeWidth: 1 },
+    markerEnd: marker,
+    markerStart: marker,
+    data: { isBidirectional: true },
+  };
+}
+
+describe('groupResourceNodes', () => {
   describe('when there are no groupable nodes', () => {
     it('returns nodes and edges unchanged', () => {
       const nodes = [
@@ -65,7 +84,7 @@ describe('groupReactFlowNodes', () => {
       ];
       const edges = [createEdge('service-a', 'service-b'), createEdge('service-b', 'service-c')];
 
-      const result = groupReactFlowNodes(nodes, edges);
+      const result = groupResourceNodes(nodes, edges);
 
       expect({ ...result, nodes: result.nodes.length, edges: result.edges.length }).toEqual({
         nodes: 3,
@@ -89,7 +108,7 @@ describe('groupReactFlowNodes', () => {
         createEdge('api-service', 'resource3'),
       ];
 
-      const result = groupReactFlowNodes(nodes, edges);
+      const result = groupResourceNodes(nodes, edges);
 
       expect({ nodes: result.nodes.length, edges: result.edges.length }).toEqual({
         nodes: 4,
@@ -117,7 +136,7 @@ describe('groupReactFlowNodes', () => {
         createEdge('api-service', 'resource4'),
       ];
 
-      const result = groupReactFlowNodes(nodes, edges);
+      const result = groupResourceNodes(nodes, edges);
 
       // Should have: api-service + 1 grouped node = 2 nodes
       expect({ nodes: result.nodes.length, edges: result.edges.length }).toEqual({
@@ -155,7 +174,7 @@ describe('groupReactFlowNodes', () => {
         createEdge('api-service', 'resource5'),
       ];
 
-      const result = groupReactFlowNodes(nodes, edges);
+      const result = groupResourceNodes(nodes, edges);
 
       const groupedNode = result.nodes.find((n) => n.type === 'groupedResources');
       expect(groupedNode).toBeDefined();
@@ -183,7 +202,7 @@ describe('groupReactFlowNodes', () => {
         createEdge('service-b', 'resource4'),
       ];
 
-      const result = groupReactFlowNodes(nodes, edges);
+      const result = groupResourceNodes(nodes, edges);
 
       // No grouping should occur (less than 4 from each source)
       const groupedNodes = result.nodes.filter((n) => n.type === 'groupedResources');
@@ -213,7 +232,7 @@ describe('groupReactFlowNodes', () => {
         createEdge('service-b', 'resource4'),
       ];
 
-      const result = groupReactFlowNodes(nodes, edges);
+      const result = groupResourceNodes(nodes, edges);
 
       // Should have: 2 services + 1 grouped node
       expect({ nodes: result.nodes.length, edges: result.edges.length }).toEqual({
@@ -240,7 +259,7 @@ describe('groupReactFlowNodes', () => {
         createEdge('api-service', 'resource4'),
       ];
 
-      const result = groupReactFlowNodes(nodes, edges);
+      const result = groupResourceNodes(nodes, edges);
 
       expect(result.edges).toHaveLength(1);
       expect(result.edges[0]).toEqual(
@@ -272,7 +291,7 @@ describe('groupReactFlowNodes', () => {
         createEdge('api-service', 'resource4'),
       ];
 
-      const result = groupReactFlowNodes(nodes, edges);
+      const result = groupResourceNodes(nodes, edges);
 
       const groupedNode = result.nodes.find((n) => n.type === 'groupedResources');
       expect(groupedNode).toBeDefined();
@@ -299,7 +318,7 @@ describe('groupReactFlowNodes', () => {
         createEdge('api-service', 'resource4'),
       ];
 
-      const result = groupReactFlowNodes(nodes, edges);
+      const result = groupResourceNodes(nodes, edges);
 
       const groupedNode = result.nodes.find((n) => n.type === 'groupedResources');
       expect(groupedNode).toBeDefined();
@@ -340,7 +359,7 @@ describe('groupReactFlowNodes', () => {
         createEdge('kafka/payments', 'consumer-service'),
       ];
 
-      const result = groupReactFlowNodes(nodes, edges);
+      const result = groupResourceNodes(nodes, edges);
 
       // The kafka topics should be grouped
       const groupedNodes = result.nodes.filter((n) => n.type === 'groupedResources');
@@ -380,7 +399,7 @@ describe('groupReactFlowNodes', () => {
         createEdge('resource-0', 'downstream'),
       ];
 
-      const result = groupReactFlowNodes(nodes, edges);
+      const result = groupResourceNodes(nodes, edges);
 
       // Verify no orphaned edges exist
       const nodeIds = new Set(result.nodes.map((n) => n.id));
@@ -417,7 +436,7 @@ describe('groupReactFlowNodes', () => {
         createEdge('api-service', 'downstream'),
       ];
 
-      const result = groupReactFlowNodes(nodes, edges);
+      const result = groupResourceNodes(nodes, edges);
 
       // The api-service -> downstream edge should survive
       const serviceToDownstream = result.edges.find(
@@ -445,7 +464,7 @@ describe('groupReactFlowNodes', () => {
         createEdge('api-service', 'resource4'),
       ];
 
-      const result = groupReactFlowNodes(nodes, edges);
+      const result = groupResourceNodes(nodes, edges);
 
       // Should have: api-service + backend-service + grouped node = 3 nodes
       expect({ nodes: result.nodes.length, edges: result.edges.length }).toEqual({
@@ -473,7 +492,7 @@ describe('groupReactFlowNodes', () => {
         createEdge('api-service', 'db4:5432'),
       ];
 
-      const result = groupReactFlowNodes(nodes, edges);
+      const result = groupResourceNodes(nodes, edges);
 
       // Should NOT group db nodes - all 5 nodes should remain
       expect({
@@ -485,6 +504,53 @@ describe('groupReactFlowNodes', () => {
         edges: 4,
         groupedNodes: 0,
       });
+    });
+  });
+
+  describe('bidirectional edges', () => {
+    it('preserves bidirectional edge (markerStart and markerEnd) when no grouping applies', () => {
+      const nodes = [createServiceNode('service-a'), createServiceNode('service-b')];
+      const edges = [createBidirectionalEdge('service-a', 'service-b')];
+
+      const result = groupResourceNodes(nodes, edges);
+
+      expect(result.edges).toHaveLength(1);
+      const edge = result.edges[0];
+      expect(edge.source).toBe('service-a');
+      expect(edge.target).toBe('service-b');
+      expect(edge.data?.isBidirectional).toBe(true);
+      expect(edge.markerEnd).toBeDefined();
+      expect(edge.markerStart).toBeDefined();
+      expect(edge.markerStart).toEqual(edge.markerEnd);
+    });
+
+    it('preserves bidirectional edge when grouping other nodes', () => {
+      const nodes = [
+        createServiceNode('service-a'),
+        createServiceNode('service-b'),
+        createDependencyNode('resource1', GROUPABLE_SPAN_TYPE, GROUPABLE_SPAN_SUBTYPE),
+        createDependencyNode('resource2', GROUPABLE_SPAN_TYPE, GROUPABLE_SPAN_SUBTYPE),
+        createDependencyNode('resource3', GROUPABLE_SPAN_TYPE, GROUPABLE_SPAN_SUBTYPE),
+        createDependencyNode('resource4', GROUPABLE_SPAN_TYPE, GROUPABLE_SPAN_SUBTYPE),
+      ];
+      const edges = [
+        createBidirectionalEdge('service-a', 'service-b'),
+        createEdge('service-a', 'resource1'),
+        createEdge('service-a', 'resource2'),
+        createEdge('service-a', 'resource3'),
+        createEdge('service-a', 'resource4'),
+      ];
+
+      const result = groupResourceNodes(nodes, edges);
+
+      // service-a <-> service-b bidirectional edge must still be present with both markers
+      const bidirectionalEdge = result.edges.find(
+        (e) => e.source === 'service-a' && e.target === 'service-b'
+      );
+      expect(bidirectionalEdge).toBeDefined();
+      expect(bidirectionalEdge!.data?.isBidirectional).toBe(true);
+      expect(bidirectionalEdge!.markerStart).toBeDefined();
+      expect(bidirectionalEdge!.markerEnd).toBeDefined();
     });
   });
 });

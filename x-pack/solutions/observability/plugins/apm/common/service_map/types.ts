@@ -249,7 +249,7 @@ export interface ServiceMapEdge extends Edge<ServiceMapEdgeData> {
   markerStart?: EdgeMarker;
 }
 
-export interface GroupReactFlowNodesResult {
+export interface GroupResourceNodesResult {
   nodes: ServiceMapNode[];
   edges: ServiceMapEdge[];
   nodesCount: number;

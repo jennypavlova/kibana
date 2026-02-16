@@ -16,7 +16,7 @@ import type {
   ServiceMapEdge,
   GroupedNodeData,
   GroupInfo,
-  GroupReactFlowNodesResult,
+  GroupResourceNodesResult,
 } from './types';
 import { isDependencyNodeData } from './types';
 import { isSpanGroupingSupported, getEdgeId, createEdgeMarker } from './utils';
@@ -165,10 +165,10 @@ function createOutgoingGroupedEdges(
  * This is a native ReactFlow implementation that doesn't require
  * grouping.
  */
-export function groupReactFlowNodes(
+export function groupResourceNodes(
   nodes: ServiceMapNode[],
   edges: ServiceMapEdge[]
-): GroupReactFlowNodesResult {
+): GroupResourceNodesResult {
   const nodesById = new Map(nodes.map((n) => [n.id, n]));
 
   const groups = findGroups(nodes, edges);

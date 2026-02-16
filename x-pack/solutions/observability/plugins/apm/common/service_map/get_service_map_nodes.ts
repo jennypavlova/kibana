@@ -278,7 +278,8 @@ export function markBidirectionalConnections({ connections }: { connections: Con
 
   for (const connection of connections) {
     const edgeId = getEdgeId(connection.source, connection.target);
-    const reversedConnection = targets.get(edgeId);
+    const reverseEdgeId = getEdgeId(connection.target, connection.source);
+    const reversedConnection = targets.get(reverseEdgeId);
 
     if (reversedConnection) {
       reversedConnection.bidirectional = true;

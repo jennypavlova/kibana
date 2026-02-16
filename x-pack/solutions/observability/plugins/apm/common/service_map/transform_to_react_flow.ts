@@ -9,6 +9,7 @@
  * Transform service map API response directly to React Flow format.
  */
 
+import type { AgentName } from '@kbn/apm-types';
 import {
   SERVICE_NAME,
   AGENT_NAME,
@@ -45,30 +46,28 @@ import {
 } from './get_service_map_nodes';
 import { DEFAULT_EDGE_STYLE } from './constants';
 
-function toServiceNodeData(node: ConnectionNode): ServiceNodeData {
-  const serviceNode = node as ServiceConnectionNode;
+function toServiceNodeData(node: ServiceConnectionNode): ServiceNodeData {
   return {
     id: node.id,
-    label: serviceNode[SERVICE_NAME] ?? node.label ?? node.id,
-    agentName: serviceNode[AGENT_NAME] as ServiceNodeData['agentName'],
+    label: node[SERVICE_NAME] ?? node.label ?? node.id,
+    agentName: node[AGENT_NAME] as AgentName,
     isService: true,
-    serviceAnomalyStats: serviceNode.serviceAnomalyStats,
+    serviceAnomalyStats: node.serviceAnomalyStats,
   };
 }
 
-function toDependencyNodeData(node: ConnectionNode): DependencyNodeData {
-  const ext = node as ExternalConnectionNode;
+function toDependencyNodeData(node: ExternalConnectionNode): DependencyNodeData {
   return {
     id: node.id,
-    label: ext[SPAN_DESTINATION_SERVICE_RESOURCE] ?? node.label ?? node.id,
-    spanType: ext[SPAN_TYPE],
-    spanSubtype: ext[SPAN_SUBTYPE],
+    label: node[SPAN_DESTINATION_SERVICE_RESOURCE] ?? node.label ?? node.id,
+    spanType: node[SPAN_TYPE],
+    spanSubtype: node[SPAN_SUBTYPE],
     isService: false,
   };
 }
 
-function isServiceNode(node: ConnectionNode): boolean {
-  return (node as ServiceConnectionNode)[SERVICE_NAME] !== undefined;
+function isServiceNode(node: ConnectionNode): node is ServiceConnectionNode {
+  return SERVICE_NAME in node && node[SERVICE_NAME] !== undefined;
 }
 
 function toNodeData(node: ConnectionNode): ServiceMapNodeData {

@@ -35,7 +35,7 @@ import type {
 } from './types';
 import { createEdgeMarker, toDisplayName } from './utils';
 import { getPaths } from './get_paths';
-import { groupReactFlowNodes } from './group_react_flow_nodes';
+import { groupReactFlowNodes } from './group_resource_nodes';
 import {
   addMessagingConnections,
   getAllNodes,

@@ -31,8 +31,7 @@ import type {
   ServiceMapNodeData,
   ServiceNodeData,
   DependencyNodeData,
-  EdgeSourceData,
-} from './react_flow_types';
+} from './types';
 import { createEdgeMarker } from './utils';
 import { getPaths } from './get_paths';
 import { groupReactFlowNodes } from './group_react_flow_nodes';
@@ -98,8 +97,8 @@ function toReactFlowEdge(edge: ConnectionEdge): ServiceMapEdge {
     ...(isBidirectional && { markerStart: createEdgeMarker() }),
     data: {
       isBidirectional,
-      sourceData: edge.sourceData as EdgeSourceData | undefined,
-      targetData: edge.targetData as EdgeSourceData | undefined,
+      sourceData: edge.sourceData,
+      targetData: edge.targetData,
       resources: edge.resources,
     },
   };

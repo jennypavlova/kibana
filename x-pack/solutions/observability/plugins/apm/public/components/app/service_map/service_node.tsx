@@ -11,13 +11,13 @@ import { useEuiTheme, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { getAgentIcon } from '@kbn/custom-icons';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
-import type { ServiceNodeData } from '../../../../../common/service_map/react_flow_types';
+import type { ServiceNodeData } from '../../../../common/service_map';
 import {
   getServiceHealthStatusColor,
   getServiceHealthStatusLabel,
   ServiceHealthStatus,
-} from '../../../../../common/service_health_status';
-import { SERVICE_NODE_CIRCLE_SIZE } from '../../../../../common/service_map/constants';
+} from '../../../../common/service_health_status';
+import { SERVICE_NODE_CIRCLE_SIZE } from '../../../../common/service_map/constants';
 import { NodeLabel } from './node_label';
 
 type ServiceNodeType = Node<ServiceNodeData, 'service'>;

@@ -5,22 +5,7 @@
  * 2.0.
  */
 
-import type {
-  Connection,
-  ConnectionEdge,
-  ConnectionNode,
-  ExitSpanDestination,
-  ExternalConnectionNode,
-  GroupResourceNodesResponse,
-  ServiceConnectionNode,
-  ServicesResponse,
-  ServiceMapResponse,
-  ServiceMapConnections,
-  ServiceMapTelemetry,
-  NodeStats,
-  NodeItem,
-} from './types';
-
+export * from './types';
 export * from './utils';
 export * from './constants';
 export {
@@ -34,20 +19,3 @@ export {
 export { getPaths } from './get_paths';
 export { transformToReactFlow } from './transform_to_react_flow';
 export { groupReactFlowNodes } from './group_react_flow_nodes';
-export * from './react_flow_types';
-
-export type {
-  Connection,
-  ConnectionEdge,
-  ConnectionNode,
-  ExitSpanDestination,
-  ExternalConnectionNode,
-  GroupResourceNodesResponse,
-  ServiceConnectionNode,
-  ServicesResponse,
-  ServiceMapConnections,
-  ServiceMapResponse,
-  ServiceMapTelemetry,
-  NodeStats,
-  NodeItem,
-};

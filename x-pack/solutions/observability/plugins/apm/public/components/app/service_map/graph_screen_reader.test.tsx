@@ -8,8 +8,8 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { ReactFlowProvider } from '@xyflow/react';
-import { ReactFlowServiceMap } from './react_flow_graph';
-import type { ServiceMapNode } from '../../../../../common/service_map';
+import { ServiceMapGraph } from './graph';
+import type { ServiceMapNode } from '../../../../common/service_map';
 import { MOCK_EUI_THEME } from './constants';
 
 jest.mock('@elastic/eui', () => {
@@ -92,8 +92,8 @@ jest.mock('./use_reduced_motion', () => ({
   })),
 }));
 
-jest.mock('./react_flow_popover', () => ({
-  ReactFlowPopover: () => <div data-testid="react-flow-popover" />,
+jest.mock('./popover', () => ({
+  MapPopover: () => <div data-testid="service-map-popover" />,
 }));
 
 jest.mock('./layout', () => ({
@@ -126,7 +126,7 @@ const defaultProps = {
   end: '2024-01-01T01:00:00Z',
 };
 
-describe('ReactFlowServiceMap - Screen Reader Announcements', () => {
+describe('ServiceMapGraph - Screen Reader Announcements', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     mockScreenReaderAnnouncementValue = '';
@@ -135,7 +135,7 @@ describe('ReactFlowServiceMap - Screen Reader Announcements', () => {
   it('renders EuiScreenReaderLive with proper ARIA attributes', () => {
     render(
       <ReactFlowProvider>
-        <ReactFlowServiceMap {...defaultProps} />
+        <ServiceMapGraph {...defaultProps} />
       </ReactFlowProvider>
     );
 
@@ -148,11 +148,11 @@ describe('ReactFlowServiceMap - Screen Reader Announcements', () => {
   it('renders EuiScreenReaderLive within the service map container', () => {
     render(
       <ReactFlowProvider>
-        <ReactFlowServiceMap {...defaultProps} />
+        <ServiceMapGraph {...defaultProps} />
       </ReactFlowProvider>
     );
 
-    const serviceMapContainer = screen.getByTestId('reactFlowServiceMap');
+    const serviceMapContainer = screen.getByTestId('serviceMapGraph');
     const liveRegion = screen.getByRole('status');
 
     expect(serviceMapContainer).toContainElement(liveRegion);
@@ -161,7 +161,7 @@ describe('ReactFlowServiceMap - Screen Reader Announcements', () => {
   it('displays screen reader instructions with proper ID', () => {
     render(
       <ReactFlowProvider>
-        <ReactFlowServiceMap {...defaultProps} />
+        <ServiceMapGraph {...defaultProps} />
       </ReactFlowProvider>
     );
 
@@ -174,11 +174,11 @@ describe('ReactFlowServiceMap - Screen Reader Announcements', () => {
   it('links service map container to instructions via aria-describedby', () => {
     render(
       <ReactFlowProvider>
-        <ReactFlowServiceMap {...defaultProps} />
+        <ServiceMapGraph {...defaultProps} />
       </ReactFlowProvider>
     );
 
-    const serviceMapContainer = screen.getByTestId('reactFlowServiceMap');
+    const serviceMapContainer = screen.getByTestId('serviceMapGraph');
     const instructions = screen.getByText(/This is an interactive service map/i);
     const instructionsId = instructions.getAttribute('id');
 
@@ -194,11 +194,11 @@ describe('ReactFlowServiceMap - Screen Reader Announcements', () => {
 
     render(
       <ReactFlowProvider>
-        <ReactFlowServiceMap {...defaultProps} nodes={nodes} />
+        <ServiceMapGraph {...defaultProps} nodes={nodes} />
       </ReactFlowProvider>
     );
 
-    const serviceMapContainer = screen.getByTestId('reactFlowServiceMap');
+    const serviceMapContainer = screen.getByTestId('serviceMapGraph');
     expect(serviceMapContainer).toHaveAttribute(
       'aria-label',
       expect.stringContaining('3 services')
@@ -208,11 +208,11 @@ describe('ReactFlowServiceMap - Screen Reader Announcements', () => {
   it('has proper role and tabIndex on service map container', () => {
     render(
       <ReactFlowProvider>
-        <ReactFlowServiceMap {...defaultProps} />
+        <ServiceMapGraph {...defaultProps} />
       </ReactFlowProvider>
     );
 
-    const serviceMapContainer = screen.getByTestId('reactFlowServiceMap');
+    const serviceMapContainer = screen.getByTestId('serviceMapGraph');
     expect(serviceMapContainer).toHaveAttribute('role', 'group');
     expect(serviceMapContainer).toHaveAttribute('tabIndex', '0');
   });
@@ -220,7 +220,7 @@ describe('ReactFlowServiceMap - Screen Reader Announcements', () => {
   it('instructions contain keyboard navigation guidance', () => {
     render(
       <ReactFlowProvider>
-        <ReactFlowServiceMap {...defaultProps} />
+        <ServiceMapGraph {...defaultProps} />
       </ReactFlowProvider>
     );
 

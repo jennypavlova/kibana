@@ -8,14 +8,14 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { ReactFlowProvider } from '@xyflow/react';
-import { ReactFlowPopover } from './react_flow_popover';
+import { MapPopover } from './popover';
 import type {
   ServiceMapNode,
   ServiceNodeData,
   DependencyNodeData,
   GroupedNodeData,
   ServiceMapEdge,
-} from '../../../../../common/service_map';
+} from '../../../common/service_map';
 import { MarkerType } from '@xyflow/react';
 import { MOCK_DEFAULT_COLOR, MOCK_EUI_THEME } from './constants';
 
@@ -55,7 +55,7 @@ jest.mock('@elastic/eui', () => {
 });
 
 // Mock APM plugin context
-jest.mock('../../../../context/apm_plugin/use_apm_plugin_context', () => ({
+jest.mock('../../../context/apm_plugin/use_apm_plugin_context', () => ({
   useApmPluginContext: () => ({
     core: {
       uiSettings: {
@@ -66,14 +66,14 @@ jest.mock('../../../../context/apm_plugin/use_apm_plugin_context', () => ({
 }));
 
 // Mock APM router
-jest.mock('../../../../hooks/use_apm_router', () => ({
+jest.mock('../../../hooks/use_apm_router', () => ({
   useApmRouter: () => ({
     link: jest.fn((path: string) => `/app/apm${path}`),
   }),
 }));
 
 // Mock APM params
-jest.mock('../../../../hooks/use_apm_params', () => ({
+jest.mock('../../../hooks/use_apm_params', () => ({
   useAnyOfApmParams: () => ({
     query: {
       rangeFrom: 'now-15m',
@@ -85,7 +85,7 @@ jest.mock('../../../../hooks/use_apm_params', () => ({
 }));
 
 // Mock time range hook
-jest.mock('../../../../hooks/use_time_range', () => ({
+jest.mock('../../../hooks/use_time_range', () => ({
   useTimeRange: () => ({
     start: '2023-01-01T00:00:00.000Z',
     end: '2023-01-01T01:00:00.000Z',
@@ -93,7 +93,7 @@ jest.mock('../../../../hooks/use_time_range', () => ({
 }));
 
 // Mock fetcher
-jest.mock('../../../../hooks/use_fetcher', () => ({
+jest.mock('../../../hooks/use_fetcher', () => ({
   FETCH_STATUS: {
     LOADING: 'loading',
     SUCCESS: 'success',
@@ -125,7 +125,7 @@ jest.mock('@xyflow/react', () => {
   };
 });
 
-describe('ReactFlowPopover', () => {
+describe('MapPopover', () => {
   const defaultProps = {
     selectedNode: null,
     selectedEdge: null,
@@ -140,7 +140,7 @@ describe('ReactFlowPopover', () => {
   const renderPopover = (props = {}) => {
     return render(
       <ReactFlowProvider>
-        <ReactFlowPopover {...defaultProps} {...props} />
+        <MapPopover {...defaultProps} {...props} />
       </ReactFlowProvider>
     );
   };

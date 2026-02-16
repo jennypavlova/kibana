@@ -8,7 +8,7 @@
 import { renderHook } from '@testing-library/react';
 import { MarkerType } from '@xyflow/react';
 import { useEdgeHighlighting } from './use_edge_highlighting';
-import type { ServiceMapEdge } from '../../../../../common/service_map';
+import type { ServiceMapEdge } from '../../../../common/service_map';
 import {
   DEFAULT_MARKER_SIZE,
   HIGHLIGHTED_MARKER_SIZE,
@@ -17,6 +17,7 @@ import {
   MOCK_PRIMARY_COLOR,
   MOCK_DEFAULT_COLOR,
 } from './constants';
+import { SPAN_DESTINATION_SERVICE_RESOURCE, SPAN_TYPE, SPAN_SUBTYPE } from '@kbn/apm-types';
 
 jest.mock('@elastic/eui', () => {
   const original = jest.requireActual('@elastic/eui');
@@ -55,8 +56,20 @@ function createEdge(
     },
     data: {
       isBidirectional,
-      sourceData: { id: source, label: source },
-      targetData: { id: target, label: target },
+      sourceData: {
+        id: source,
+        label: source,
+        [SPAN_DESTINATION_SERVICE_RESOURCE]: source,
+        [SPAN_TYPE]: 'external',
+        [SPAN_SUBTYPE]: 'http',
+      },
+      targetData: {
+        id: target,
+        label: target,
+        [SPAN_DESTINATION_SERVICE_RESOURCE]: target,
+        [SPAN_TYPE]: 'external',
+        [SPAN_SUBTYPE]: 'http',
+      },
     },
   };
 }

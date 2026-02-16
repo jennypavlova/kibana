@@ -9,9 +9,9 @@ import React from 'react';
 import type { Meta, StoryObj } from '@storybook/react';
 import { ReactFlowProvider } from '@xyflow/react';
 import { useEuiTheme } from '@elastic/eui';
-import { MockApmPluginStorybook } from '../../../../../context/apm_plugin/mock_apm_plugin_storybook';
+import { MockApmPluginStorybook } from '../../../../context/apm_plugin/mock_apm_plugin_storybook';
 import { GroupedResourcesNode } from '../grouped_resources_node';
-import type { GroupedNodeData } from '../../../../../../common/service_map/react_flow_types';
+import type { GroupedNodeData } from '../../../../../common/service_map';
 
 const LabelText = ({ children }: { children: React.ReactNode }) => {
   const { euiTheme } = useEuiTheme();

@@ -9,8 +9,8 @@ import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { ReactFlowProvider } from '@xyflow/react';
 import { ServiceNode } from './service_node';
-import { ServiceHealthStatus } from '../../../../../common/service_health_status';
-import type { ServiceNodeData } from '../../../../../common/service_map/react_flow_types';
+import { ServiceHealthStatus } from '../../../../common/service_health_status';
+import type { ServiceNodeData } from '../../../../common/service_map';
 import { MOCK_EUI_THEME, MOCK_DEFAULT_COLOR } from './constants';
 
 // Mock EUI theme
@@ -67,8 +67,8 @@ jest.mock('@kbn/custom-icons', () => ({
 }));
 
 // Mock getServiceHealthStatusColor
-jest.mock('../../../../../common/service_health_status', () => ({
-  ...jest.requireActual('../../../../../common/service_health_status'),
+jest.mock('../../../../common/service_health_status', () => ({
+  ...jest.requireActual('../../../../common/service_health_status'),
   getServiceHealthStatusColor: jest.fn((_theme, status) => {
     switch (status) {
       case 'critical':

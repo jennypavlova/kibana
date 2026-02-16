@@ -22,23 +22,23 @@ test.describe(
     test.beforeEach(async ({ browserAuth, pageObjects: { serviceMapPage } }) => {
       await browserAuth.loginAsViewer();
       await serviceMapPage.gotoWithDateSelected(testData.START_DATE, testData.END_DATE);
-      await serviceMapPage.waitForReactFlowServiceMapToLoad();
+      await serviceMapPage.waitForMapToLoad();
       await serviceMapPage.dismissPopoverIfOpen();
     });
 
     test('renders service map with controls', async ({ pageObjects: { serviceMapPage } }) => {
-      await expect(serviceMapPage.reactFlowServiceMap).toBeVisible();
-      await expect(serviceMapPage.reactFlowControls).toBeVisible();
-      await expect(serviceMapPage.reactFlowZoomInBtn).toBeVisible();
-      await expect(serviceMapPage.reactFlowZoomOutBtn).toBeVisible();
-      await expect(serviceMapPage.reactFlowFitViewBtn).toBeVisible();
+      await expect(serviceMapPage.serviceMapGraph).toBeVisible();
+      await expect(serviceMapPage.mapControls).toBeVisible();
+      await expect(serviceMapPage.zoomInBtnControl).toBeVisible();
+      await expect(serviceMapPage.zoomOutBtnControl).toBeVisible();
+      await expect(serviceMapPage.fitViewBtn).toBeVisible();
 
       await test.step('zoom controls are interactive', async () => {
-        await expect(serviceMapPage.reactFlowControls).toBeVisible();
-        await serviceMapPage.clickReactFlowZoomIn();
-        await serviceMapPage.clickReactFlowZoomOut();
-        await serviceMapPage.clickReactFlowFitView();
-        await expect(serviceMapPage.reactFlowControls).toBeVisible();
+        await expect(serviceMapPage.mapControls).toBeVisible();
+        await serviceMapPage.clickMapZoomIn();
+        await serviceMapPage.clickMapZoomOut();
+        await serviceMapPage.clickFitView();
+        await expect(serviceMapPage.mapControls).toBeVisible();
       });
 
       await serviceMapPage.waitForNodeToLoad(SERVICE_OPBEANS_JAVA);
@@ -77,7 +77,7 @@ test.describe(
       await serviceMapPage.waitForPopoverToBeVisible();
       await expect(serviceMapPage.serviceMapPopoverContent).toBeVisible();
 
-      await serviceMapPage.clickReactFlowFitView();
+      await serviceMapPage.clickFitView();
       await serviceMapPage.waitForNodeToLoad(SERVICE_OPBEANS_JAVA);
       await serviceMapPage.waitForPopoverToBeHidden();
       await expect(serviceMapPage.serviceMapPopoverContent).toBeHidden();
@@ -121,8 +121,8 @@ test.describe(
         new RegExp(`/app/apm/services/${SERVICE_OPBEANS_JAVA}/overview`)
       );
       await page.goBack();
-      await serviceMapPage.waitForReactFlowServiceMapToLoad();
-      await expect(serviceMapPage.reactFlowServiceMap).toBeVisible();
+      await serviceMapPage.waitForMapToLoad();
+      await expect(serviceMapPage.serviceMapGraph).toBeVisible();
     });
 
     test('navigates to Focus Map from popover', async ({
@@ -138,8 +138,8 @@ test.describe(
       await expect(page).toHaveURL(
         new RegExp(`/app/apm/services/${SERVICE_OPBEANS_JAVA}/service-map`)
       );
-      await serviceMapPage.waitForReactFlowServiceMapToLoad();
-      await expect(serviceMapPage.reactFlowServiceMap).toBeVisible();
+      await serviceMapPage.waitForMapToLoad();
+      await expect(serviceMapPage.serviceMapGraph).toBeVisible();
     });
 
     test('navigates to Dependency Details from popover', async ({
@@ -154,8 +154,8 @@ test.describe(
 
       await expect(page).toHaveURL(new RegExp(`/app/apm/dependencies/overview`));
       await page.goBack();
-      await serviceMapPage.waitForReactFlowServiceMapToLoad();
-      await expect(serviceMapPage.reactFlowServiceMap).toBeVisible();
+      await serviceMapPage.waitForMapToLoad();
+      await expect(serviceMapPage.serviceMapGraph).toBeVisible();
     });
   }
 );

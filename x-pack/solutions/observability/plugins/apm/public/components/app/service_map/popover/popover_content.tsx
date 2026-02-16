@@ -47,7 +47,7 @@ export interface ContentsProps {
   onDiagnoseClick?: () => void;
 }
 
-const ServiceContentsWithDiagnose = withDiagnoseButton(ServiceContents);
+export const ServiceContentsWithDiagnose = withDiagnoseButton(ServiceContents);
 
 /**
  * Returns the content component for the given selection (node or edge).
@@ -118,41 +118,39 @@ export function PopoverContent({
   }
 
   return (
-    <>
-      <EuiFlexGroup
-        direction="column"
-        gutterSize="s"
-        style={{ minWidth: POPOVER_WIDTH }}
-        data-test-subj="serviceMapPopoverContent"
-      >
-        <EuiFlexItem>
-          <EuiTitle size="xxs">
-            <h3 style={{ wordBreak: 'break-all' }} data-test-subj="serviceMapPopoverTitle">
-              {getPopoverTitle(selection)}
-              {kuery && (
-                <EuiIconTip
-                  position="bottom"
-                  content={i18n.translate('xpack.apm.serviceMap.kqlFilterInfo', {
-                    defaultMessage: 'The KQL filter is not applied in the displayed stats.',
-                  })}
-                  type="info"
-                />
-              )}
-            </h3>
-          </EuiTitle>
-          <EuiHorizontalRule margin="xs" />
-        </EuiFlexItem>
-        <ContentsComponent
-          selection={selection}
-          onFocusClick={onFocusClick}
-          environment={environment}
-          kuery={kuery}
-          start={start}
-          end={end}
-          showDiagnoseButton={isDiagnosticModeEnabled}
-          onDiagnoseClick={onOpenDiagnostic}
-        />
-      </EuiFlexGroup>
-    </>
+    <EuiFlexGroup
+      direction="column"
+      gutterSize="s"
+      style={{ minWidth: POPOVER_WIDTH }}
+      data-test-subj="serviceMapPopoverContent"
+    >
+      <EuiFlexItem>
+        <EuiTitle size="xxs">
+          <h3 style={{ wordBreak: 'break-all' }} data-test-subj="serviceMapPopoverTitle">
+            {getPopoverTitle(selection)}
+            {kuery && (
+              <EuiIconTip
+                position="bottom"
+                content={i18n.translate('xpack.apm.serviceMap.kqlFilterInfo', {
+                  defaultMessage: 'The KQL filter is not applied in the displayed stats.',
+                })}
+                type="info"
+              />
+            )}
+          </h3>
+        </EuiTitle>
+        <EuiHorizontalRule margin="xs" />
+      </EuiFlexItem>
+      <ContentsComponent
+        selection={selection}
+        onFocusClick={onFocusClick}
+        environment={environment}
+        kuery={kuery}
+        start={start}
+        end={end}
+        showDiagnoseButton={isDiagnosticModeEnabled}
+        onDiagnoseClick={onOpenDiagnostic}
+      />
+    </EuiFlexGroup>
   );
 }

@@ -10,7 +10,7 @@ import { render } from '@testing-library/react';
 import { ReactFlowProvider } from '@xyflow/react';
 import { Position } from '@xyflow/react';
 import { ServiceMapEdge } from './service_map_edge';
-import type { ServiceMapEdgeData } from '../../../../../common/service_map/react_flow_types';
+import type { ServiceMapEdgeData } from '../../../../common/service_map';
 import { MOCK_PRIMARY_COLOR, MOCK_DEFAULT_COLOR, MOCK_EUI_THEME } from './constants';
 
 // Mock EUI theme

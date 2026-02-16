@@ -22,17 +22,17 @@ import {
   EuiText,
 } from '@elastic/eui';
 import { CodeEditor } from '@kbn/code-editor';
-import { MockApmPluginStorybook } from '../../../../../context/apm_plugin/mock_apm_plugin_storybook';
-import { ReactFlowServiceMap } from '../react_flow_graph';
+import { MockApmPluginStorybook } from '../../../../context/apm_plugin/mock_apm_plugin_storybook';
+import { ServiceMapGraph } from '../graph';
 import {
-  generateReactFlowElements,
+  generateServiceMapElements,
   createSimpleServiceMap,
   createMicroservicesExample,
   createLargeServiceMap,
   type GenerateOptions,
-} from './generate_react_flow_elements';
-import { transformToReactFlow } from '../../../../../../common/service_map/transform_to_react_flow';
-import type { ServiceMapResponse } from '../../../../../../common/service_map';
+} from './generate_elements';
+import { transformToReactFlow } from '../../../../../common/service_map/transform_to_react_flow';
+import type { ServiceMapResponse } from '../../../../../common/service_map';
 
 function getHeight() {
   return window.innerHeight - 50;
@@ -44,9 +44,9 @@ const defaultTimeRange = {
   end: new Date().toISOString(),
 };
 
-const meta: Meta<typeof ReactFlowServiceMap> = {
+const meta: Meta<typeof ServiceMapGraph> = {
   title: 'app/ServiceMap/ServiceMap',
-  component: ReactFlowServiceMap,
+  component: ServiceMapGraph,
   decorators: [
     (Story) => (
       <MockApmPluginStorybook routePath="/service-map?rangeFrom=now-15m&rangeTo=now">
@@ -78,13 +78,13 @@ const meta: Meta<typeof ReactFlowServiceMap> = {
 };
 
 export default meta;
-type Story = StoryObj<typeof ReactFlowServiceMap>;
+type Story = StoryObj<typeof ServiceMapGraph>;
 
 export const SimpleExample: Story = {
   render: () => {
     const { nodes, edges } = createSimpleServiceMap();
     return (
-      <ReactFlowServiceMap
+      <ServiceMapGraph
         height={getHeight()}
         nodes={nodes}
         edges={edges}
@@ -101,7 +101,7 @@ export const MicroservicesExample: Story = {
   render: () => {
     const { nodes, edges } = createMicroservicesExample();
     return (
-      <ReactFlowServiceMap
+      <ServiceMapGraph
         height={getHeight()}
         nodes={nodes}
         edges={edges}
@@ -124,10 +124,10 @@ export const GenerateMap: StoryFn = () => {
     includeBidirectional: true,
   });
   const [json, setJson] = useState<string>('');
-  const [{ nodes, edges }, setElements] = useState(() => generateReactFlowElements(options));
+  const [{ nodes, edges }, setElements] = useState(() => generateServiceMapElements(options));
 
   const handleGenerate = useCallback(() => {
-    setElements(generateReactFlowElements(options));
+    setElements(generateServiceMapElements(options));
     setJson('');
   }, [options]);
 
@@ -213,7 +213,7 @@ export const GenerateMap: StoryFn = () => {
 
       <EuiSpacer size="s" />
 
-      <ReactFlowServiceMap
+      <ServiceMapGraph
         height={getHeight()}
         nodes={nodes}
         edges={edges}
@@ -323,7 +323,7 @@ const MapFromJSONTemplate = () => {
         </EuiFlexItem>
       )}
       <EuiFlexItem grow>
-        <ReactFlowServiceMap
+        <ServiceMapGraph
           key={uniqueKeyCounter}
           height={getHeight()}
           nodes={elements.nodes}
@@ -387,7 +387,7 @@ export const LargeMap: Story = {
           iconType="clock"
         />
         <EuiSpacer size="m" />
-        <ReactFlowServiceMap
+        <ServiceMapGraph
           height={getHeight()}
           nodes={nodes}
           edges={edges}

@@ -7,7 +7,7 @@
 
 import React, { memo } from 'react';
 import type { Node, NodeProps } from '@xyflow/react';
-import type { DependencyNodeData } from '../../../../../common/service_map/react_flow_types';
+import type { DependencyNodeData } from '../../../../common/service_map';
 import { DiamondNode } from './diamond_node';
 
 type DependencyNodeType = Node<DependencyNodeData, 'dependency'>;

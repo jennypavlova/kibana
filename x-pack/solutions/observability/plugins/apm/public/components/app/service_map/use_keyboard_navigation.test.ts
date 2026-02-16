@@ -8,9 +8,10 @@
 import { renderHook, act } from '@testing-library/react';
 import { MarkerType } from '@xyflow/react';
 import { useKeyboardNavigation } from './use_keyboard_navigation';
-import type { ServiceMapNode, ServiceMapEdge } from '../../../../../common/service_map';
+import type { ServiceMapNode, ServiceMapEdge } from '../../../../common/service_map';
 import { DIRECTION_THRESHOLD } from './constants';
-import { DEFAULT_EDGE_COLOR } from '../../../../../common/service_map/constants';
+import { DEFAULT_EDGE_COLOR } from '../../../../common/service_map/constants';
+import { SPAN_DESTINATION_SERVICE_RESOURCE, SPAN_TYPE, SPAN_SUBTYPE } from '@kbn/apm-types';
 
 function createNode(id: string, x: number, y: number, label?: string): ServiceMapNode {
   return {
@@ -39,8 +40,20 @@ function createEdge(source: string, target: string): ServiceMapEdge {
     },
     data: {
       isBidirectional: false,
-      sourceData: { label: source, id: source },
-      targetData: { label: target, id: target },
+      sourceData: {
+        label: source,
+        id: source,
+        [SPAN_DESTINATION_SERVICE_RESOURCE]: source,
+        [SPAN_TYPE]: 'external',
+        [SPAN_SUBTYPE]: 'http',
+      },
+      targetData: {
+        label: target,
+        id: target,
+        [SPAN_DESTINATION_SERVICE_RESOURCE]: target,
+        [SPAN_TYPE]: 'external',
+        [SPAN_SUBTYPE]: 'http',
+      },
     },
   };
 }

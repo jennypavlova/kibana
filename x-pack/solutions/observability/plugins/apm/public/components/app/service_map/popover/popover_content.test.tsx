@@ -7,14 +7,13 @@
 
 import React from 'react';
 import { MarkerType } from '@xyflow/react';
-import { getContentsComponent } from './popover_content';
+import { getContentsComponent, ServiceContentsWithDiagnose } from './popover_content';
 import type { ServiceMapNode, ServiceMapEdge } from '../../../../../common/service_map';
 import { ServiceContents } from './service_contents';
 import { DependencyContents } from './dependency_contents';
 import { ExternalsListContents } from './externals_list_contents';
 import { ResourceContents } from './resource_contents';
 import { EdgeContents } from './edge_contents';
-import { withDiagnoseButton } from './with_diagnose_button';
 
 jest.mock('./service_contents', () => ({
   ServiceContents: jest.fn(() => <div data-testid="service-contents" />),
@@ -34,10 +33,6 @@ jest.mock('./resource_contents', () => ({
 
 jest.mock('./edge_contents', () => ({
   EdgeContents: jest.fn(() => <div data-testid="edge-contents" />),
-}));
-
-jest.mock('./with_diagnose_button', () => ({
-  withDiagnoseButton: jest.fn((Component) => Component),
 }));
 
 function node(data: ServiceMapNode['data'], id = data.id): ServiceMapNode {
@@ -78,8 +73,8 @@ describe('getContentsComponent', () => {
         label: 'Test Service',
         isService: true,
       });
-      getContentsComponent(selection, true);
-      expect(withDiagnoseButton).toHaveBeenCalledWith(ServiceContents);
+      const Component = getContentsComponent(selection, true);
+      expect(Component).toBe(ServiceContentsWithDiagnose);
     });
   });
 

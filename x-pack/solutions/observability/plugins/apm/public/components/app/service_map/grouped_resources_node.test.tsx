@@ -9,7 +9,7 @@ import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { ReactFlowProvider } from '@xyflow/react';
 import { GroupedResourcesNode } from './grouped_resources_node';
-import type { GroupedNodeData } from '../../../../../common/service_map/react_flow_types';
+import type { GroupedNodeData } from '../../../../common/service_map';
 import { MOCK_EUI_THEME } from './constants';
 
 // Mock EUI theme

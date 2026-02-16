@@ -9,7 +9,7 @@ import React, { memo } from 'react';
 import type { NodeProps, Node } from '@xyflow/react';
 import { EuiBadge, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
-import type { GroupedNodeData } from '../../../../../common/service_map/react_flow_types';
+import type { GroupedNodeData } from '../../../../common/service_map';
 import { DiamondNode } from './diamond_node';
 
 type GroupedResourcesNodeType = Node<GroupedNodeData, 'groupedResources'>;

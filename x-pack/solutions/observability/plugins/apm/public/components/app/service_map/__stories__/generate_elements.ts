@@ -13,9 +13,9 @@ import type {
   ServiceNodeData,
   DependencyNodeData,
   GroupedNodeData,
-} from '../../../../../../common/service_map/react_flow_types';
-import { ServiceHealthStatus } from '../../../../../../common/service_health_status';
-import type { ServiceAnomalyStats } from '../../../../../../common/anomaly_detection';
+} from '../../../../../common/service_map';
+import { ServiceHealthStatus } from '../../../../../common/service_health_status';
+import type { ServiceAnomalyStats } from '../../../../../common/anomaly_detection';
 
 const AGENT_NAMES: AgentName[] = [
   'dotnet',
@@ -156,7 +156,7 @@ export interface GenerateOptions {
   includeBidirectional: boolean;
 }
 
-export function generateReactFlowElements(options: GenerateOptions): {
+export function generateServiceMapElements(options: GenerateOptions): {
   nodes: ServiceMapNode[];
   edges: ServiceMapEdge[];
 } {
@@ -423,7 +423,7 @@ export function createSimpleServiceMap(): { nodes: ServiceMapNode[]; edges: Serv
 }
 
 export function createMicroservicesExample(): { nodes: ServiceMapNode[]; edges: ServiceMapEdge[] } {
-  return generateReactFlowElements({
+  return generateServiceMapElements({
     serviceCount: 12,
     dependencyCount: 4,
     includeGroupedResources: true,
@@ -441,7 +441,7 @@ export function createLargeServiceMap(nodeCount: number = 100): {
   const dependencyCount = Math.floor(nodeCount * 0.2);
   const groupedCount = Math.floor(nodeCount * 0.1);
 
-  return generateReactFlowElements({
+  return generateServiceMapElements({
     serviceCount,
     dependencyCount,
     includeGroupedResources: groupedCount > 0,

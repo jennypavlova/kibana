@@ -14,7 +14,7 @@ import {
   HIGHLIGHTED_MARKER_SIZE,
   HIGHLIGHTED_STROKE_WIDTH,
 } from './constants';
-import type { ServiceMapEdge, EdgeMarker } from '../../../../../common/service_map';
+import type { ServiceMapEdge, EdgeMarker } from '../../../../common/service_map';
 
 interface EdgeMarkers {
   defaultEnd: EdgeMarker;

@@ -13,7 +13,7 @@ import type {
   ExternalConnectionNode,
   ServiceConnectionNode,
 } from './types';
-import type { EdgeMarker } from './react_flow_types';
+import type { EdgeMarker } from './types';
 import {
   AGENT_NAME,
   SERVICE_ENVIRONMENT,

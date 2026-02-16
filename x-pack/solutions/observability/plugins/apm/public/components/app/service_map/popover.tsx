@@ -17,10 +17,10 @@ import {
   EDGE_OFFSET_DIVISOR,
   CENTER_ANIMATION_DURATION_MS,
 } from './constants';
-import type { Environment } from '../../../../../common/environment_rt';
-import { PopoverContent, type ServiceMapSelection } from '../popover/popover_content';
-import type { ServiceMapNode, ServiceMapEdge } from '../../../../../common/service_map';
-import { DiagnosticFlyout } from '../diagnostic_tool/diagnostic_flyout';
+import type { Environment } from '../../../../common/environment_rt';
+import { PopoverContent, type ServiceMapSelection } from './popover/popover_content';
+import type { ServiceMapNode, ServiceMapEdge } from '../../../../common/service_map';
+import { DiagnosticFlyout } from './diagnostic_tool/diagnostic_flyout';
 
 interface PopoverPosition {
   position: 'absolute';
@@ -107,7 +107,7 @@ function getNodePopoverPosition(
   };
 }
 
-interface ReactFlowPopoverProps {
+interface MapPopoverProps {
   selectedNode: ServiceMapNode | null;
   selectedEdge: ServiceMapEdge | null;
   focusedServiceName?: string;
@@ -118,7 +118,7 @@ interface ReactFlowPopoverProps {
   onClose: () => void;
 }
 
-export function ReactFlowPopover({
+export function MapPopover({
   selectedNode,
   selectedEdge,
   focusedServiceName,
@@ -127,7 +127,7 @@ export function ReactFlowPopover({
   start,
   end,
   onClose,
-}: ReactFlowPopoverProps) {
+}: MapPopoverProps) {
   const { euiTheme } = useEuiTheme();
   const popoverRef = useRef<EuiPopover>(null);
   const reactFlowInstance = useReactFlow();

@@ -17,7 +17,7 @@ test.describe(
     test.beforeEach(async ({ browserAuth, pageObjects: { serviceMapPage } }) => {
       await browserAuth.loginAsViewer();
       await serviceMapPage.gotoWithDateSelected(testData.START_DATE, testData.END_DATE);
-      await serviceMapPage.waitForReactFlowServiceMapToLoad();
+      await serviceMapPage.waitForMapToLoad();
     });
 
     test('axe-core automated accessibility checks pass', async ({
@@ -25,9 +25,9 @@ test.describe(
       pageObjects: { serviceMapPage },
     }) => {
       await test.step('service map container has no accessibility violations', async () => {
-        await page.testSubj.locator('reactFlowServiceMap').waitFor({ state: 'visible' });
+        await page.testSubj.locator('serviceMapGraph').waitFor({ state: 'visible' });
         const { violations } = await page.checkA11y({
-          include: ['[data-test-subj="reactFlowServiceMap"]'],
+          include: ['[data-test-subj="serviceMapGraph"]'],
         });
         expect(violations).toHaveLength(0);
       });
@@ -56,7 +56,7 @@ test.describe(
     }) => {
       await test.step('service map nodes are focusable with Tab key', async () => {
         await serviceMapPage.waitForNodeToLoad(SERVICE_OPBEANS_JAVA);
-        const serviceMap = page.testSubj.locator('reactFlowServiceMap');
+        const serviceMap = page.testSubj.locator('serviceMapGraph');
         await serviceMap.focus();
         await page.keyboard.press('Tab');
         const focusedElement = await page.evaluate(() => document.activeElement?.tagName);
@@ -112,12 +112,12 @@ test.describe(
       });
 
       await test.step('zoom controls are keyboard accessible', async () => {
-        await expect(serviceMapPage.reactFlowZoomInBtn).toBeVisible();
-        await expect(serviceMapPage.reactFlowZoomOutBtn).toBeVisible();
-        await expect(serviceMapPage.reactFlowFitViewBtn).toBeVisible();
-        await serviceMapPage.reactFlowZoomInBtn.focus();
+        await expect(serviceMapPage.zoomInBtnControl).toBeVisible();
+        await expect(serviceMapPage.zoomOutBtnControl).toBeVisible();
+        await expect(serviceMapPage.fitViewBtn).toBeVisible();
+        await serviceMapPage.zoomInBtnControl.focus();
         await page.keyboard.press('Enter');
-        await expect(serviceMapPage.reactFlowControls).toBeVisible();
+        await expect(serviceMapPage.mapControls).toBeVisible();
       });
     });
 
@@ -126,7 +126,7 @@ test.describe(
       pageObjects: { serviceMapPage },
     }) => {
       await test.step('service map container has aria-label describing the content', async () => {
-        const serviceMapContainer = page.testSubj.locator('reactFlowServiceMap');
+        const serviceMapContainer = page.testSubj.locator('serviceMapGraph');
         await expect(serviceMapContainer).toBeVisible();
         await expect(serviceMapContainer).toHaveAttribute('aria-label', /Service map/);
       });
@@ -144,7 +144,7 @@ test.describe(
       });
 
       await test.step('screen reader announcement region exists within service map', async () => {
-        const serviceMapContainer = page.testSubj.locator('reactFlowServiceMap');
+        const serviceMapContainer = page.testSubj.locator('serviceMapGraph');
         const liveRegion = serviceMapContainer.locator('[aria-live="polite"]');
         await expect(liveRegion).toHaveCount(1);
       });

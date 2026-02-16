@@ -10,10 +10,10 @@ import type { Meta, StoryObj } from '@storybook/react';
 import { ReactFlowProvider } from '@xyflow/react';
 import { useEuiTheme } from '@elastic/eui';
 import type { ElasticAgentName, OpenTelemetryAgentName } from '@kbn/apm-types';
-import { MockApmPluginStorybook } from '../../../../../context/apm_plugin/mock_apm_plugin_storybook';
+import { MockApmPluginStorybook } from '../../../../context/apm_plugin/mock_apm_plugin_storybook';
 import { ServiceNode } from '../service_node';
-import type { ServiceNodeData } from '../../../../../../common/service_map/react_flow_types';
-import { ServiceHealthStatus } from '../../../../../../common/service_health_status';
+import type { ServiceNodeData } from '../../../../../common/service_map';
+import { ServiceHealthStatus } from '../../../../../common/service_health_status';
 
 const LabelText = ({ children }: { children: React.ReactNode }) => {
   const { euiTheme } = useEuiTheme();

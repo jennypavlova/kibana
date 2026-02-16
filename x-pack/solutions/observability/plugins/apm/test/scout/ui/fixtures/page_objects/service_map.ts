@@ -11,14 +11,14 @@ import { EXTENDED_TIMEOUT, PRODUCTION_ENVIRONMENT, SERVICE_OPBEANS_JAVA } from '
 
 export class ServiceMapPage {
   public serviceMap: Locator;
-  public reactFlowServiceMap: Locator;
-  public reactFlowControls: Locator;
+  public serviceMapGraph: Locator;
+  public mapControls: Locator;
   public zoomInBtn: Locator;
   public zoomOutBtn: Locator;
   public centerServiceMapBtn: Locator;
-  public reactFlowZoomInBtn: Locator;
-  public reactFlowZoomOutBtn: Locator;
-  public reactFlowFitViewBtn: Locator;
+  public zoomInBtnControl: Locator;
+  public zoomOutBtnControl: Locator;
+  public fitViewBtn: Locator;
   public noServicesPlaceholder: Locator;
   public serviceMapPopover: Locator;
   public serviceMapPopoverContent: Locator;
@@ -29,14 +29,14 @@ export class ServiceMapPage {
 
   constructor(private readonly page: ScoutPage, private readonly kbnUrl: KibanaUrl) {
     this.serviceMap = page.testSubj.locator('serviceMap');
-    this.reactFlowServiceMap = page.testSubj.locator('reactFlowServiceMap');
-    this.reactFlowControls = page.locator('[data-testid="rf__controls"]');
-    this.zoomInBtn = this.reactFlowControls.getByRole('button', { name: 'Zoom In' });
-    this.zoomOutBtn = this.reactFlowControls.getByRole('button', { name: 'Zoom Out' });
-    this.centerServiceMapBtn = this.reactFlowControls.getByRole('button', { name: 'Fit View' });
-    this.reactFlowZoomInBtn = this.zoomInBtn;
-    this.reactFlowZoomOutBtn = this.zoomOutBtn;
-    this.reactFlowFitViewBtn = this.centerServiceMapBtn;
+    this.serviceMapGraph = page.testSubj.locator('serviceMapGraph');
+    this.mapControls = page.locator('[data-testid="rf__controls"]');
+    this.zoomInBtn = this.mapControls.getByRole('button', { name: 'Zoom In' });
+    this.zoomOutBtn = this.mapControls.getByRole('button', { name: 'Zoom Out' });
+    this.centerServiceMapBtn = this.mapControls.getByRole('button', { name: 'Fit View' });
+    this.zoomInBtnControl = this.zoomInBtn;
+    this.zoomOutBtnControl = this.zoomOutBtn;
+    this.fitViewBtn = this.centerServiceMapBtn;
     this.noServicesPlaceholder = page.locator('.euiEmptyPrompt__content .euiTitle');
     this.serviceMapPopover = page.testSubj.locator('serviceMapPopover');
     this.serviceMapPopoverContent = page.testSubj.locator('serviceMapPopoverContent');
@@ -80,21 +80,20 @@ export class ServiceMapPage {
 
   async waitForServiceMapToLoad() {
     await this.serviceMap.waitFor({ state: 'visible' });
-    await this.reactFlowServiceMap.waitFor({ state: 'visible' });
+    await this.serviceMapGraph.waitFor({ state: 'visible' });
   }
 
-  async waitForReactFlowServiceMapToLoad() {
-    await this.reactFlowServiceMap.waitFor({ state: 'visible' });
+  async waitForMapToLoad() {
+    await this.serviceMapGraph.waitFor({ state: 'visible' });
   }
 
   async clickZoom(direction: 'in' | 'out') {
     const button = direction === 'in' ? this.zoomInBtn : this.zoomOutBtn;
     await button.waitFor({ state: 'visible' });
-    await this.page.waitForTimeout(500);
     try {
-      await button.click({ timeout: 5000 });
+      await button.click({ timeout: EXTENDED_TIMEOUT });
     } catch {
-      await button.click({ force: true, timeout: 5000 });
+      await button.click({ timeout: EXTENDED_TIMEOUT });
     }
   }
 
@@ -106,20 +105,20 @@ export class ServiceMapPage {
     await this.clickZoom('out');
   }
 
-  async clickReactFlowZoomIn() {
-    await this.reactFlowZoomInBtn.click();
+  async clickMapZoomIn() {
+    await this.zoomInBtnControl.click();
   }
 
-  async clickReactFlowZoomOut() {
-    await this.reactFlowZoomOutBtn.click();
+  async clickMapZoomOut() {
+    await this.zoomOutBtnControl.click();
   }
 
-  async clickReactFlowFitView() {
-    await this.reactFlowFitViewBtn.click();
+  async clickFitView() {
+    await this.fitViewBtn.click();
   }
 
   getNodeById(nodeId: string) {
-    return this.reactFlowServiceMap.locator(`[data-id="${nodeId}"]`);
+    return this.serviceMapGraph.locator(`[data-id="${nodeId}"]`);
   }
 
   async waitForNodeToLoad(nodeId: string) {
@@ -127,7 +126,7 @@ export class ServiceMapPage {
   }
 
   getEdgeById(edgeId: string) {
-    return this.reactFlowServiceMap.locator(`[data-id="${edgeId}"]`);
+    return this.serviceMapGraph.locator(`[data-id="${edgeId}"]`);
   }
 
   async waitForEdgeToLoad(edgeId: string) {
@@ -135,7 +134,14 @@ export class ServiceMapPage {
   }
 
   async clickNode(nodeId: string, options?: { force?: boolean }) {
-    await this.getNodeById(nodeId).click(options?.force ? { force: true } : undefined);
+    const node = this.getNodeById(nodeId);
+    const button = node.locator('[role="button"]');
+    const clickOptions = options?.force ? { force: true } : undefined;
+    if ((await button.count()) > 0) {
+      await button.click(clickOptions);
+    } else {
+      await node.click(clickOptions);
+    }
   }
 
   async clickEdge(edgeId: string) {

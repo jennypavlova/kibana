@@ -32,6 +32,7 @@ export function ResourceContents({ selection }: ContentsProps) {
     return null;
   }
   const data: DependencyNodeData = node.data;
+  // Support both camelCase and field-constant keys (data may come from different sources)
   const subtype = data.spanSubtype ?? data[SPAN_SUBTYPE];
   const type = data.spanType ?? data[SPAN_TYPE];
 

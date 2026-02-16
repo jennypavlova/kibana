@@ -7,12 +7,7 @@
 
 import { MarkerType } from '@xyflow/react';
 import { groupReactFlowNodes } from './group_react_flow_nodes';
-import type {
-  ServiceMapNode,
-  ServiceMapEdge,
-  DependencyNodeData,
-  GroupedNodeData,
-} from './react_flow_types';
+import type { ServiceMapNode, ServiceMapEdge, DependencyNodeData, GroupedNodeData } from './types';
 import { DEFAULT_EDGE_COLOR, GROUPABLE_SPAN_SUBTYPE, GROUPABLE_SPAN_TYPE } from './constants';
 
 function createServiceNode(id: string, label?: string): ServiceMapNode {

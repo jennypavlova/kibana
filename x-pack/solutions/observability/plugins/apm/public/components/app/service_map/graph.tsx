@@ -38,12 +38,12 @@ import { ServiceMapEdge } from './service_map_edge';
 import { useEdgeHighlighting } from './use_edge_highlighting';
 import { useReducedMotion } from './use_reduced_motion';
 import { useKeyboardNavigation } from './use_keyboard_navigation';
-import { ReactFlowPopover } from './react_flow_popover';
-import type { Environment } from '../../../../../common/environment_rt';
+import { MapPopover } from './popover';
+import type { Environment } from '../../../../common/environment_rt';
 import type {
   ServiceMapNode,
   ServiceMapEdge as ServiceMapEdgeType,
-} from '../../../../../common/service_map';
+} from '../../../../common/service_map';
 
 const nodeTypes: NodeTypes = {
   service: ServiceNode,
@@ -55,7 +55,7 @@ const edgeTypes: EdgeTypes = {
   default: ServiceMapEdge,
 };
 
-interface ReactFlowGraphProps {
+interface GraphProps {
   height: number;
   nodes: ServiceMapNode[];
   edges: ServiceMapEdgeType[];
@@ -67,7 +67,7 @@ interface ReactFlowGraphProps {
   end: string;
 }
 
-function ReactFlowGraphInner({
+function GraphInner({
   height,
   nodes: initialNodes,
   edges: initialEdges,
@@ -76,7 +76,7 @@ function ReactFlowGraphInner({
   kuery,
   start,
   end,
-}: ReactFlowGraphProps) {
+}: GraphProps) {
   const { euiTheme } = useEuiTheme();
   const { fitView } = useReactFlow();
   const [selectedNodeId, setSelectedNodeId] = useState<string | null>(null);
@@ -316,7 +316,7 @@ function ReactFlowGraphInner({
   return (
     <div
       css={css(containerStyle)}
-      data-test-subj="reactFlowServiceMap"
+      data-test-subj="serviceMapGraph"
       role="group"
       tabIndex={0}
       aria-label={i18n.translate('xpack.apm.serviceMap.regionLabel', {
@@ -355,7 +355,7 @@ function ReactFlowGraphInner({
         <Background gap={24} size={1} color={euiTheme.colors.lightShade} />
         <Controls showInteractive={false} position="top-left" css={controlsStyles} />
       </ReactFlow>
-      <ReactFlowPopover
+      <MapPopover
         selectedNode={selectedNodeForPopover}
         selectedEdge={selectedEdgeForPopover}
         focusedServiceName={serviceName}
@@ -369,10 +369,10 @@ function ReactFlowGraphInner({
   );
 }
 
-export function ReactFlowServiceMap(props: ReactFlowGraphProps) {
+export function ServiceMapGraph(props: GraphProps) {
   return (
     <ReactFlowProvider>
-      <ReactFlowGraphInner {...props} />
+      <GraphInner {...props} />
     </ReactFlowProvider>
   );
 }

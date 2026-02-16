@@ -17,8 +17,8 @@ import type {
   GroupedNodeData,
   GroupInfo,
   GroupReactFlowNodesResult,
-} from './react_flow_types';
-import { isDependencyNodeData } from './react_flow_types';
+} from './types';
+import { isDependencyNodeData } from './types';
 import { isSpanGroupingSupported, getEdgeId, createEdgeMarker } from './utils';
 import { MINIMUM_GROUP_SIZE, DEFAULT_EDGE_STYLE } from './constants';
 

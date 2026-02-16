@@ -9,7 +9,7 @@ import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { ReactFlowProvider } from '@xyflow/react';
 import { DependencyNode } from './dependency_node';
-import type { DependencyNodeData } from '../../../../../common/service_map/react_flow_types';
+import type { DependencyNodeData } from '../../../../common/service_map';
 import { MOCK_EUI_THEME } from './constants';
 
 // Mock EUI theme

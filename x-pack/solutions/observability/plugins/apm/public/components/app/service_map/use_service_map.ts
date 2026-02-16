@@ -6,7 +6,7 @@
  */
 import { useEffect, useState } from 'react';
 import type { IHttpFetchError, ResponseErrorBody } from '@kbn/core/public';
-import type { ReactFlowServiceMapResponse } from '../../../../common/service_map/react_flow_types';
+import type { ReactFlowServiceMapResponse } from '../../../../common/service_map';
 import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
 import { useLicenseContext } from '../../../context/license/use_license_context';
 import { isActivePlatinumLicense } from '../../../../common/license_check';

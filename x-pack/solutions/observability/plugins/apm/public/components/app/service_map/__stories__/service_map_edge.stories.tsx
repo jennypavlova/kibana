@@ -18,7 +18,7 @@ import {
 } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
 import { EuiText, EuiSpacer, EuiCallOut } from '@elastic/eui';
-import { MockApmPluginStorybook } from '../../../../../context/apm_plugin/mock_apm_plugin_storybook';
+import { MockApmPluginStorybook } from '../../../../context/apm_plugin/mock_apm_plugin_storybook';
 import { ServiceNode } from '../service_node';
 import { DependencyNode } from '../dependency_node';
 import { ServiceMapEdge } from '../service_map_edge';
@@ -26,12 +26,12 @@ import { applyDagreLayout } from '../layout';
 import type {
   ServiceMapNode,
   ServiceMapEdge as ServiceMapEdgeType,
-} from '../../../../../../common/service_map';
+} from '../../../../../common/service_map';
 import {
   DEFAULT_EDGE_COLOR,
   DEFAULT_EDGE_STROKE_WIDTH,
   DEFAULT_MARKER_SIZE,
-} from '../../../../../../common/service_map/constants';
+} from '../../../../../common/service_map/constants';
 
 const nodeTypes = {
   service: ServiceNode,

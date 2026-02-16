@@ -25,7 +25,7 @@ import type { Environment } from '../../../../common/environment_rt';
 import { useTimeRange } from '../../../hooks/use_time_range';
 import { DisabledPrompt } from './disabled_prompt';
 import { useServiceMap } from './use_service_map';
-import { ReactFlowServiceMap } from './react_flow_service_map';
+import { ServiceMapGraph } from './graph';
 
 function PromptContainer({ children }: { children: ReactNode }) {
   return (
@@ -173,7 +173,7 @@ export function ServiceMap({
       <EuiPanel hasBorder={true} paddingSize="none">
         <div data-test-subj="serviceMap" style={{ height: heightWithPadding }} ref={ref}>
           {status === FETCH_STATUS.LOADING && <LoadingSpinner />}
-          <ReactFlowServiceMap
+          <ServiceMapGraph
             height={heightWithPadding}
             nodes={data.nodes}
             edges={data.edges}

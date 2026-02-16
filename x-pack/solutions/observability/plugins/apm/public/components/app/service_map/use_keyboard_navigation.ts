@@ -7,7 +7,7 @@
 
 import { useEffect, useCallback, useState } from 'react';
 import { i18n } from '@kbn/i18n';
-import type { ServiceMapNode, ServiceMapEdge } from '../../../../../common/service_map';
+import type { ServiceMapNode, ServiceMapEdge } from '../../../../common/service_map';
 import { DIRECTION_THRESHOLD } from './constants';
 
 type ArrowDirection = 'ArrowUp' | 'ArrowDown' | 'ArrowLeft' | 'ArrowRight';

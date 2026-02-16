@@ -14,7 +14,7 @@ import { i18n } from '@kbn/i18n';
 import {
   DEPENDENCY_NODE_DIAMOND_SIZE,
   DEPENDENCY_NODE_DIAMOND_CONTAINER_SIZE,
-} from '../../../../../common/service_map/constants';
+} from '../../../../common/service_map/constants';
 import { NodeLabel } from './node_label';
 
 interface DiamondNodeProps {

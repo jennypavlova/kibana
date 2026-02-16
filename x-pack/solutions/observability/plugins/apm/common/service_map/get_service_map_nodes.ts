@@ -22,7 +22,7 @@ import type {
   ConnectionEdge,
 } from './types';
 
-import { getEdgeId, getExitSpanNodeId, isExitSpan } from './utils';
+import { getEdgeId, getExitSpanNodeId, isExitSpan, toDisplayName } from './utils';
 import { FORBIDDEN_SERVICE_NAMES } from './constants';
 
 // Exports helper functions for use in React Flow transformation
@@ -210,10 +210,11 @@ export function mapNodes({
 }
 
 function getConnectionNodeLabel(node: ConnectionNode): string {
+  const fallback = toDisplayName(node.id);
   if (isExitSpan(node)) {
-    return node[SPAN_DESTINATION_SERVICE_RESOURCE] ?? node.label ?? node.id;
+    return node[SPAN_DESTINATION_SERVICE_RESOURCE] ?? node.label ?? fallback;
   }
-  return node[SERVICE_NAME] ?? node.label ?? node.id;
+  return node[SERVICE_NAME] ?? node.label ?? fallback;
 }
 
 export function mapEdges({
@@ -261,6 +262,8 @@ export function mapEdges({
       id,
       sourceData,
       targetData,
+      sourceLabel,
+      targetLabel,
       resources: resource ? [resource] : [],
     });
 

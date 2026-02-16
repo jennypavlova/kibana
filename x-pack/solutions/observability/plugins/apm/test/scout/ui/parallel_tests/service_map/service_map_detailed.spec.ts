@@ -90,7 +90,7 @@ test.describe(
       await expect(serviceMapPage.serviceMapPopoverContent).toBeVisible();
 
       const popoverTitle = await serviceMapPage.getPopoverTitle();
-      expect(popoverTitle).toContain(`${SERVICE_OPBEANS_JAVA} → >${DEPENDENCY_POSTGRESQL}`);
+      expect(popoverTitle).toContain(`${SERVICE_OPBEANS_JAVA} → ${DEPENDENCY_POSTGRESQL}`);
     });
 
     test('shows popover when clicking on a dependency node', async ({

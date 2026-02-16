@@ -33,7 +33,7 @@ import type {
   ServiceNodeData,
   DependencyNodeData,
 } from './types';
-import { createEdgeMarker } from './utils';
+import { createEdgeMarker, toDisplayName } from './utils';
 import { getPaths } from './get_paths';
 import { groupReactFlowNodes } from './group_react_flow_nodes';
 import {
@@ -59,7 +59,7 @@ function toServiceNodeData(node: ServiceConnectionNode): ServiceNodeData {
 function toDependencyNodeData(node: ExternalConnectionNode): DependencyNodeData {
   return {
     id: node.id,
-    label: node[SPAN_DESTINATION_SERVICE_RESOURCE] ?? node.label ?? node.id,
+    label: node[SPAN_DESTINATION_SERVICE_RESOURCE] ?? node.label ?? toDisplayName(node.id),
     spanType: node[SPAN_TYPE],
     spanSubtype: node[SPAN_SUBTYPE],
     isService: false,
@@ -98,6 +98,8 @@ function toReactFlowEdge(edge: ConnectionEdge): ServiceMapEdge {
       isBidirectional,
       sourceData: edge.sourceData,
       targetData: edge.targetData,
+      sourceLabel: edge.sourceLabel,
+      targetLabel: edge.targetLabel,
       resources: edge.resources,
     },
   };

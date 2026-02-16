@@ -74,7 +74,9 @@ export function getContentsComponent(
 
 function getPopoverTitle(selection: ServiceMapSelection): string {
   if (isEdge(selection)) {
-    return `${selection.source} → ${selection.target}`;
+    const source = selection.data?.sourceLabel ?? selection.source;
+    const target = selection.data?.targetLabel ?? selection.target;
+    return `${source} → ${target}`;
   }
   return selection.data.label ?? selection.id;
 }

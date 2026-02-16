@@ -95,6 +95,9 @@ export interface ConnectionEdge {
   resources?: string[];
   sourceData?: ConnectionNode;
   targetData?: ConnectionNode;
+  /** Display-ready target and source node names (e.g. without leading ">" for dependencies). */
+  sourceLabel?: string;
+  targetLabel?: string;
 }
 
 export type NodeItem = {
@@ -229,6 +232,10 @@ export interface ServiceMapEdgeData extends Record<string, unknown> {
   isBidirectional: boolean;
   sourceData?: ConnectionNode;
   targetData?: ConnectionNode;
+  /** Display-ready source node name for titles/aria. */
+  sourceLabel?: string;
+  /** Display-ready target node name for titles/aria. */
+  targetLabel?: string;
   resources?: string[];
 }
 

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { getConnections } from './utils';
+import { getConnections, toDisplayName } from './utils';
 import type {
   Connection,
   ConnectionNode,
@@ -97,5 +97,17 @@ describe('getConnections', () => {
       'opbeans-python -> external',
       'opbeans-go -> opbeans-node',
     ]);
+  });
+});
+
+describe('toDisplayName', () => {
+  it('strips leading ">" from dependency node id', () => {
+    expect(toDisplayName('>postgresql')).toBe('postgresql');
+    expect(toDisplayName('>redis')).toBe('redis');
+  });
+
+  it('returns id unchanged when it does not start with ">"', () => {
+    expect(toDisplayName('opbeans-java')).toBe('opbeans-java');
+    expect(toDisplayName('service-a')).toBe('service-a');
   });
 });

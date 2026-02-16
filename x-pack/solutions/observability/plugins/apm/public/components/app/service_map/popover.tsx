@@ -193,13 +193,16 @@ export function MapPopover({
     if (selectedEdge) {
       return i18n.translate('xpack.apm.serviceMap.popover.edgeAriaLabel', {
         defaultMessage: 'Details for connection from {source} to {target}. Press Escape to close.',
-        values: { source: selectedEdge.source, target: selectedEdge.target },
+        values: {
+          source: selectedEdge.data?.sourceLabel ?? selectedEdge.source,
+          target: selectedEdge.data?.targetLabel ?? selectedEdge.target,
+        },
       });
     }
     if (selectedNode) {
       return i18n.translate('xpack.apm.serviceMap.popover.nodeAriaLabel', {
         defaultMessage: 'Details for {nodeName}. Press Escape to close.',
-        values: { nodeName: selectedNode.data.label || selectedNode.id },
+        values: { nodeName: selectedNode.data.label ?? selectedNode.id },
       });
     }
     return '';

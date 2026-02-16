@@ -113,6 +113,10 @@ export function getExitSpanNodeId(span: ExternalConnectionNode) {
   return `>${span[SPAN_DESTINATION_SERVICE_RESOURCE]}`;
 }
 
+export function toDisplayName(id: string): string {
+  return id.startsWith('>') ? id.slice(1) : id;
+}
+
 /**
  * Create an edge marker with the specified color
  */

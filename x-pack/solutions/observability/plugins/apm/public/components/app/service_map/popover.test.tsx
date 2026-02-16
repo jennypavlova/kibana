@@ -18,6 +18,14 @@ import type {
 } from '../../../../common/service_map';
 import { MarkerType } from '@xyflow/react';
 import { MOCK_DEFAULT_COLOR, MOCK_EUI_THEME } from './constants';
+import {
+  AGENT_NAME,
+  SERVICE_ENVIRONMENT,
+  SERVICE_NAME,
+  SPAN_DESTINATION_SERVICE_RESOURCE,
+  SPAN_SUBTYPE,
+  SPAN_TYPE,
+} from '@kbn/observability-shared-plugin/common';
 
 // Mock the EUI theme
 jest.mock('@elastic/eui', () => {
@@ -194,6 +202,27 @@ describe('MapPopover', () => {
     expect(screen.getByText('elasticsearch')).toBeInTheDocument();
   });
 
+  it('shows dependency name without ">" in title when node id has prefix', () => {
+    const dependencyNode: ServiceMapNode = {
+      id: '>postgresql',
+      type: 'dependency',
+      position: { x: 200, y: 200 },
+      data: {
+        id: '>postgresql',
+        label: 'postgresql',
+        isService: false,
+        spanType: 'db',
+        spanSubtype: 'postgresql',
+      } as DependencyNodeData,
+    };
+
+    renderPopover({ selectedNode: dependencyNode });
+
+    expect(screen.getByTestId('serviceMapPopover')).toBeInTheDocument();
+    expect(screen.getByTestId('serviceMapPopoverTitle')).toHaveTextContent('postgresql');
+    expect(screen.getByTestId('serviceMapPopoverTitle')).not.toHaveTextContent('>postgresql');
+  });
+
   it('renders popover when a grouped resources node is selected', () => {
     const groupedNode: ServiceMapNode = {
       id: 'grouped-resources',
@@ -256,19 +285,31 @@ describe('MapPopover', () => {
     expect(screen.getByTestId('serviceMapPopover')).toBeInTheDocument();
   });
 
-  it('renders popover when an edge is selected', () => {
+  it('renders popover when an edge is selected and shows display names without ">"', () => {
     const edge: ServiceMapEdge = {
-      id: 'service-a->dependency-b',
+      id: 'service-a~>postgresql',
       source: 'service-a',
-      target: 'dependency-b',
+      target: '>postgresql',
       type: 'default',
       style: { stroke: MOCK_DEFAULT_COLOR, strokeWidth: 1 },
       markerEnd: { type: MarkerType.ArrowClosed, width: 18, height: 18, color: MOCK_DEFAULT_COLOR },
       data: {
         isBidirectional: false,
-        sourceData: { id: 'service-a', 'service.name': 'Service A' },
-        targetData: { id: 'dependency-b' },
-        resources: ['dependency-b'],
+        sourceLabel: 'Service A',
+        targetLabel: 'postgresql',
+        sourceData: {
+          id: 'service-a',
+          [SERVICE_NAME]: 'Service A',
+          [AGENT_NAME]: 'test-agent',
+          [SERVICE_ENVIRONMENT]: null,
+        },
+        targetData: {
+          id: '>postgresql',
+          [SPAN_DESTINATION_SERVICE_RESOURCE]: 'postgresql',
+          [SPAN_TYPE]: 'external',
+          [SPAN_SUBTYPE]: 'http',
+        },
+        resources: ['postgresql'],
       },
     };
 
@@ -281,6 +322,10 @@ describe('MapPopover', () => {
     renderPopover({ selectedEdge: edge });
 
     expect(screen.getByTestId('serviceMapPopover')).toBeInTheDocument();
+    expect(screen.getByTestId('serviceMapPopoverTitle')).toHaveTextContent(
+      'Service A → postgresql'
+    );
+    expect(screen.getByTestId('serviceMapPopoverTitle')).not.toHaveTextContent('>postgresql');
   });
 
   it('does not show popover content when neither node nor edge is selected', () => {

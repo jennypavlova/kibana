@@ -10,7 +10,8 @@ import { i18n } from '@kbn/i18n';
 import React from 'react';
 import styled from '@emotion/styled';
 import { NOT_AVAILABLE_LABEL } from '../../../../../common/i18n';
-import { isEdge, type ContentsProps } from './popover_content';
+import { isEdge } from './utils';
+import type { ContentsProps } from './popover_content';
 import { isDependencyNodeData, type DependencyNodeData } from '../../../../../common/service_map';
 
 const ItemRow = styled.div`

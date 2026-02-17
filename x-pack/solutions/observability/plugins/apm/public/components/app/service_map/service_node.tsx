@@ -17,7 +17,11 @@ import {
   getServiceHealthStatusLabel,
   ServiceHealthStatus,
 } from '../../../../common/service_health_status';
-import { SERVICE_NODE_CIRCLE_SIZE } from '../../../../common/service_map/constants';
+import {
+  NODE_BORDER_WIDTH_DEFAULT,
+  NODE_BORDER_WIDTH_SELECTED,
+  SERVICE_NODE_CIRCLE_SIZE,
+} from '../../../../common/service_map/constants';
 import { NodeLabel } from './node_label';
 
 type ServiceNodeType = Node<ServiceNodeData, 'service'>;
@@ -39,8 +43,8 @@ export const ServiceNode = memo(
 
     const borderWidth = useMemo(() => {
       const status = data.serviceAnomalyStats?.healthStatus;
-      if (status === ServiceHealthStatus.critical) return '4px';
-      return selected ? '4px' : '3px';
+      if (status === ServiceHealthStatus.critical) return `${NODE_BORDER_WIDTH_SELECTED}px`;
+      return selected ? `${NODE_BORDER_WIDTH_SELECTED}px` : `${NODE_BORDER_WIDTH_DEFAULT}px`;
     }, [data.serviceAnomalyStats?.healthStatus, selected]);
 
     const borderStyle = useMemo(() => {

@@ -17,6 +17,7 @@ import {
   type ServiceMapNode,
   type ServiceMapEdge,
 } from '../../../../../common/service_map';
+import { isEdge, type ServiceMapSelection } from './utils';
 import { POPOVER_WIDTH } from './constants';
 import { DependencyContents } from './dependency_contents';
 import { EdgeContents } from './edge_contents';
@@ -26,11 +27,8 @@ import { ServiceContents } from './service_contents';
 import { withDiagnoseButton } from './with_diagnose_button';
 import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
 
-export type ServiceMapSelection = ServiceMapNode | ServiceMapEdge;
-
-export function isEdge(selection: ServiceMapSelection): selection is ServiceMapEdge {
-  return 'source' in selection && 'target' in selection;
-}
+export type { ServiceMapSelection } from './utils';
+export { isEdge } from './utils';
 
 /**
  * Props for the popover content subcomponents (service, dependency, edge, etc.)

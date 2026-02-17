@@ -15,21 +15,24 @@ import React, { Fragment } from 'react';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import type { ServiceMapNode } from '../../../../../common/service_map';
-import type { ContentsProps } from './popover_content';
 import {
   SPAN_DESTINATION_SERVICE_RESOURCE,
   SPAN_TYPE,
   SPAN_SUBTYPE,
 } from '../../../../../common/es_fields/apm';
-import { isEdge } from './popover_content';
+import { isEdge, type ServiceMapSelection } from './utils';
 import { isGroupedNodeData, type GroupedConnectionInfo } from '../../../../../common/service_map';
+
+export interface ExternalsListContentsProps {
+  selection: ServiceMapSelection;
+}
 
 const externalResourcesListCss = css`
   max-height: 360px;
   overflow: auto;
 `;
 
-export function ExternalsListContents({ selection }: Pick<ContentsProps, 'selection'>) {
+export function ExternalsListContents({ selection }: ExternalsListContentsProps) {
   if (isEdge(selection)) {
     return null;
   }

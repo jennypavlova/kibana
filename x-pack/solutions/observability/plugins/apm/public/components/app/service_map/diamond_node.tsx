@@ -12,8 +12,10 @@ import { getSpanIcon } from '@kbn/apm-ui-shared';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import {
-  DEPENDENCY_NODE_DIAMOND_SIZE,
   DEPENDENCY_NODE_DIAMOND_CONTAINER_SIZE,
+  DEPENDENCY_NODE_DIAMOND_SIZE,
+  NODE_BORDER_WIDTH_DEFAULT,
+  NODE_BORDER_WIDTH_SELECTED,
 } from '../../../../common/service_map/constants';
 import { NodeLabel } from './node_label';
 
@@ -50,7 +52,9 @@ export const DiamondNode = memo(
     const { euiTheme } = useEuiTheme();
 
     const borderColor = selected ? euiTheme.colors.primary : euiTheme.colors.mediumShade;
-    const diamondBorderWidth = selected ? '4px' : '3px';
+    const diamondBorderWidth = selected
+      ? `${NODE_BORDER_WIDTH_SELECTED}px`
+      : `${NODE_BORDER_WIDTH_DEFAULT}px`;
 
     const iconUrl = useMemo(() => {
       if (spanType || spanSubtype) {

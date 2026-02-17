@@ -262,10 +262,18 @@ export interface ReactFlowServiceMapResponse {
 }
 
 /**
- * Helper to check if a node is a service node
+ * Type guard to check if node data is service node data.
+ * Use this when you have the data object directly (e.g., after accessing node.data).
+ */
+export function isServiceNodeData(data: ServiceMapNodeData): data is ServiceNodeData {
+  return data.isService === true;
+}
+
+/**
+ * Helper to check if a node is a service node (delegates to isServiceNodeData).
  */
 export function isServiceNode(node: ServiceMapNode): node is Node<ServiceNodeData> {
-  return node.data.isService === true;
+  return isServiceNodeData(node.data);
 }
 
 /**
@@ -280,14 +288,6 @@ export function isExternalNode(node: ServiceMapNode): node is Node<DependencyNod
  */
 export function isGroupedNode(node: ServiceMapNode): node is Node<GroupedNodeData> {
   return 'isGrouped' in node.data && node.data.isGrouped === true;
-}
-
-/**
- * Type guard to check if node data is service node data.
- * Use this when you have the data object directly (e.g., after accessing node.data).
- */
-export function isServiceNodeData(data: ServiceMapNodeData): data is ServiceNodeData {
-  return data.isService === true;
 }
 
 /**

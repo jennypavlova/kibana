@@ -6,7 +6,7 @@
  */
 
 import { usePerformanceContext } from '@kbn/ebt-tools';
-import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner, EuiPanel } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner, EuiPanel, useEuiTheme } from '@elastic/eui';
 import type { ReactNode } from 'react';
 import React from 'react';
 import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
@@ -106,6 +106,7 @@ export function ServiceMap({
   });
 
   const { ref, height } = useRefDimensions();
+  const { euiTheme } = useEuiTheme();
 
   // Temporary hack to work around bottom padding introduced by EuiPage
   const PADDING_BOTTOM = 24;
@@ -171,7 +172,14 @@ export function ServiceMap({
     <>
       <SearchBar showTimeComparison />
       <EuiPanel hasBorder={true} paddingSize="none">
-        <div data-test-subj="serviceMap" style={{ height: heightWithPadding }} ref={ref}>
+        <div
+          data-test-subj="serviceMap"
+          style={{
+            height: heightWithPadding,
+            zIndex: Number(euiTheme.levels.content) + 1,
+          }}
+          ref={ref}
+        >
           {status === FETCH_STATUS.LOADING && <LoadingSpinner />}
           <ServiceMapGraph
             height={heightWithPadding}

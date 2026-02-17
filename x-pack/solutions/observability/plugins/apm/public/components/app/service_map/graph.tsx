@@ -231,6 +231,7 @@ function GraphInner({
       height,
       width: '100%',
       overflow: 'auto',
+      zIndex: Number(euiTheme.levels.content) + 1,
       background: `linear-gradient(
         90deg,
         ${euiTheme.colors.backgroundBasePlain}

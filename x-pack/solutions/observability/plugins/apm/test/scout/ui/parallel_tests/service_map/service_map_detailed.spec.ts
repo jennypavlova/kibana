@@ -98,7 +98,7 @@ test.describe(
     }) => {
       await serviceMapPage.dismissPopoverIfOpen();
       await serviceMapPage.waitForNodeToLoad(`>${DEPENDENCY_POSTGRESQL}`);
-      await serviceMapPage.clickNode(`>${DEPENDENCY_POSTGRESQL}`, { force: true });
+      await serviceMapPage.clickNode(`>${DEPENDENCY_POSTGRESQL}`);
       await serviceMapPage.waitForPopoverToBeVisible();
       await expect(serviceMapPage.serviceMapPopoverContent).toBeVisible();
 
@@ -113,7 +113,7 @@ test.describe(
     }) => {
       await serviceMapPage.dismissPopoverIfOpen();
       await serviceMapPage.waitForNodeToLoad(SERVICE_OPBEANS_JAVA);
-      await serviceMapPage.clickNode(SERVICE_OPBEANS_JAVA, { force: true });
+      await serviceMapPage.clickNode(SERVICE_OPBEANS_JAVA);
       await serviceMapPage.waitForPopoverToBeVisible();
       await serviceMapPage.serviceMapServiceDetailsButton.click();
 
@@ -131,7 +131,7 @@ test.describe(
     }) => {
       await serviceMapPage.dismissPopoverIfOpen();
       await serviceMapPage.waitForNodeToLoad(SERVICE_OPBEANS_JAVA);
-      await serviceMapPage.clickNode(SERVICE_OPBEANS_JAVA, { force: true });
+      await serviceMapPage.clickNode(SERVICE_OPBEANS_JAVA);
       await serviceMapPage.waitForPopoverToBeVisible();
       await serviceMapPage.serviceMapFocusMapButton.click();
 
@@ -148,7 +148,7 @@ test.describe(
     }) => {
       await serviceMapPage.dismissPopoverIfOpen();
       await serviceMapPage.waitForNodeToLoad(`>${DEPENDENCY_POSTGRESQL}`);
-      await serviceMapPage.clickNode(`>${DEPENDENCY_POSTGRESQL}`, { force: true });
+      await serviceMapPage.clickNode(`>${DEPENDENCY_POSTGRESQL}`);
       await serviceMapPage.waitForPopoverToBeVisible();
       await serviceMapPage.serviceMapDependencyDetailsButton.click();
 

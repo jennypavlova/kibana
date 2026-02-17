@@ -133,11 +133,10 @@ export class ServiceMapPage {
     await this.getEdgeById(edgeId).waitFor({ state: 'visible', timeout: EXTENDED_TIMEOUT });
   }
 
-  async clickNode(nodeId: string, options?: { force?: boolean }) {
+  async clickNode(nodeId: string) {
     const node = this.getNodeById(nodeId);
     await node.scrollIntoViewIfNeeded();
-    const clickOptions = options?.force === false ? undefined : { force: true };
-    await node.click(clickOptions);
+    await node.click({ force: true });
   }
 
   async clickEdge(edgeId: string) {

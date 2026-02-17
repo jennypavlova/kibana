@@ -136,12 +136,14 @@ export class ServiceMapPage {
   async clickNode(nodeId: string, options?: { force?: boolean }) {
     const node = this.getNodeById(nodeId);
     await node.scrollIntoViewIfNeeded();
-    const clickOptions = options?.force ? { force: true } : undefined;
+    const clickOptions = options?.force === false ? undefined : { force: true };
     await node.click(clickOptions);
   }
 
   async clickEdge(edgeId: string) {
-    await this.getEdgeById(edgeId).click();
+    const edge = this.getEdgeById(edgeId);
+    await edge.scrollIntoViewIfNeeded();
+    await edge.click({ force: true });
   }
 
   async waitForPopoverToBeVisible() {

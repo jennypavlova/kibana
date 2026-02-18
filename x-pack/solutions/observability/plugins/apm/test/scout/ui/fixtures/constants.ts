@@ -15,6 +15,9 @@ export const EXTENDED_TIMEOUT = 45000;
 export const SERVICE_OPBEANS_NODE = 'opbeans-node';
 export const SERVICE_OPBEANS_JAVA = 'opbeans-java';
 export const SERVICE_OPBEANS_RUM = 'opbeans-rum';
+
+export const SERVICE_MAP_KUERY_OPBEANS_JAVA = 'service.name: "opbeans-java"';
+export const SERVICE_MAP_KUERY_OPBEANS = 'service.name: opbeans*';
 export const DEPENDENCY_POSTGRESQL = 'postgresql';
 export const EDGE_OPBEANS_JAVA_TO_POSTGRESQL = `${SERVICE_OPBEANS_JAVA}~>${DEPENDENCY_POSTGRESQL}`;
 export const SERVICE_GO = 'service-go';

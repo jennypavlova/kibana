@@ -11,6 +11,7 @@ import { test, testData } from '../../fixtures';
 import {
   DEPENDENCY_POSTGRESQL,
   EDGE_OPBEANS_JAVA_TO_POSTGRESQL,
+  SERVICE_MAP_KUERY_OPBEANS,
   SERVICE_OPBEANS_JAVA,
   SERVICE_OPBEANS_NODE,
 } from '../../fixtures/constants';
@@ -21,7 +22,9 @@ test.describe(
   () => {
     test.beforeEach(async ({ browserAuth, pageObjects: { serviceMapPage } }) => {
       await browserAuth.loginAsViewer();
-      await serviceMapPage.gotoWithDateSelected(testData.START_DATE, testData.END_DATE);
+      await serviceMapPage.gotoWithDateSelected(testData.START_DATE, testData.END_DATE, {
+        kuery: SERVICE_MAP_KUERY_OPBEANS,
+      });
       await serviceMapPage.waitForMapToLoad();
       await serviceMapPage.dismissPopoverIfOpen();
     });
@@ -41,12 +44,12 @@ test.describe(
         await expect(serviceMapPage.mapControls).toBeVisible();
       });
 
-      await serviceMapPage.waitForNodeToLoad(SERVICE_OPBEANS_JAVA);
+      await serviceMapPage.waitForServiceNodeToLoad(SERVICE_OPBEANS_JAVA);
 
       await test.step('service nodes from opbeans data', async () => {
-        const opbeansJavaNode = serviceMapPage.getNodeById(SERVICE_OPBEANS_JAVA);
+        const opbeansJavaNode = serviceMapPage.getServiceNode(SERVICE_OPBEANS_JAVA);
         await expect(opbeansJavaNode).toBeVisible();
-        const opbeansNodeNode = serviceMapPage.getNodeById(SERVICE_OPBEANS_NODE);
+        const opbeansNodeNode = serviceMapPage.getServiceNode(SERVICE_OPBEANS_NODE);
         await expect(opbeansNodeNode).toBeVisible();
       });
 
@@ -61,8 +64,8 @@ test.describe(
       pageObjects: { serviceMapPage },
     }) => {
       await serviceMapPage.clickFitView();
-      await serviceMapPage.waitForNodeToLoad(SERVICE_OPBEANS_JAVA);
-      await serviceMapPage.clickNode(SERVICE_OPBEANS_JAVA);
+      await serviceMapPage.waitForServiceNodeToLoad(SERVICE_OPBEANS_JAVA);
+      await serviceMapPage.clickServiceNode(SERVICE_OPBEANS_JAVA);
       await serviceMapPage.waitForPopoverToBeVisible();
       await expect(serviceMapPage.serviceMapPopover).toBeVisible();
 
@@ -74,13 +77,13 @@ test.describe(
 
     test('dismisses popover when clicking outside', async ({ pageObjects: { serviceMapPage } }) => {
       await serviceMapPage.clickFitView();
-      await serviceMapPage.waitForNodeToLoad(SERVICE_OPBEANS_JAVA);
-      await serviceMapPage.clickNode(SERVICE_OPBEANS_JAVA);
+      await serviceMapPage.waitForServiceNodeToLoad(SERVICE_OPBEANS_JAVA);
+      await serviceMapPage.clickServiceNode(SERVICE_OPBEANS_JAVA);
       await serviceMapPage.waitForPopoverToBeVisible();
       await expect(serviceMapPage.serviceMapPopoverContent).toBeVisible();
 
       await serviceMapPage.clickFitView();
-      await serviceMapPage.waitForNodeToLoad(SERVICE_OPBEANS_JAVA);
+      await serviceMapPage.waitForServiceNodeToLoad(SERVICE_OPBEANS_JAVA);
       await serviceMapPage.waitForPopoverToBeHidden();
       await expect(serviceMapPage.serviceMapPopoverContent).toBeHidden();
     });
@@ -117,8 +120,8 @@ test.describe(
     }) => {
       await serviceMapPage.dismissPopoverIfOpen();
       await serviceMapPage.clickFitView();
-      await serviceMapPage.waitForNodeToLoad(SERVICE_OPBEANS_JAVA);
-      await serviceMapPage.clickNode(SERVICE_OPBEANS_JAVA);
+      await serviceMapPage.waitForServiceNodeToLoad(SERVICE_OPBEANS_JAVA);
+      await serviceMapPage.clickServiceNode(SERVICE_OPBEANS_JAVA);
       await serviceMapPage.waitForPopoverToBeVisible();
       await serviceMapPage.serviceMapServiceDetailsButton.click();
 
@@ -136,8 +139,8 @@ test.describe(
     }) => {
       await serviceMapPage.dismissPopoverIfOpen();
       await serviceMapPage.clickFitView();
-      await serviceMapPage.waitForNodeToLoad(SERVICE_OPBEANS_JAVA);
-      await serviceMapPage.clickNode(SERVICE_OPBEANS_JAVA);
+      await serviceMapPage.waitForServiceNodeToLoad(SERVICE_OPBEANS_JAVA);
+      await serviceMapPage.clickServiceNode(SERVICE_OPBEANS_JAVA);
       await serviceMapPage.waitForPopoverToBeVisible();
       await serviceMapPage.serviceMapFocusMapButton.click();
 

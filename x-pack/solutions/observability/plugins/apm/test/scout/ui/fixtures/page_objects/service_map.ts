@@ -50,12 +50,16 @@ export class ServiceMapPage {
     );
   }
 
-  async gotoWithDateSelected(start: string, end: string) {
-    await this.page.goto(
-      `${this.kbnUrl.app(
-        'apm'
-      )}/service-map?rangeFrom=${start}&rangeTo=${end}&environment=${PRODUCTION_ENVIRONMENT}`
-    );
+  async gotoWithDateSelected(start: string, end: string, options?: { kuery?: string }) {
+    const params = new URLSearchParams({
+      rangeFrom: start,
+      rangeTo: end,
+      environment: PRODUCTION_ENVIRONMENT,
+    });
+    if (options?.kuery) {
+      params.set('kuery', options.kuery);
+    }
+    await this.page.goto(`${this.kbnUrl.app('apm')}/service-map?${params.toString()}`);
     return await waitForApmSettingsHeaderLink(this.page);
   }
 
@@ -121,8 +125,23 @@ export class ServiceMapPage {
     return this.serviceMapGraph.locator(`[data-id="${nodeId}"]`);
   }
 
+  /**
+   * Service nodes are rendered as role="button" with aria-label like "Service: {serviceName}. Agent: {agentName}".
+   * data.label (service name) has no regex-special chars in our test data; use string for substring match.
+   */
+  getServiceNode(serviceName: string) {
+    return this.serviceMapGraph.getByRole('button', { name: serviceName });
+  }
+
   async waitForNodeToLoad(nodeId: string) {
     await this.getNodeById(nodeId).waitFor({ state: 'visible', timeout: EXTENDED_TIMEOUT });
+  }
+
+  async waitForServiceNodeToLoad(serviceName: string) {
+    await this.getServiceNode(serviceName).waitFor({
+      state: 'visible',
+      timeout: EXTENDED_TIMEOUT,
+    });
   }
 
   getEdgeById(edgeId: string) {
@@ -136,12 +155,24 @@ export class ServiceMapPage {
   async clickNode(nodeId: string) {
     const node = this.getNodeById(nodeId);
     await node.scrollIntoViewIfNeeded();
+    await node.waitFor({ state: 'visible', timeout: EXTENDED_TIMEOUT });
+    await node.focus();
     await node.click({ force: true });
+  }
+
+  /** Click a service node by its service name (uses role + aria-label). */
+  async clickServiceNode(serviceName: string) {
+    const button = this.getServiceNode(serviceName);
+    await button.scrollIntoViewIfNeeded();
+    await button.waitFor({ state: 'visible', timeout: EXTENDED_TIMEOUT });
+    await button.click({ force: true });
   }
 
   async clickEdge(edgeId: string) {
     const edge = this.getEdgeById(edgeId);
     await edge.scrollIntoViewIfNeeded();
+    await edge.waitFor({ state: 'visible', timeout: EXTENDED_TIMEOUT });
+    await edge.focus();
     await edge.click({ force: true });
   }
 
@@ -187,11 +218,60 @@ export class ServiceMapPage {
     );
   }
 
+  /** Focus a service node by service name (uses role + aria-label) and wait for focus. */
+  async focusServiceNodeAndWaitForFocus(serviceName: string) {
+    await this.waitForServiceNodeToLoad(serviceName);
+    const button = this.getServiceNode(serviceName);
+    await button.focus();
+    await this.page.waitForFunction(
+      (name: string) => {
+        const focused = document.activeElement;
+        if (!focused || !focused.getAttribute('aria-label')) return false;
+        return focused.getAttribute('aria-label')!.toLowerCase().includes(name.toLowerCase());
+      },
+      serviceName,
+      { timeout: EXTENDED_TIMEOUT }
+    );
+  }
+
+  /**
+   * Focus the node wrapper (element with data-id) so the document keydown handler
+   * sees activeElement.closest('[data-id]') and can open the popover on Enter/Space.
+   */
+  async focusNodeWrapperAndWaitForFocus(nodeId: string) {
+    await this.waitForNodeToLoad(nodeId);
+    const wrapper = this.getNodeById(nodeId);
+    await wrapper.focus();
+    await this.page.waitForFunction(
+      (id: string) => document.activeElement?.getAttribute('data-id') === id,
+      nodeId,
+      { timeout: EXTENDED_TIMEOUT }
+    );
+  }
+
   async openPopoverWithKeyboard(nodeId: string, key: 'Enter' | ' ') {
     await this.focusNodeAndWaitForFocus(nodeId);
     const node = this.getNodeById(nodeId);
     const button = node.locator('[role="button"]');
     await button.press(key === ' ' ? 'Space' : key);
+    await this.waitForPopoverToBeVisible();
+  }
+
+  /**
+   * Open popover via keyboard for a service node. Focuses the node wrapper then dispatches keydown
+   * on document so the document listener (use_keyboard_navigation) runs; it uses activeElement
+   * (the focused wrapper) to find the node and open the popover. Dispatching on document avoids
+   * React Flow's node wrapper onKeyDown handling Enter/Space before our listener.
+   */
+  async openPopoverWithKeyboardForService(serviceName: string, key: 'Enter' | ' ') {
+    await this.waitForServiceNodeToLoad(serviceName);
+    await this.focusNodeWrapperAndWaitForFocus(serviceName);
+    const keyToSend = key === ' ' ? ' ' : 'Enter';
+    await this.page.evaluate((k: string) => {
+      document.dispatchEvent(
+        new KeyboardEvent('keydown', { key: k, code: k === ' ' ? 'Space' : 'Enter', bubbles: true })
+      );
+    }, keyToSend);
     await this.waitForPopoverToBeVisible();
   }
 }

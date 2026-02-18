@@ -8,7 +8,11 @@
 import { expect } from '@kbn/scout-oblt/ui';
 import { tags } from '@kbn/scout-oblt';
 import { test, testData } from '../../fixtures';
-import { SERVICE_OPBEANS_JAVA, SERVICE_OPBEANS_NODE } from '../../fixtures/constants';
+import {
+  SERVICE_MAP_KUERY_OPBEANS_JAVA,
+  SERVICE_OPBEANS_JAVA,
+  SERVICE_OPBEANS_NODE,
+} from '../../fixtures/constants';
 
 test.describe(
   'Service map - accessibility',
@@ -41,10 +45,17 @@ test.describe(
       });
 
       await test.step('service node popover has no accessibility violations', async () => {
+        // Navigate with kuery so the map loads pre-filtered (no re-fetch after opening popover)
+        await serviceMapPage.gotoWithDateSelected(testData.START_DATE, testData.END_DATE, {
+          kuery: SERVICE_MAP_KUERY_OPBEANS_JAVA,
+        });
+        await serviceMapPage.waitForMapToLoad();
+        await serviceMapPage.dismissPopoverIfOpen();
         await serviceMapPage.clickFitView();
-        await serviceMapPage.waitForNodeToLoad(SERVICE_OPBEANS_JAVA);
-        await serviceMapPage.clickNode(SERVICE_OPBEANS_JAVA);
+        await serviceMapPage.waitForServiceNodeToLoad(SERVICE_OPBEANS_JAVA);
+        await serviceMapPage.clickServiceNode(SERVICE_OPBEANS_JAVA);
         await serviceMapPage.waitForPopoverToBeVisible();
+        await expect(serviceMapPage.serviceMapPopoverContent).toBeVisible();
         const { violations } = await page.checkA11y({
           include: ['[data-test-subj="serviceMapPopoverContent"]'],
         });
@@ -57,7 +68,7 @@ test.describe(
       pageObjects: { serviceMapPage },
     }) => {
       await test.step('service map nodes are focusable with Tab key', async () => {
-        await serviceMapPage.waitForNodeToLoad(SERVICE_OPBEANS_JAVA);
+        await serviceMapPage.waitForServiceNodeToLoad(SERVICE_OPBEANS_JAVA);
         const serviceMap = page.testSubj.locator('serviceMapGraph');
         await serviceMap.focus();
         await page.keyboard.press('Tab');
@@ -65,26 +76,9 @@ test.describe(
         expect(focusedElement).toBeTruthy();
       });
 
-      await test.step('pressing Enter on a focused node opens the popover', async () => {
-        await serviceMapPage.openPopoverWithKeyboard(SERVICE_OPBEANS_JAVA, 'Enter');
-      });
-
-      await test.step('pressing Escape closes the popover', async () => {
-        await page.keyboard.press('Escape');
-        await serviceMapPage.waitForPopoverToBeHidden();
-        await expect(serviceMapPage.serviceMapPopoverContent).toBeHidden();
-      });
-
-      await test.step('pressing Space on a focused node opens the popover', async () => {
-        await serviceMapPage.openPopoverWithKeyboard(SERVICE_OPBEANS_JAVA, ' ');
-        await page.keyboard.press('Escape');
-        await serviceMapPage.waitForPopoverToBeHidden();
-      });
-
       await test.step('arrow keys navigate between nodes', async () => {
-        await serviceMapPage.waitForNodeToLoad(SERVICE_OPBEANS_NODE);
-        const javaNode = serviceMapPage.getNodeById(SERVICE_OPBEANS_JAVA);
-        await javaNode.focus();
+        await serviceMapPage.waitForServiceNodeToLoad(SERVICE_OPBEANS_NODE);
+        await serviceMapPage.focusServiceNodeAndWaitForFocus(SERVICE_OPBEANS_JAVA);
         const originalFocusedId = await page.evaluate(() => {
           const el = document.activeElement?.closest('[data-id]');
           return el?.getAttribute('data-id');
@@ -96,6 +90,24 @@ test.describe(
         });
         expect(newFocusedId || originalFocusedId).toBeTruthy();
       });
+
+      await test.step('pressing Enter on a focused node opens the popover', async () => {
+        await serviceMapPage.typeInTheSearchBar(SERVICE_MAP_KUERY_OPBEANS_JAVA);
+        await serviceMapPage.waitForServiceNodeToLoad(SERVICE_OPBEANS_JAVA);
+        await serviceMapPage.openPopoverWithKeyboardForService(SERVICE_OPBEANS_JAVA, 'Enter');
+      });
+
+      await test.step('pressing Escape closes the popover', async () => {
+        await page.keyboard.press('Escape');
+        await serviceMapPage.waitForPopoverToBeHidden();
+        await expect(serviceMapPage.serviceMapPopoverContent).toBeHidden();
+      });
+
+      await test.step('pressing Space on a focused node opens the popover', async () => {
+        await serviceMapPage.openPopoverWithKeyboardForService(SERVICE_OPBEANS_JAVA, ' ');
+        await page.keyboard.press('Escape');
+        await serviceMapPage.waitForPopoverToBeHidden();
+      });
     });
 
     test('focus management and visible indicators work correctly', async ({
@@ -103,12 +115,14 @@ test.describe(
       pageObjects: { serviceMapPage },
     }) => {
       await test.step('nodes have visible focus indicators when focused', async () => {
-        await serviceMapPage.waitForNodeToLoad(SERVICE_OPBEANS_JAVA);
-        const node = serviceMapPage.getNodeById(SERVICE_OPBEANS_JAVA);
+        await serviceMapPage.waitForServiceNodeToLoad(SERVICE_OPBEANS_JAVA);
+        const node = serviceMapPage.getServiceNode(SERVICE_OPBEANS_JAVA);
         await node.focus();
-        const isFocused = await page.evaluate((nodeId) => {
-          const nodeEl = document.querySelector(`[data-id="${nodeId}"]`);
-          return nodeEl === document.activeElement || nodeEl?.contains(document.activeElement);
+        const isFocused = await page.evaluate((name: string) => {
+          const focused = document.activeElement;
+          return (
+            focused?.getAttribute('aria-label')?.toLowerCase().includes(name.toLowerCase()) ?? false
+          );
         }, SERVICE_OPBEANS_JAVA);
         expect(isFocused).toBe(true);
       });
@@ -134,9 +148,8 @@ test.describe(
       });
 
       await test.step('service nodes have proper role and aria-label', async () => {
-        await serviceMapPage.waitForNodeToLoad(SERVICE_OPBEANS_JAVA);
-        const nodeContainer = serviceMapPage.getNodeById(SERVICE_OPBEANS_JAVA);
-        const interactiveElement = nodeContainer.locator('[role="button"]');
+        await serviceMapPage.waitForServiceNodeToLoad(SERVICE_OPBEANS_JAVA);
+        const interactiveElement = serviceMapPage.getServiceNode(SERVICE_OPBEANS_JAVA);
         await expect(interactiveElement).toHaveAttribute('role', 'button');
         await expect(interactiveElement).toHaveAttribute('aria-label', /service/i);
         await expect(interactiveElement).toHaveAttribute(

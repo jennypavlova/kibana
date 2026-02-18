@@ -60,6 +60,7 @@ test.describe(
     test('shows popover when clicking on a service node', async ({
       pageObjects: { serviceMapPage },
     }) => {
+      await serviceMapPage.clickFitView();
       await serviceMapPage.waitForNodeToLoad(SERVICE_OPBEANS_JAVA);
       await serviceMapPage.clickNode(SERVICE_OPBEANS_JAVA);
       await serviceMapPage.waitForPopoverToBeVisible();
@@ -72,6 +73,7 @@ test.describe(
     });
 
     test('dismisses popover when clicking outside', async ({ pageObjects: { serviceMapPage } }) => {
+      await serviceMapPage.clickFitView();
       await serviceMapPage.waitForNodeToLoad(SERVICE_OPBEANS_JAVA);
       await serviceMapPage.clickNode(SERVICE_OPBEANS_JAVA);
       await serviceMapPage.waitForPopoverToBeVisible();
@@ -84,6 +86,7 @@ test.describe(
     });
 
     test('shows popover when clicking on an edge', async ({ pageObjects: { serviceMapPage } }) => {
+      await serviceMapPage.clickFitView();
       await serviceMapPage.waitForEdgeToLoad(EDGE_OPBEANS_JAVA_TO_POSTGRESQL);
       await serviceMapPage.clickEdge(EDGE_OPBEANS_JAVA_TO_POSTGRESQL);
       await serviceMapPage.waitForPopoverToBeVisible();
@@ -97,6 +100,7 @@ test.describe(
       pageObjects: { serviceMapPage },
     }) => {
       await serviceMapPage.dismissPopoverIfOpen();
+      await serviceMapPage.clickFitView();
       await serviceMapPage.waitForNodeToLoad(`>${DEPENDENCY_POSTGRESQL}`);
       await serviceMapPage.clickNode(`>${DEPENDENCY_POSTGRESQL}`);
       await serviceMapPage.waitForPopoverToBeVisible();
@@ -112,6 +116,7 @@ test.describe(
       pageObjects: { serviceMapPage },
     }) => {
       await serviceMapPage.dismissPopoverIfOpen();
+      await serviceMapPage.clickFitView();
       await serviceMapPage.waitForNodeToLoad(SERVICE_OPBEANS_JAVA);
       await serviceMapPage.clickNode(SERVICE_OPBEANS_JAVA);
       await serviceMapPage.waitForPopoverToBeVisible();
@@ -130,6 +135,7 @@ test.describe(
       pageObjects: { serviceMapPage },
     }) => {
       await serviceMapPage.dismissPopoverIfOpen();
+      await serviceMapPage.clickFitView();
       await serviceMapPage.waitForNodeToLoad(SERVICE_OPBEANS_JAVA);
       await serviceMapPage.clickNode(SERVICE_OPBEANS_JAVA);
       await serviceMapPage.waitForPopoverToBeVisible();
@@ -147,6 +153,7 @@ test.describe(
       pageObjects: { serviceMapPage },
     }) => {
       await serviceMapPage.dismissPopoverIfOpen();
+      await serviceMapPage.clickFitView();
       await serviceMapPage.waitForNodeToLoad(`>${DEPENDENCY_POSTGRESQL}`);
       await serviceMapPage.clickNode(`>${DEPENDENCY_POSTGRESQL}`);
       await serviceMapPage.waitForPopoverToBeVisible();

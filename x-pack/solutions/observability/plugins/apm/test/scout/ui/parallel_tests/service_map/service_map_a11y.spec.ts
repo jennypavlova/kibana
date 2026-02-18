@@ -18,6 +18,7 @@ test.describe(
       await browserAuth.loginAsViewer();
       await serviceMapPage.gotoWithDateSelected(testData.START_DATE, testData.END_DATE);
       await serviceMapPage.waitForMapToLoad();
+      await serviceMapPage.dismissPopoverIfOpen();
     });
 
     test('axe-core automated accessibility checks pass', async ({
@@ -40,6 +41,7 @@ test.describe(
       });
 
       await test.step('service node popover has no accessibility violations', async () => {
+        await serviceMapPage.clickFitView();
         await serviceMapPage.waitForNodeToLoad(SERVICE_OPBEANS_JAVA);
         await serviceMapPage.clickNode(SERVICE_OPBEANS_JAVA);
         await serviceMapPage.waitForPopoverToBeVisible();

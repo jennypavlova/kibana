@@ -39,9 +39,7 @@ test.describe(
         });
         expect(violations).toHaveLength(0);
       });
-
     });
-
 
     test('focus management and visible indicators work correctly', async ({
       page,

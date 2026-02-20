@@ -22,7 +22,7 @@ export function editAgentConfigurationHref(
     query: {
       // ignoring because `name` has not been added to url params. Related: https://github.com/elastic/kibana/issues/51963
       // @ts-expect-error
-      name: configService.name,
+      name: configService?.name,
       environment: configService?.environment ?? ENVIRONMENT_NOT_DEFINED.value,
     },
   });

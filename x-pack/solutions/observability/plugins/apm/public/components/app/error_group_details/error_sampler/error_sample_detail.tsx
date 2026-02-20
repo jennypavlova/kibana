@@ -222,7 +222,7 @@ export function ErrorSampleDetails({
             rangeTo={rangeTo}
             queryParams={{
               kuery,
-              serviceName: error?.service.name,
+              serviceName: error?.service?.name,
               errorGroupId: groupId,
             }}
           />
@@ -361,7 +361,7 @@ export function ErrorSampleDetailTabContent({
   currentTab,
 }: {
   error: {
-    service: {
+    service?: {
       language?: {
         name?: string;
       };
@@ -371,9 +371,9 @@ export function ErrorSampleDetailTabContent({
   };
   currentTab: ErrorTab;
 }) {
-  const codeLanguage = error?.service.language?.name;
-  const exceptions = error?.error.exception || [];
-  const logStackframes = error?.error.log?.stacktrace;
+  const codeLanguage = error?.service?.language?.name;
+  const exceptions = error?.error?.exception || [];
+  const logStackframes = error?.error?.log?.stacktrace;
   const isPlaintextException =
     !!error?.error?.stack_trace && exceptions.length === 1 && !exceptions[0].stacktrace;
   switch (currentTab.key) {
@@ -384,7 +384,7 @@ export function ErrorSampleDetailTabContent({
         <PlaintextStacktrace
           message={exceptions[0].message}
           type={exceptions[0]?.type}
-          stacktrace={error?.error.stack_trace}
+          stacktrace={error?.error?.stack_trace}
           codeLanguage={codeLanguage}
         />
       ) : (

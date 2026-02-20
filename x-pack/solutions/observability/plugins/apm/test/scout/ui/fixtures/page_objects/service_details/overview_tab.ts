@@ -22,6 +22,8 @@ export class OverviewTab extends ServiceDetailsTab {
   public readonly instancesLatencyDistribution: Locator;
   public readonly serviceOverviewInstancesTable: Locator;
 
+  public readonly coldstartRateChart: Locator;
+
   constructor(page: ScoutPage, kbnUrl: KibanaUrl, defaultServiceName: string) {
     super(page, kbnUrl, defaultServiceName);
     this.tab = this.page.getByTestId(`${this.tabName}Tab`);
@@ -31,6 +33,7 @@ export class OverviewTab extends ServiceDetailsTab {
     this.serviceOverviewErrorsTable = this.page.getByTestId('serviceOverviewErrorsTable');
     this.instancesLatencyDistribution = this.page.getByTestId('instancesLatencyDistribution');
     this.serviceOverviewInstancesTable = this.page.getByTestId('serviceOverviewInstancesTable');
+    this.coldstartRateChart = this.page.getByTestId('coldstartRate');
   }
 
   protected async waitForTabLoad(): Promise<void> {

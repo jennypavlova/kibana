@@ -18,7 +18,6 @@ test.describe(
     });
 
     test('displays cold start rate chart and not transaction breakdown chart', async ({
-      page,
       pageObjects: { serviceDetailsPage },
     }) => {
       await serviceDetailsPage.overviewTab.goToTab({
@@ -34,11 +33,12 @@ test.describe(
       });
 
       await test.step('Verify Cold start rate heading is visible', async () => {
-        await expect(page.getByRole('heading', { name: 'Cold start rate' })).toBeVisible();
+        await serviceDetailsPage.overviewTab.coldstartRateChartTitle.scrollIntoViewIfNeeded();
+        await expect(serviceDetailsPage.overviewTab.coldstartRateChartTitle).toBeVisible();
       });
 
       await test.step('Verify transaction breakdown chart is not shown', async () => {
-        await expect(page.getByText('Time spent by span type')).toBeHidden();
+        await expect(serviceDetailsPage.overviewTab.transactionBreakdownChart).toBeHidden();
       });
     });
   }

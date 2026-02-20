@@ -21,10 +21,7 @@ test.describe(
       await serviceMapPage.dismissPopoverIfOpen();
     });
 
-    test('axe-core automated accessibility checks pass', async ({
-      page,
-      pageObjects: { serviceMapPage },
-    }) => {
+    test('axe-core automated accessibility checks pass', async ({ page }) => {
       await test.step('service map container has no accessibility violations', async () => {
         await page.testSubj.locator('serviceMapGraph').waitFor({ state: 'visible' });
         const { violations } = await page.checkA11y({

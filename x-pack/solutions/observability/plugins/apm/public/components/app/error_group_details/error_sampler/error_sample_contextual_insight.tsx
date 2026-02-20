@@ -46,10 +46,10 @@ export function ErrorSampleContextualInsight({
 
   const messages = useMemo<Message[] | undefined>(() => {
     const serviceName = error.service.name;
-    const languageName = error.service.language?.name ?? '';
-    const runtimeName = error.service.runtime?.name ?? '';
-    const runtimeVersion = error.service.runtime?.version ?? '';
-    const transactionName = transaction?.transaction.name ?? '';
+    const languageName = error?.service?.language?.name ?? '';
+    const runtimeName = error?.service?.runtime?.name ?? '';
+    const runtimeVersion = error?.service?.runtime?.version ?? '';
+    const transactionName = transaction?.transaction?.name ?? '';
 
     return observabilityAIAssistant?.getContextualInsightMessages({
       message: `I'm looking at an exception and trying to understand what it means`,
@@ -95,7 +95,7 @@ export function ErrorSampleContextualInsight({
         }}
         style={{ display: 'none' }}
       >
-        {error.error.log?.message && (
+        {error?.error?.log?.message && (
           <ErrorSampleDetailTabContent error={error} currentTab={logStacktraceTab} />
         )}
       </div>
@@ -105,7 +105,7 @@ export function ErrorSampleContextualInsight({
         }}
         style={{ display: 'none' }}
       >
-        {error.error.exception?.length && (
+        {error?.error?.exception?.length && (
           <ErrorSampleDetailTabContent error={error} currentTab={exceptionStacktraceTab} />
         )}
       </div>

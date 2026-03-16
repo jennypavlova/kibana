@@ -514,6 +514,17 @@ export function InfraHomePageProvider({ getService, getPageObjects }: FtrProvide
       return testSubjects.click('euiFlyoutCloseButton');
     },
 
+    /**
+     * Closes the host/asset details flyout using Escape only (EuiFlyout closes on Escape).
+     * Presses Escape several times to dismiss any nested popovers then the flyout.
+     * Avoids relying on the close button to prevent flakiness.
+     */
+    async closeFlyoutWithEscape() {
+      for (let i = 0; i < 3; i++) {
+        await browser.pressKeys(browser.keys.ESCAPE);
+      }
+    },
+
     async clickCustomMetricDropdown() {
       await testSubjects.click('infraInventoryMetricDropdown');
     },

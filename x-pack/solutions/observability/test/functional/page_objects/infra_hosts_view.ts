@@ -122,6 +122,8 @@ export function InfraHostsViewProvider({ getService }: FtrProviderContext) {
 
     async visitMetricsTab() {
       const metricsTab = await this.getMetricsTab();
+      await metricsTab.scrollIntoViewIfNecessary();
+      await metricsTab.moveMouseTo();
       return metricsTab.click();
     },
 
@@ -169,6 +171,8 @@ export function InfraHostsViewProvider({ getService }: FtrProviderContext) {
 
     async visitLogsTab() {
       const logsTab = await this.getLogsTab();
+      await logsTab.scrollIntoViewIfNecessary();
+      await logsTab.moveMouseTo();
       await logsTab.click();
     },
 
@@ -201,6 +205,8 @@ export function InfraHostsViewProvider({ getService }: FtrProviderContext) {
 
     async visitAlertTab() {
       const alertsTab = await this.getAlertsTab();
+      await alertsTab.scrollIntoViewIfNecessary();
+      await alertsTab.moveMouseTo();
       await alertsTab.click();
     },
 

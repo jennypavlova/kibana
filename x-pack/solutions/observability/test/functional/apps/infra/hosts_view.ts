@@ -238,9 +238,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         (await pageObjects.infraHostsView.isKPIChartsLoaded())
     );
 
-  // Failing: See https://github.com/elastic/kibana/issues/257428
-  // Failing: See https://github.com/elastic/kibana/issues/257429
-  describe.skip('Hosts View', function () {
+  describe('Hosts View', function () {
     let synthEsInfraClient: InfraSynthtraceEsClient;
     let synthEsLogsClient: LogsSynthtraceEsClient;
     let synthtraceApmClient: ApmSynthtraceEsClient;
@@ -336,6 +334,11 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
         describe('Tabs', () => {
           before(async () => {
+            await pageObjects.infraHome.closeFlyoutWithEscape();
+            await retry.waitFor(
+              'date picker to be visible before setting range',
+              async () => await pageObjects.timePicker.timePickerExists()
+            );
             await pageObjects.timePicker.setAbsoluteRange(
               START_SYNTHTRACE_DATE.format(DATE_PICKER_FORMAT),
               END_SYNTHTRACE_DATE.format(DATE_PICKER_FORMAT)
@@ -347,9 +350,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           });
 
           after(async () => {
-            await retry.tryForTime(5000, async () => {
-              await pageObjects.infraHome.clickCloseFlyoutButton();
-            });
+            await pageObjects.infraHome.closeFlyoutWithEscape();
           });
 
           describe('Overview Tab', () => {
@@ -620,6 +621,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
         describe('Metrics Tab', () => {
           before(async () => {
+            await browser.scrollTop();
+            await browser.pressKeys(browser.keys.ESCAPE);
             await pageObjects.infraHostsView.visitMetricsTab();
           });
 
@@ -644,6 +647,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         describe('Logs Tab', () => {
           before(async () => {
             await browser.scrollTop();
+            await browser.pressKeys(browser.keys.ESCAPE);
             await pageObjects.infraHostsView.visitLogsTab();
           });
 
@@ -798,6 +802,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
             await waitForPageToLoad();
             await browser.scrollTop();
+            await browser.pressKeys(browser.keys.ESCAPE);
             await pageObjects.infraHostsView.visitAlertTab();
           });
 

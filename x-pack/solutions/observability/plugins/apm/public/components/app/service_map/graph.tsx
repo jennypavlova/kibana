@@ -33,11 +33,15 @@ import { i18n } from '@kbn/i18n';
 import '@xyflow/react/dist/style.css';
 import { css } from '@emotion/react';
 import { applyDagreLayout } from './layout';
+import { ServiceMapControlsPanel } from './service_map_controls_panel';
+import type { ServiceMapControlState, LayoutDirection } from './service_map_control_state';
 import { FIT_VIEW_PADDING, FIT_VIEW_DURATION, FIT_VIEW_DEFER_MS } from './constants';
 import { ServiceNode } from './service_node';
 import { DependencyNode } from './dependency_node';
 import { GroupedResourcesNode } from './grouped_resources_node';
+import { SubflowGroupNode } from './subflow_group_node';
 import { ServiceMapEdge } from './service_map_edge';
+import { applyGroupBy } from './apply_group_by';
 import { useEdgeHighlighting } from './use_edge_highlighting';
 import { useReducedMotion } from './use_reduced_motion';
 import { useKeyboardNavigation } from './use_keyboard_navigation';
@@ -54,6 +58,7 @@ const nodeTypes: NodeTypes = {
   service: ServiceNode,
   dependency: DependencyNode,
   groupedResources: GroupedResourcesNode,
+  subflowGroup: SubflowGroupNode,
 };
 
 const edgeTypes: EdgeTypes = {
@@ -80,6 +85,14 @@ interface GraphProps {
   showPopover?: boolean;
   /** When provided, used as popover content instead of default (e.g. embeddable context with Discover in header). */
   renderPopoverContent?: (props: PopoverContentProps) => React.ReactNode;
+  /** Control state for options panel (search, filters, group by, layout). */
+  controlState?: ServiceMapControlState;
+  /** Callback when control state changes. */
+  onControlStateChange?: (state: Partial<ServiceMapControlState>) => void;
+  /** Layout direction; used when controlState is not provided. */
+  layoutDirection?: LayoutDirection;
+  /** Per-service group-by field values from API (for fields not on the map response). */
+  serviceGroupByValues?: Record<string, string>;
 }
 
 function GraphInner({
@@ -97,6 +110,10 @@ function GraphInner({
   showMinimap = true,
   showPopover = true,
   renderPopoverContent,
+  controlState,
+  onControlStateChange,
+  layoutDirection: layoutDirectionProp,
+  serviceGroupByValues,
 }: GraphProps) {
   const { euiTheme } = useEuiTheme();
   const { fitView } = useReactFlow();
@@ -122,24 +139,45 @@ function GraphInner({
     [getAnimationDuration]
   );
 
+  const layoutDirection = controlState?.layoutDirection ?? layoutDirectionProp ?? 'horizontal';
   const layoutedNodes = useMemo(
-    () => applyDagreLayout(initialNodes, initialEdges),
-    [initialNodes, initialEdges]
+    () =>
+      applyDagreLayout(initialNodes, initialEdges, {
+        rankdir: layoutDirection === 'vertical' ? 'TB' : 'LR',
+      }),
+    [initialNodes, initialEdges, layoutDirection]
   );
 
-  const [nodes, setNodes, onNodesChange] = useNodesState<ServiceMapNode>(layoutedNodes);
+  const nodesWithGrouping = useMemo(() => {
+    if (controlState?.groupBy) {
+      return applyGroupBy(
+        layoutedNodes,
+        initialEdges,
+        controlState.groupBy,
+        serviceGroupByValues
+      );
+    }
+    return layoutedNodes;
+  }, [
+    layoutedNodes,
+    initialEdges,
+    controlState?.groupBy,
+    serviceGroupByValues,
+  ]);
+
+  const [nodes, setNodes, onNodesChange] = useNodesState<ServiceMapNode>(nodesWithGrouping);
   const [edges, setEdges, onEdgesChange] = useEdgesState<ServiceMapEdgeType>(initialEdges);
 
   useEffect(() => {
-    setNodes(layoutedNodes);
+    setNodes(nodesWithGrouping);
     setEdges(applyEdgeHighlighting(initialEdges, selectedNodeIdRef.current));
 
-    if (layoutedNodes.length > 0) {
+    if (nodesWithGrouping.length > 0) {
       const timer = setTimeout(() => fitView(getFitViewOptions()), FIT_VIEW_DEFER_MS);
       return () => clearTimeout(timer);
     }
   }, [
-    layoutedNodes,
+    nodesWithGrouping,
     initialEdges,
     setNodes,
     setEdges,
@@ -435,6 +473,13 @@ function GraphInner({
                 aria-label={fullscreenButtonLabel}
               />
             </ControlButton>
+          )}
+          {controlState && onControlStateChange && (
+            <ServiceMapControlsPanel
+              nodes={nodes}
+              controlState={controlState}
+              onControlStateChange={onControlStateChange}
+            />
           )}
         </Controls>
         {showMinimap && <ServiceMapMinimap />}

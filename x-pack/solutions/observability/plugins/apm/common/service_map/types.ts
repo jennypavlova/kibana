@@ -182,6 +182,8 @@ interface BaseNodeData extends Record<string, unknown> {
 export interface ServiceNodeData extends BaseNodeData {
   isService: true;
   agentName?: AgentName;
+  /** Service environment (e.g. production, staging). Used for group-by. */
+  serviceEnvironment?: string | null;
   serviceAnomalyStats?: ServiceAnomalyStats;
   /** Active alerts count (from service inventory source). Shown as badge on node. */
   alertsCount?: number;
@@ -226,7 +228,24 @@ export interface GroupedNodeData extends BaseNodeData {
   count: number;
 }
 
-export type ServiceMapNodeData = ServiceNodeData | DependencyNodeData | GroupedNodeData;
+/** Data for a "group by" subflow container node (parent of service nodes). */
+export interface SubflowGroupNodeData extends BaseNodeData {
+  isSubflowGroup: true;
+  /** Display label for the group (e.g. environment or agent name). */
+  groupKey: string;
+  /** CSS color for the group border/background. */
+  color: string;
+  /** Width in pixels (used for layout). */
+  width: number;
+  /** Height in pixels (used for layout). */
+  height: number;
+}
+
+export type ServiceMapNodeData =
+  | ServiceNodeData
+  | DependencyNodeData
+  | GroupedNodeData
+  | SubflowGroupNodeData;
 
 export type ServiceMapNode = Node<ServiceMapNodeData>;
 
@@ -290,7 +309,11 @@ export function isServiceNode(node: ServiceMapNode): node is Node<ServiceNodeDat
  * Helper to check if a node is an external/dependency node
  */
 export function isExternalNode(node: ServiceMapNode): node is Node<DependencyNodeData> {
-  return node.data.isService === false && !('isGrouped' in node.data);
+  return (
+    node.data.isService === false &&
+    !('isGrouped' in node.data) &&
+    !('isSubflowGroup' in node.data)
+  );
 }
 
 /**
@@ -313,5 +336,12 @@ export function isGroupedNodeData(data: ServiceMapNodeData): data is GroupedNode
  * Use this when you have the data object directly (e.g., after accessing node.data).
  */
 export function isDependencyNodeData(data: ServiceMapNodeData): data is DependencyNodeData {
-  return data.isService === false && !('isGrouped' in data);
+  return data.isService === false && !('isGrouped' in data) && !('isSubflowGroup' in data);
+}
+
+/**
+ * Type guard for subflow group node data (group-by container).
+ */
+export function isSubflowGroupNodeData(data: ServiceMapNodeData): data is SubflowGroupNodeData {
+  return 'isSubflowGroup' in data && data.isSubflowGroup === true;
 }

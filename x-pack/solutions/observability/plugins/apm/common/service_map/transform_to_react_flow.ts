@@ -13,6 +13,7 @@ import type { AgentName } from '@kbn/apm-types';
 import {
   SERVICE_NAME,
   AGENT_NAME,
+  SERVICE_ENVIRONMENT,
   SPAN_TYPE,
   SPAN_SUBTYPE,
   SPAN_DESTINATION_SERVICE_RESOURCE,
@@ -51,6 +52,7 @@ function toServiceNodeData(node: ServiceConnectionNode): ServiceNodeData {
     id: node.id,
     label: node[SERVICE_NAME] ?? node.label ?? node.id,
     agentName: node[AGENT_NAME] as AgentName,
+    serviceEnvironment: node[SERVICE_ENVIRONMENT] ?? undefined,
     isService: true,
     serviceAnomalyStats: node.serviceAnomalyStats,
   };

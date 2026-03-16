@@ -27,6 +27,7 @@ import {
   type ServiceSloStatsResponse,
 } from '../services/get_services/get_services_slo_stats';
 import { getServiceMap } from './get_service_map';
+import { getServiceMapGroupByValues } from './get_service_map_group_by_values';
 import type { ServiceMapServiceDependencyInfoResponse } from './get_service_map_dependency_node_info';
 import { getServiceMapDependencyNodeInfo } from './get_service_map_dependency_node_info';
 import type { ServiceMapServiceNodeInfoResponse } from './get_service_map_service_node_info';
@@ -270,8 +271,61 @@ const serviceMapDependencyNodeRoute = createApmServerRoute({
   },
 });
 
+const serviceMapGroupByValuesRoute = createApmServerRoute({
+  endpoint: 'GET /internal/apm/service-map/group-by-values',
+  params: t.type({
+    query: t.intersection([
+      t.type({
+        serviceNames: t.string,
+        groupByField: t.string,
+      }),
+      environmentRt,
+      rangeRt,
+      t.partial({ kuery: kueryRt.props.kuery }),
+    ]),
+  }),
+  security: { authz: { requiredPrivileges: ['apm'] } },
+  handler: async (resources): Promise<Record<string, string>> => {
+    const { config, params } = resources;
+
+    if (!config.serviceMapEnabled) {
+      throw Boom.notFound();
+    }
+
+    const apmEventClient = await getApmEventClient(resources);
+    const {
+      query: { serviceNames, groupByField, environment, start, end, kuery = '' },
+    } = params;
+
+    const namesList = serviceNames
+      .split(',')
+      .map((s) => s.trim())
+      .filter(Boolean);
+
+    const searchAggregatedTransactions = await getSearchTransactionsEvents({
+      apmEventClient,
+      config,
+      start,
+      end,
+      kuery,
+    });
+
+    return getServiceMapGroupByValues({
+      apmEventClient,
+      searchAggregatedTransactions,
+      serviceNames: namesList,
+      groupByField,
+      start,
+      end,
+      environment: environment ?? '',
+      kuery,
+    });
+  },
+});
+
 export const serviceMapRouteRepository = {
   ...serviceMapRoute,
   ...serviceMapServiceNodeRoute,
   ...serviceMapDependencyNodeRoute,
+  ...serviceMapGroupByValuesRoute,
 };

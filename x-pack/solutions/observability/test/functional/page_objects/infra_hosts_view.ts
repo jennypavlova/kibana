@@ -11,10 +11,14 @@ import type { FtrProviderContext } from '../ftr_provider_context';
 
 export function InfraHostsViewProvider({ getService }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
+  const retry = getService('retry');
+  const browser = getService('browser');
 
   return {
     async clickTableOpenFlyoutButton() {
-      return testSubjects.click('hostsView-flyout-button');
+      await retry.tryForTime(15000, async () => {
+        await testSubjects.click('hostsView-flyout-button');
+      });
     },
 
     async clickHostCheckbox(id: string, os: string) {
@@ -123,8 +127,7 @@ export function InfraHostsViewProvider({ getService }: FtrProviderContext) {
     async visitMetricsTab() {
       const metricsTab = await this.getMetricsTab();
       await metricsTab.scrollIntoViewIfNecessary();
-      await metricsTab.moveMouseTo();
-      return metricsTab.click();
+      await browser.execute('arguments[0].click();', metricsTab);
     },
 
     async getAllMetricsCharts() {
@@ -172,8 +175,7 @@ export function InfraHostsViewProvider({ getService }: FtrProviderContext) {
     async visitLogsTab() {
       const logsTab = await this.getLogsTab();
       await logsTab.scrollIntoViewIfNecessary();
-      await logsTab.moveMouseTo();
-      await logsTab.click();
+      await browser.execute('arguments[0].click();', logsTab);
     },
 
     async getLogEntries() {
@@ -206,8 +208,7 @@ export function InfraHostsViewProvider({ getService }: FtrProviderContext) {
     async visitAlertTab() {
       const alertsTab = await this.getAlertsTab();
       await alertsTab.scrollIntoViewIfNecessary();
-      await alertsTab.moveMouseTo();
-      await alertsTab.click();
+      await browser.execute('arguments[0].click();', alertsTab);
     },
 
     setAlertStatusFilter(alertStatus?: PublicAlertStatus) {

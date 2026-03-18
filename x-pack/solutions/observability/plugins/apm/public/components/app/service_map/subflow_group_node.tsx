@@ -28,12 +28,15 @@ export const SubflowGroupNode = memo(({ data }: NodeProps<ServiceMapNode>) => {
   const sizeS = euiTheme.size?.s ?? '8px';
   const sizeM = euiTheme.size?.m ?? '12px';
 
+  /* Background: same as border color but faded (opacity) for a subtle fill */
+  const backgroundFaded = `color-mix(in srgb, ${color} 14%, transparent)`;
+
   const containerStyle = css`
     width: ${safeWidth}px;
     height: ${safeHeight}px;
     border: ${SUBFLOW_GROUP_BORDER_WIDTH}px solid ${color};
     border-radius: ${euiTheme.border?.radius?.medium ?? '6px'};
-    background: ${euiTheme.colors?.backgroundBasePlain ?? '#fff'};
+    background: ${backgroundFaded};
     box-shadow: 0 ${sizeXs} ${sizeS} ${shadowColor};
     padding: ${SUBFLOW_GROUP_PADDING}px;
     box-sizing: border-box;
@@ -45,7 +48,7 @@ export const SubflowGroupNode = memo(({ data }: NodeProps<ServiceMapNode>) => {
     top: -${sizeS};
     left: ${sizeM};
     padding: 0 ${sizeXs};
-    background: ${euiTheme.colors?.backgroundBasePlain ?? '#fff'};
+    background: ${backgroundFaded};
     border: 1px solid ${color};
     border-radius: ${euiTheme.border?.radius?.small ?? '4px'};
   `;

@@ -132,7 +132,7 @@ export function ServiceMapControlsPanel({
 
   const button = (
     <EuiButtonIcon
-      iconType={isOpen ? 'transitionLeftOut' : 'transitionLeftIn'}
+      iconType={isOpen ? 'transitionLeftIn' : 'transitionLeftOut'}
       color="text"
       onClick={() => setIsOpen((prev) => !prev)}
       aria-label={
@@ -153,7 +153,7 @@ export function ServiceMapControlsPanel({
       button={button}
       isOpen={isOpen}
       closePopover={() => setIsOpen(false)}
-      anchorPosition="rightUp"
+      anchorPosition="leftDown"
       panelPaddingSize="none"
       data-test-subj="serviceMapControlsPopover"
     >
@@ -356,7 +356,7 @@ export function ServiceMapControlsPanelContent({
 
       <EuiSpacer size="m" />
 
-      {/* Show only active alerts */}
+      {/* Show only services with active alerts */}
       <EuiSwitch
         label={i18n.translate('xpack.apm.serviceMap.controls.showOnlyActiveAlerts', {
           defaultMessage: 'Show only active alerts',
@@ -365,50 +365,6 @@ export function ServiceMapControlsPanelContent({
         onChange={(e) => onControlStateChange({ showOnlyActiveAlerts: e.target.checked })}
         data-test-subj="serviceMapShowOnlyActiveAlerts"
       />
-
-      <EuiSpacer size="m" />
-
-      {/* Controls: badges */}
-      <EuiText size="xs" color="subdued">
-        <strong>
-          {i18n.translate('xpack.apm.serviceMap.controls.controlsSection', {
-            defaultMessage: 'Controls',
-          })}
-        </strong>
-      </EuiText>
-      <EuiSpacer size="s" />
-      <EuiFlexGroup direction="column" gutterSize="s">
-        <EuiFlexItem grow={false}>
-          <EuiSwitch
-            label={i18n.translate('xpack.apm.serviceMap.controls.showSloBadge', {
-              defaultMessage: 'Show SLOs badge',
-            })}
-            checked={controlState.showSloBadge}
-            onChange={(e) => onControlStateChange({ showSloBadge: e.target.checked })}
-            data-test-subj="serviceMapShowSloBadge"
-          />
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiSwitch
-            label={i18n.translate('xpack.apm.serviceMap.controls.showAlertsBadge', {
-              defaultMessage: 'Show alerts badge',
-            })}
-            checked={controlState.showAlertsBadge}
-            onChange={(e) => onControlStateChange({ showAlertsBadge: e.target.checked })}
-            data-test-subj="serviceMapShowAlertsBadge"
-          />
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiSwitch
-            label={i18n.translate('xpack.apm.serviceMap.controls.showAnomalyBadge', {
-              defaultMessage: 'Show anomaly status',
-            })}
-            checked={controlState.showAnomalyBadge}
-            onChange={(e) => onControlStateChange({ showAnomalyBadge: e.target.checked })}
-            data-test-subj="serviceMapShowAnomalyBadge"
-          />
-        </EuiFlexItem>
-      </EuiFlexGroup>
 
       <EuiSpacer size="m" />
 

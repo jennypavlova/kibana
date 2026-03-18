@@ -15,6 +15,8 @@ import {
 } from '../../../../common/es_fields/apm';
 
 const GROUP_PADDING = 40;
+/** Minimum gap between group bounding boxes so groups do not overlap. */
+const GROUP_GAP = 24;
 
 /** Colors for subflow groups (distinct per group). */
 const SUBFLOW_GROUP_COLORS = [
@@ -30,7 +32,7 @@ const SUBFLOW_GROUP_COLORS = [
   '#F98510',
 ];
 
-function getGroupKey(
+export function getGroupKey(
   node: ServiceMapNode,
   groupByField: string,
   serviceGroupByValues?: Record<string, string>
@@ -55,6 +57,26 @@ function getGroupKey(
     default:
       return 'unknown';
   }
+}
+
+/**
+ * Returns distinct group values for a field across the given service nodes.
+ * Used to filter group-by options to only fields with meaningful variety (e.g. not only "unknown").
+ */
+export function getDistinctGroupValues(
+  nodes: ServiceMapNode[],
+  groupByField: string,
+  serviceGroupByValues?: Record<string, string>
+): Set<string> {
+  const serviceNodes = nodes.filter(
+    (n): n is ServiceMapNode => n.type === 'service' && isServiceNodeData(n.data)
+  );
+  const values = new Set<string>();
+  for (const node of serviceNodes) {
+    const key = getGroupKey(node, groupByField, serviceGroupByValues);
+    if (key !== '') values.add(key);
+  }
+  return values;
 }
 
 /**
@@ -133,6 +155,33 @@ export function applyGroupBy(
       };
       nodesById.set(node.id, updated);
     }
+  }
+
+  // Reposition groups so their bounding boxes do not overlap (sort by position, then shift)
+  const groupsWithBounds = groupNodes.map((g) => ({
+    node: g,
+    x: g.position.x,
+    y: g.position.y,
+    w: (g.style?.width as number) ?? g.data.width,
+    h: (g.style?.height as number) ?? g.data.height,
+  }));
+  groupsWithBounds.sort((a, b) => a.y - b.y || a.x - b.x);
+  for (let i = 1; i < groupsWithBounds.length; i++) {
+    const curr = groupsWithBounds[i];
+    for (let j = 0; j < i; j++) {
+      const prev = groupsWithBounds[j];
+      const prevRight = prev.x + prev.w + GROUP_GAP;
+      const prevBottom = prev.y + prev.h + GROUP_GAP;
+      const overlapsX = curr.x < prevRight && curr.x + curr.w > prev.x;
+      const overlapsY = curr.y < prevBottom && curr.y + curr.h > prev.y;
+      if (overlapsX && overlapsY) {
+        const shiftRight = prevRight - curr.x;
+        const shiftDown = prevBottom - curr.y;
+        if (shiftRight > 0) curr.x += shiftRight;
+        if (shiftDown > 0) curr.y += shiftDown;
+      }
+    }
+    curr.node.position = { x: curr.x, y: curr.y };
   }
 
   const dependencyAndGroupedResourceNodes = nodes.filter(

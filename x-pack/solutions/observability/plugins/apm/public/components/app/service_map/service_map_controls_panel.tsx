@@ -26,9 +26,24 @@ import { useReactFlow } from '@xyflow/react';
 import { css } from '@emotion/react';
 import type { ServiceMapNode, ServiceNodeData } from '../../../../common/service_map';
 import { isServiceNodeData } from '../../../../common/service_map';
-import { type ServiceMapControlState, type LayoutDirection } from './service_map_control_state';
-import { useAdHocApmDataView } from '../../../hooks/use_adhoc_apm_data_view';
+import {
+  type ServiceMapControlState,
+  type LayoutDirection,
+  SERVICE_MAP_GROUP_BY_FIELDS,
+} from './service_map_control_state';
+import { AGENT_NAME, SERVICE_ENVIRONMENT } from '../../../../common/es_fields/apm';
+import { getDistinctGroupValues } from './apply_group_by';
 import { CENTER_ANIMATION_DURATION_MS, NODE_WIDTH, NODE_HEIGHT } from './constants';
+
+/** Fields we get from node data; only hide when these have every value = "unknown". */
+const NODE_DERIVED_GROUP_BY_FIELDS = new Set([SERVICE_ENVIRONMENT, AGENT_NAME]);
+
+/** Values treated as "no data" – hide field only when every value is in this set. */
+const MEANINGLESS_GROUP_VALUES = new Set(['unknown', 'undefined', '']);
+
+function hasMeaningfulGroupValue(values: Set<string>): boolean {
+  return [...values].some((v) => !MEANINGLESS_GROUP_VALUES.has(v));
+}
 import type { SloStatus } from '../../../../common/service_inventory';
 import {
   type ServiceHealthStatus,
@@ -52,32 +67,40 @@ const ANOMALY_STATUS_OPTIONS: { value: ServiceHealthStatus; label: string }[] = 
   { value: HealthStatus.unknown, label: getServiceHealthStatusLabel(HealthStatus.unknown) },
 ];
 
-/** Meta and internal field prefixes to exclude from group-by (same as search bar behavior). */
-const EXCLUDED_FIELD_PREFIXES = ['_', '@'];
-
-function getGroupByFieldOptionsFromDataView(
-  dataView:
-    | {
-        fields:
-          | Array<{ name: string; aggregatable?: boolean }>
-          | { getAll(): Array<{ name: string; aggregatable?: boolean }> };
-      }
-    | undefined
+/**
+ * Group-by options: show fields that have at least one meaningful value (e.g. request; unknown/undefined/empty don't count).
+ * Hide only when every value is "unknown", "undefined", or empty (and we have real data).
+ */
+function getGroupByFieldOptions(
+  nodes: ServiceMapNode[],
+  serviceGroupByValues?: Record<string, string>,
+  currentGroupBy?: string | null
 ): Array<{ label: string; value: string }> {
-  if (!dataView?.fields) return [];
-  const raw = dataView.fields;
-  const all =
-    typeof (raw as { getAll?: () => unknown[] }).getAll === 'function'
-      ? (raw as { getAll(): Array<{ name: string; aggregatable?: boolean }> }).getAll()
-      : Array.isArray(raw)
-      ? raw
-      : [];
-  const aggregatable = all.filter(
-    (f: { name: string; aggregatable?: boolean }) =>
-      f.aggregatable !== false && !EXCLUDED_FIELD_PREFIXES.some((p) => f.name.startsWith(p))
+  const serviceNodes = nodes.filter((n) => n.type === 'service' && isServiceNodeData(n.data));
+  if (serviceNodes.length === 0) return [];
+
+  const allowed = new Set(
+    SERVICE_MAP_GROUP_BY_FIELDS.filter((field) => {
+      const values = getDistinctGroupValues(
+        nodes,
+        field,
+        field === currentGroupBy ? serviceGroupByValues : undefined
+      );
+      if (values.size === 0) return false;
+      // At least one meaningful value (e.g. request + unknown) → show
+      if (hasMeaningfulGroupValue(values)) return true;
+      // Every value is unknown/undefined/empty → hide only when we have real data (node-derived or fetched)
+      const hasRealData = NODE_DERIVED_GROUP_BY_FIELDS.has(field) || field === currentGroupBy;
+      if (hasRealData) return false;
+      // No real data yet (e.g. transaction.type before selection) → show so user can select
+      return true;
+    })
   );
-  const sorted = [...aggregatable].sort((a, b) => a.name.localeCompare(b.name));
-  return sorted.map((f: { name: string }) => ({ label: f.name, value: f.name }));
+  // Always include current selection so it remains visible when clearing or switching
+  if (currentGroupBy && !allowed.has(currentGroupBy)) {
+    allowed.add(currentGroupBy);
+  }
+  return [...allowed].sort((a, b) => a.localeCompare(b)).map((value) => ({ label: value, value }));
 }
 
 export interface ServiceMapControlsPanelProps {
@@ -86,6 +109,8 @@ export interface ServiceMapControlsPanelProps {
   onControlStateChange: (state: Partial<ServiceMapControlState>) => void;
   /** All service nodes before SLO/anomaly filter; used to show counts per status. */
   allServiceNodesForCounts?: ServiceMapNode[];
+  /** Group-by values from API for the current groupBy field; used to show options with meaningful variety. */
+  serviceGroupByValues?: Record<string, string>;
 }
 
 export interface ServiceMapControlsPanelContentProps {
@@ -95,6 +120,8 @@ export interface ServiceMapControlsPanelContentProps {
   onClose: () => void;
   /** All service nodes before SLO/anomaly filter; used to show counts per status. */
   allServiceNodesForCounts?: ServiceMapNode[];
+  /** Group-by values from API for the current groupBy field; used to show options with meaningful variety. */
+  serviceGroupByValues?: Record<string, string>;
 }
 
 function getServiceNodes(nodes: ServiceMapNode[]): ServiceMapNode[] {
@@ -127,6 +154,7 @@ export function ServiceMapControlsPanel({
   controlState,
   onControlStateChange,
   allServiceNodesForCounts,
+  serviceGroupByValues,
 }: ServiceMapControlsPanelProps) {
   const [isOpen, setIsOpen] = useState(false);
 
@@ -163,6 +191,7 @@ export function ServiceMapControlsPanel({
         onControlStateChange={onControlStateChange}
         onClose={() => setIsOpen(false)}
         allServiceNodesForCounts={allServiceNodesForCounts}
+        serviceGroupByValues={serviceGroupByValues}
       />
     </EuiPopover>
   );
@@ -208,10 +237,10 @@ export function ServiceMapControlsPanelContent({
   onControlStateChange,
   onClose,
   allServiceNodesForCounts,
+  serviceGroupByValues,
 }: ServiceMapControlsPanelContentProps) {
   const { euiTheme } = useEuiTheme();
   const [searchQuery, setSearchQuery] = useState('');
-  const { dataView } = useAdHocApmDataView();
   const { setCenter } = useReactFlow();
 
   const nodesForCounts = allServiceNodesForCounts ?? nodes;
@@ -261,9 +290,11 @@ export function ServiceMapControlsPanelContent({
     [anomalyStatusCounts]
   );
 
+  const nodesForGroupByOptions = allServiceNodesForCounts ?? nodes;
   const groupByFieldOptions = useMemo(
-    () => getGroupByFieldOptionsFromDataView(dataView),
-    [dataView]
+    () =>
+      getGroupByFieldOptions(nodesForGroupByOptions, serviceGroupByValues, controlState.groupBy),
+    [nodesForGroupByOptions, serviceGroupByValues, controlState.groupBy]
   );
   const serviceNodes = useMemo(() => getServiceNodes(nodes), [nodes]);
   const searchResults = useMemo(() => {

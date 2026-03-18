@@ -483,6 +483,7 @@ function GraphInner({
               controlState={controlState}
               onControlStateChange={onControlStateChange}
               allServiceNodesForCounts={allServiceNodesForCounts}
+              serviceGroupByValues={serviceGroupByValues}
             />
           )}
         </Controls>

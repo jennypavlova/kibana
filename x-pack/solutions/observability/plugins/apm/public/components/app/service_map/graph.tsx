@@ -93,6 +93,8 @@ interface GraphProps {
   layoutDirection?: LayoutDirection;
   /** Per-service group-by field values from API (for fields not on the map response). */
   serviceGroupByValues?: Record<string, string>;
+  /** All service nodes before SLO/anomaly filter; used for filter dropdown counts. */
+  allServiceNodesForCounts?: ServiceMapNode[];
 }
 
 function GraphInner({
@@ -114,6 +116,7 @@ function GraphInner({
   onControlStateChange,
   layoutDirection: layoutDirectionProp,
   serviceGroupByValues,
+  allServiceNodesForCounts,
 }: GraphProps) {
   const { euiTheme } = useEuiTheme();
   const { fitView } = useReactFlow();
@@ -479,6 +482,7 @@ function GraphInner({
               nodes={nodes}
               controlState={controlState}
               onControlStateChange={onControlStateChange}
+              allServiceNodesForCounts={allServiceNodesForCounts}
             />
           )}
         </Controls>

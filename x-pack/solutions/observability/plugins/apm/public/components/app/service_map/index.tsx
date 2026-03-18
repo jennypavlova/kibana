@@ -40,6 +40,7 @@ import {
   type ServiceMapControlState,
 } from './service_map_control_state';
 import { filterServiceMapElements } from './filter_service_map_nodes';
+import { isServiceNodeData } from '../../../../common/service_map';
 
 function PromptContainer({ children }: { children: ReactNode }) {
   return (
@@ -152,6 +153,12 @@ export function ServiceMap({
   const { nodes: filteredNodes, edges: filteredEdges } = useMemo(
     () => filterServiceMapElements(data.nodes, data.edges, controlState),
     [data.nodes, data.edges, controlState]
+  );
+
+  /** Service nodes before any SLO/anomaly filter, for dropdown counts (so users see how many per status). */
+  const allServiceNodesForCounts = useMemo(
+    () => data.nodes.filter((n) => n.type === 'service' && isServiceNodeData(n.data)),
+    [data.nodes]
   );
 
   const serviceNamesForGroupBy = useMemo(
@@ -304,6 +311,7 @@ export function ServiceMap({
                 setControlState((prev) => ({ ...prev, ...update }))
               }
               serviceGroupByValues={serviceGroupByValues}
+              allServiceNodesForCounts={allServiceNodesForCounts}
             />
           </div>
         </EuiPanel>

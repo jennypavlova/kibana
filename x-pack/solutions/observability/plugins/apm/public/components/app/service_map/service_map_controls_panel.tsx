@@ -7,6 +7,7 @@
 
 import React, { useCallback, useMemo, useState } from 'react';
 import {
+  EuiBadge,
   EuiButtonEmpty,
   EuiButtonIcon,
   EuiComboBox,
@@ -23,7 +24,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { useReactFlow } from '@xyflow/react';
 import { css } from '@emotion/react';
-import type { ServiceMapNode } from '../../../../common/service_map';
+import type { ServiceMapNode, ServiceNodeData } from '../../../../common/service_map';
 import { isServiceNodeData } from '../../../../common/service_map';
 import { type ServiceMapControlState, type LayoutDirection } from './service_map_control_state';
 import { useAdHocApmDataView } from '../../../hooks/use_adhoc_apm_data_view';
@@ -83,6 +84,8 @@ export interface ServiceMapControlsPanelProps {
   nodes: ServiceMapNode[];
   controlState: ServiceMapControlState;
   onControlStateChange: (state: Partial<ServiceMapControlState>) => void;
+  /** All service nodes before SLO/anomaly filter; used to show counts per status. */
+  allServiceNodesForCounts?: ServiceMapNode[];
 }
 
 export interface ServiceMapControlsPanelContentProps {
@@ -90,6 +93,8 @@ export interface ServiceMapControlsPanelContentProps {
   controlState: ServiceMapControlState;
   onControlStateChange: (state: Partial<ServiceMapControlState>) => void;
   onClose: () => void;
+  /** All service nodes before SLO/anomaly filter; used to show counts per status. */
+  allServiceNodesForCounts?: ServiceMapNode[];
 }
 
 function getServiceNodes(nodes: ServiceMapNode[]): ServiceMapNode[] {
@@ -121,6 +126,7 @@ export function ServiceMapControlsPanel({
   nodes,
   controlState,
   onControlStateChange,
+  allServiceNodesForCounts,
 }: ServiceMapControlsPanelProps) {
   const [isOpen, setIsOpen] = useState(false);
 
@@ -156,9 +162,44 @@ export function ServiceMapControlsPanel({
         controlState={controlState}
         onControlStateChange={onControlStateChange}
         onClose={() => setIsOpen(false)}
+        allServiceNodesForCounts={allServiceNodesForCounts}
       />
     </EuiPopover>
   );
+}
+
+/** Count services by SLO status (sloStatus ?? 'noData'). */
+function getSloStatusCounts(serviceNodes: ServiceMapNode[]): Record<SloStatus, number> {
+  const counts: Record<SloStatus, number> = {
+    healthy: 0,
+    degrading: 0,
+    violated: 0,
+    noData: 0,
+  };
+  for (const node of serviceNodes) {
+    if (node.type !== 'service' || !isServiceNodeData(node.data)) continue;
+    const status = (node.data as ServiceNodeData).sloStatus ?? 'noData';
+    if (status in counts) counts[status as SloStatus]++;
+  }
+  return counts;
+}
+
+/** Count services by anomaly/health status (serviceAnomalyStats?.healthStatus ?? 'unknown'). */
+function getAnomalyStatusCounts(
+  serviceNodes: ServiceMapNode[]
+): Record<ServiceHealthStatus, number> {
+  const counts: Record<ServiceHealthStatus, number> = {
+    healthy: 0,
+    warning: 0,
+    critical: 0,
+    unknown: 0,
+  };
+  for (const node of serviceNodes) {
+    if (node.type !== 'service' || !isServiceNodeData(node.data)) continue;
+    const status = (node.data as ServiceNodeData).serviceAnomalyStats?.healthStatus ?? 'unknown';
+    if (status in counts) counts[status as ServiceHealthStatus]++;
+  }
+  return counts;
 }
 
 export function ServiceMapControlsPanelContent({
@@ -166,11 +207,59 @@ export function ServiceMapControlsPanelContent({
   controlState,
   onControlStateChange,
   onClose,
+  allServiceNodesForCounts,
 }: ServiceMapControlsPanelContentProps) {
   const { euiTheme } = useEuiTheme();
   const [searchQuery, setSearchQuery] = useState('');
   const { dataView } = useAdHocApmDataView();
   const { setCenter } = useReactFlow();
+
+  const nodesForCounts = allServiceNodesForCounts ?? nodes;
+  const serviceNodesForCounts = useMemo(() => getServiceNodes(nodesForCounts), [nodesForCounts]);
+  const sloStatusCounts = useMemo(
+    () => getSloStatusCounts(serviceNodesForCounts),
+    [serviceNodesForCounts]
+  );
+  const anomalyStatusCounts = useMemo(
+    () => getAnomalyStatusCounts(serviceNodesForCounts),
+    [serviceNodesForCounts]
+  );
+
+  const sloStatusComboBoxOptions = useMemo(
+    () =>
+      SLO_STATUS_OPTIONS.map((opt) => {
+        const count = sloStatusCounts[opt.value];
+        return {
+          label: opt.label,
+          value: opt.value,
+          append: (
+            <EuiBadge color={count === 0 ? 'subdued' : 'hollow'} title={String(count)}>
+              {count}
+            </EuiBadge>
+          ),
+          disabled: count === 0,
+        };
+      }),
+    [sloStatusCounts]
+  );
+
+  const anomalyStatusComboBoxOptions = useMemo(
+    () =>
+      ANOMALY_STATUS_OPTIONS.map((opt) => {
+        const count = anomalyStatusCounts[opt.value];
+        return {
+          label: opt.label,
+          value: opt.value,
+          append: (
+            <EuiBadge color={count === 0 ? 'subdued' : 'hollow'} title={String(count)}>
+              {count}
+            </EuiBadge>
+          ),
+          disabled: count === 0,
+        };
+      }),
+    [anomalyStatusCounts]
+  );
 
   const groupByFieldOptions = useMemo(
     () => getGroupByFieldOptionsFromDataView(dataView),
@@ -334,9 +423,9 @@ export function ServiceMapControlsPanelContent({
         placeholder={i18n.translate('xpack.apm.serviceMap.controls.sloStatusPlaceholder', {
           defaultMessage: 'All statuses',
         })}
-        options={SLO_STATUS_OPTIONS.map((opt) => ({ label: opt.label, value: opt.value }))}
+        options={sloStatusComboBoxOptions}
         selectedOptions={controlState.sloStatusFilter.map((value) => {
-          const opt = SLO_STATUS_OPTIONS.find((o) => o.value === value);
+          const opt = sloStatusComboBoxOptions.find((o) => o.value === value);
           return { label: opt?.label ?? value, value };
         })}
         onChange={(selected) => {
@@ -365,9 +454,9 @@ export function ServiceMapControlsPanelContent({
         placeholder={i18n.translate('xpack.apm.serviceMap.controls.anomalyStatusPlaceholder', {
           defaultMessage: 'All statuses',
         })}
-        options={ANOMALY_STATUS_OPTIONS.map((opt) => ({ label: opt.label, value: opt.value }))}
+        options={anomalyStatusComboBoxOptions}
         selectedOptions={controlState.anomalyStatusFilter.map((value) => {
-          const opt = ANOMALY_STATUS_OPTIONS.find((o) => o.value === value);
+          const opt = anomalyStatusComboBoxOptions.find((o) => o.value === value);
           return { label: opt?.label ?? value, value };
         })}
         onChange={(selected) => {

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import {
   EuiBadge,
   EuiButtonEmpty,
@@ -128,6 +128,13 @@ function getServiceNodes(nodes: ServiceMapNode[]): ServiceMapNode[] {
   return nodes.filter((n) => n.type === 'service' && isServiceNodeData(n.data));
 }
 
+/** Services and dependencies – nodes that can be searched and navigated to. */
+function getSearchableNodes(nodes: ServiceMapNode[]): ServiceMapNode[] {
+  return nodes.filter(
+    (n) => (n.type === 'service' && isServiceNodeData(n.data)) || n.type === 'dependency'
+  );
+}
+
 /**
  * When grouping is active, service nodes have parentId and position is relative to the group.
  * This returns the absolute position in flow coordinates so setCenter works correctly.
@@ -149,6 +156,10 @@ function getAbsolutePosition(
   return { x, y };
 }
 
+const SEARCH_SHORTCUT_KEY = 'k';
+const isSearchShortcut = (e: KeyboardEvent) =>
+  (e.metaKey || e.ctrlKey) && e.key.toLowerCase() === SEARCH_SHORTCUT_KEY;
+
 export function ServiceMapControlsPanel({
   nodes,
   controlState,
@@ -157,6 +168,16 @@ export function ServiceMapControlsPanel({
   serviceGroupByValues,
 }: ServiceMapControlsPanelProps) {
   const [isOpen, setIsOpen] = useState(false);
+
+  useEffect(() => {
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (!isSearchShortcut(e)) return;
+      e.preventDefault();
+      setIsOpen(true);
+    };
+    window.addEventListener('keydown', onKeyDown);
+    return () => window.removeEventListener('keydown', onKeyDown);
+  }, []);
 
   const button = (
     <EuiButtonIcon
@@ -241,7 +262,24 @@ export function ServiceMapControlsPanelContent({
 }: ServiceMapControlsPanelContentProps) {
   const { euiTheme } = useEuiTheme();
   const [searchQuery, setSearchQuery] = useState('');
+  const [selectedIndex, setSelectedIndex] = useState(0);
+  const searchInputRef = useRef<HTMLInputElement>(null);
+  const resultsListRef = useRef<HTMLUListElement>(null);
   const { setCenter } = useReactFlow();
+
+  useLayoutEffect(() => {
+    searchInputRef.current?.focus();
+  }, []);
+
+  useEffect(() => {
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (!isSearchShortcut(e)) return;
+      e.preventDefault();
+      searchInputRef.current?.focus();
+    };
+    window.addEventListener('keydown', onKeyDown);
+    return () => window.removeEventListener('keydown', onKeyDown);
+  }, []);
 
   const nodesForCounts = allServiceNodesForCounts ?? nodes;
   const serviceNodesForCounts = useMemo(() => getServiceNodes(nodesForCounts), [nodesForCounts]);
@@ -296,18 +334,22 @@ export function ServiceMapControlsPanelContent({
       getGroupByFieldOptions(nodesForGroupByOptions, serviceGroupByValues, controlState.groupBy),
     [nodesForGroupByOptions, serviceGroupByValues, controlState.groupBy]
   );
-  const serviceNodes = useMemo(() => getServiceNodes(nodes), [nodes]);
+  const searchableNodes = useMemo(() => getSearchableNodes(nodes), [nodes]);
   const searchResults = useMemo(() => {
-    if (!searchQuery.trim()) return serviceNodes;
+    if (!searchQuery.trim()) return searchableNodes;
     const q = searchQuery.toLowerCase();
-    return serviceNodes.filter(
+    return searchableNodes.filter(
       (node) =>
-        (node.data.label && node.data.label.toLowerCase().includes(q)) ||
+        (node.data.label && String(node.data.label).toLowerCase().includes(q)) ||
         node.id.toLowerCase().includes(q)
     );
-  }, [serviceNodes, searchQuery]);
+  }, [searchableNodes, searchQuery]);
 
-  const handleGoToService = useCallback(
+  useEffect(() => {
+    setSelectedIndex(0);
+  }, [searchQuery]);
+
+  const handleGoToNode = useCallback(
     (node: ServiceMapNode) => {
       const { x, y } = getAbsolutePosition(node, nodes);
       const centerX = x + NODE_WIDTH / 2;
@@ -321,6 +363,34 @@ export function ServiceMapControlsPanelContent({
     [nodes, setCenter, onClose]
   );
 
+  const onSearchKeyDown = useCallback(
+    (e: React.KeyboardEvent) => {
+      if (searchResults.length === 0) return;
+      if (e.key === 'ArrowDown') {
+        e.preventDefault();
+        setSelectedIndex((i) => Math.min(i + 1, searchResults.length - 1));
+        return;
+      }
+      if (e.key === 'ArrowUp') {
+        e.preventDefault();
+        setSelectedIndex((i) => Math.max(i - 1, 0));
+        return;
+      }
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        const node = searchResults[selectedIndex];
+        if (node) handleGoToNode(node);
+        return;
+      }
+    },
+    [searchResults, selectedIndex, handleGoToNode]
+  );
+
+  useLayoutEffect(() => {
+    const el = resultsListRef.current?.querySelector(`[data-index="${selectedIndex}"]`);
+    el?.scrollIntoView({ block: 'nearest' });
+  }, [selectedIndex]);
+
   const panelStyle = useMemo(
     () => css`
       min-width: 280px;
@@ -332,27 +402,35 @@ export function ServiceMapControlsPanelContent({
 
   return (
     <div css={panelStyle} data-test-subj="serviceMapControlsPopover">
-      {/* Search / Find in page + Go to service */}
+      {/* Search: Cmd+K to open, type to filter, Arrow keys + Enter to go to match */}
       <EuiFormLabel>
         {i18n.translate('xpack.apm.serviceMap.controls.findInPage', {
-          defaultMessage: 'Find in page',
+          defaultMessage: 'Find in page (⌘K)',
         })}
       </EuiFormLabel>
       <EuiSpacer size="xs" />
       <EuiFieldSearch
+        inputRef={(el) => {
+          (searchInputRef as React.MutableRefObject<HTMLInputElement | null>).current = el;
+        }}
         placeholder={i18n.translate('xpack.apm.serviceMap.controls.searchPlaceholder', {
-          defaultMessage: 'Search services...',
+          defaultMessage: 'Search services and dependencies...',
         })}
         value={searchQuery}
         onChange={(e) => setSearchQuery(e.target.value)}
+        onKeyDown={onSearchKeyDown}
         fullWidth
         incremental
         data-test-subj="serviceMapControlsSearch"
+        aria-label={i18n.translate('xpack.apm.serviceMap.controls.searchAriaLabel', {
+          defaultMessage: 'Search map; use Arrow keys to move, Enter to go to selected',
+        })}
       />
       {searchQuery.trim() && searchResults.length > 0 && (
         <>
           <EuiSpacer size="xs" />
           <ul
+            ref={resultsListRef}
             className="eui-yScrollWithShadows"
             style={{
               maxHeight: 200,
@@ -362,13 +440,21 @@ export function ServiceMapControlsPanelContent({
             }}
             data-test-subj="serviceMapControlsSearchResults"
           >
-            {searchResults.slice(0, 20).map((node) => (
-              <li key={node.id}>
+            {searchResults.slice(0, 20).map((node, index) => (
+              <li key={node.id} data-index={index}>
                 <EuiButtonEmpty
                   size="xs"
                   flush="left"
-                  onClick={() => handleGoToService(node)}
+                  onClick={() => handleGoToNode(node)}
                   data-test-subj={`serviceMapGoToService-${node.id}`}
+                  css={
+                    index === selectedIndex
+                      ? css`
+                          background-color: ${euiTheme.colors.backgroundBaseSubdued};
+                          font-weight: 500;
+                        `
+                      : undefined
+                  }
                 >
                   {node.data.label ?? node.id}
                 </EuiButtonEmpty>
@@ -379,8 +465,8 @@ export function ServiceMapControlsPanelContent({
       )}
       {searchQuery.trim() && searchResults.length === 0 && (
         <EuiText size="xs" color="subdued">
-          {i18n.translate('xpack.apm.serviceMap.controls.noServicesFound', {
-            defaultMessage: 'No services found',
+          {i18n.translate('xpack.apm.serviceMap.controls.noResultsFound', {
+            defaultMessage: 'No services or dependencies found',
           })}
         </EuiText>
       )}

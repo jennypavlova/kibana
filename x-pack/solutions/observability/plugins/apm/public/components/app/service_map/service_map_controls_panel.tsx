@@ -160,7 +160,7 @@ export function ServiceMapControlsPanel({
 
   const button = (
     <EuiButtonIcon
-      iconType={isOpen ? 'transitionLeftIn' : 'transitionLeftOut'}
+      iconType="controlsHorizontal"
       color="text"
       onClick={() => setIsOpen((prev) => !prev)}
       aria-label={
@@ -181,7 +181,7 @@ export function ServiceMapControlsPanel({
       button={button}
       isOpen={isOpen}
       closePopover={() => setIsOpen(false)}
-      anchorPosition="leftDown"
+      anchorPosition="leftUp"
       panelPaddingSize="none"
       data-test-subj="serviceMapControlsPopover"
     >

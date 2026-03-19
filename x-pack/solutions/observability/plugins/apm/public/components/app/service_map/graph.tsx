@@ -153,20 +153,10 @@ function GraphInner({
 
   const nodesWithGrouping = useMemo(() => {
     if (controlState?.groupBy) {
-      return applyGroupBy(
-        layoutedNodes,
-        initialEdges,
-        controlState.groupBy,
-        serviceGroupByValues
-      );
+      return applyGroupBy(layoutedNodes, initialEdges, controlState.groupBy, serviceGroupByValues);
     }
     return layoutedNodes;
-  }, [
-    layoutedNodes,
-    initialEdges,
-    controlState?.groupBy,
-    serviceGroupByValues,
-  ]);
+  }, [layoutedNodes, initialEdges, controlState?.groupBy, serviceGroupByValues]);
 
   const [nodes, setNodes, onNodesChange] = useNodesState<ServiceMapNode>(nodesWithGrouping);
   const [edges, setEdges, onEdgesChange] = useEdgesState<ServiceMapEdgeType>(initialEdges);
@@ -346,6 +336,16 @@ function GraphInner({
       z-index: ${euiTheme.levels.content};
       position: relative;
       margin: ${euiTheme.size.s};
+      display: flex;
+      flex-direction: column;
+
+      /* React Flow renders zoom/fit first; pull settings + separator to the top */
+      .apm-service-map-controls-settings {
+        order: -1;
+        width: 100%;
+        display: flex;
+        flex-direction: column;
+      }
 
       button,
       a[data-test-subj='serviceMapViewFullMapButton'] {
@@ -478,13 +478,26 @@ function GraphInner({
             </ControlButton>
           )}
           {controlState && onControlStateChange && (
-            <ServiceMapControlsPanel
-              nodes={nodes}
-              controlState={controlState}
-              onControlStateChange={onControlStateChange}
-              allServiceNodesForCounts={allServiceNodesForCounts}
-              serviceGroupByValues={serviceGroupByValues}
-            />
+            <div
+              className="apm-service-map-controls-settings"
+              data-test-subj="serviceMapControlsSettingsGroup"
+            >
+              <ServiceMapControlsPanel
+                nodes={nodes}
+                controlState={controlState}
+                onControlStateChange={onControlStateChange}
+                allServiceNodesForCounts={allServiceNodesForCounts}
+                serviceGroupByValues={serviceGroupByValues}
+              />
+              <div
+                css={css`
+                  border-top: ${euiTheme.border.width.thin} solid ${euiTheme.colors.lightShade};
+                  width: 100%;
+                `}
+                role="presentation"
+                data-test-subj="serviceMapControlsSeparator"
+              />
+            </div>
           )}
         </Controls>
         {showMinimap && <ServiceMapMinimap />}

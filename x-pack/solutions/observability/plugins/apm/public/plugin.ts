@@ -85,6 +85,8 @@ import type {
 } from '@kbn/discover-shared-plugin/public';
 import type { KqlPluginSetup, KqlPluginStart } from '@kbn/kql/public';
 import type { SLOPublicStart } from '@kbn/slo-plugin/public';
+import type { CPSPluginStart } from '@kbn/cps/public';
+import { ProjectRoutingAccess } from '@kbn/cps-utils';
 import type { ConfigSchema } from '.';
 import {
   getApmEnrollmentFlyoutData,
@@ -175,6 +177,7 @@ export interface ApmPluginStartDeps {
   agentBuilder?: AgentBuilderPluginStart;
   observabilityAgentBuilder?: ObservabilityAgentBuilderPluginPublicStart;
   slo?: SLOPublicStart;
+  cps?: CPSPluginStart;
 }
 
 const applicationsTitle = i18n.translate('xpack.apm.navigation.rootTitle', {
@@ -517,6 +520,8 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
 
   public start(core: CoreStart, plugins: ApmPluginStartDeps) {
     const { fleet, discoverShared } = plugins;
+
+    plugins.cps?.cpsManager?.registerAppAccess('apm', () => ProjectRoutingAccess.EDITABLE);
 
     plugins.observabilityAIAssistant?.service.register(async ({ registerRenderFunction }) => {
       const mod = await import('./assistant_functions');

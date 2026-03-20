@@ -393,8 +393,8 @@ function EmbeddableServicePopoverContent({
             });
           }}
         >
-          {i18n.translate('xpack.apm.serviceMap.embeddablePopover.viewInApm', {
-            defaultMessage: 'View in APM',
+          {i18n.translate('xpack.apm.serviceMap.embeddablePopover.viewService', {
+            defaultMessage: 'View Service',
           })}
         </EuiButton>
       </EuiFlexItem>

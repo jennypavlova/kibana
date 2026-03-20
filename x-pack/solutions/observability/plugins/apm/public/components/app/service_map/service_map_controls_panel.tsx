@@ -292,6 +292,14 @@ export function ServiceMapControlsPanelContent({
     [serviceNodesForCounts]
   );
 
+  const servicesWithActiveAlertsCount = useMemo(
+    () =>
+      serviceNodesForCounts.filter(
+        (n) => isServiceNodeData(n.data) && (n.data.alertsCount ?? 0) > 0
+      ).length,
+    [serviceNodesForCounts]
+  );
+
   const sloStatusComboBoxOptions = useMemo(
     () =>
       SLO_STATUS_OPTIONS.map((opt) => {
@@ -349,7 +357,7 @@ export function ServiceMapControlsPanelContent({
     setSelectedIndex(0);
   }, [searchQuery]);
 
-  const handleGoToNode = useCallback(
+  const centerMapOnNode = useCallback(
     (node: ServiceMapNode) => {
       const { x, y } = getAbsolutePosition(node, nodes);
       const centerX = x + NODE_WIDTH / 2;
@@ -358,9 +366,8 @@ export function ServiceMapControlsPanelContent({
         zoom: CENTER_ZOOM,
         duration: CENTER_ANIMATION_DURATION_MS,
       });
-      onClose();
     },
-    [nodes, setCenter, onClose]
+    [nodes, setCenter]
   );
 
   const onSearchKeyDown = useCallback(
@@ -379,11 +386,14 @@ export function ServiceMapControlsPanelContent({
       if (e.key === 'Enter') {
         e.preventDefault();
         const node = searchResults[selectedIndex];
-        if (node) handleGoToNode(node);
+        if (node) {
+          centerMapOnNode(node);
+          setSelectedIndex((i) => (i + 1) % searchResults.length);
+        }
         return;
       }
     },
-    [searchResults, selectedIndex, handleGoToNode]
+    [searchResults, selectedIndex, centerMapOnNode]
   );
 
   useLayoutEffect(() => {
@@ -402,7 +412,7 @@ export function ServiceMapControlsPanelContent({
 
   return (
     <div css={panelStyle} data-test-subj="serviceMapControlsPopover">
-      {/* Search: Cmd+K to open, type to filter, Arrow keys + Enter to go to match */}
+      {/* Search: Cmd+K to open; Enter cycles centering the map through matches (popover stays open) */}
       <EuiFormLabel>
         {i18n.translate('xpack.apm.serviceMap.controls.findInPage', {
           defaultMessage: 'Find in page (⌘K)',
@@ -423,7 +433,8 @@ export function ServiceMapControlsPanelContent({
         incremental
         data-test-subj="serviceMapControlsSearch"
         aria-label={i18n.translate('xpack.apm.serviceMap.controls.searchAriaLabel', {
-          defaultMessage: 'Search map; use Arrow keys to move, Enter to go to selected',
+          defaultMessage:
+            'Search map; Arrow keys change selection, Enter centers the map on the selection and moves to the next match',
         })}
       />
       {searchQuery.trim() && searchResults.length > 0 && (
@@ -440,12 +451,12 @@ export function ServiceMapControlsPanelContent({
             }}
             data-test-subj="serviceMapControlsSearchResults"
           >
-            {searchResults.slice(0, 20).map((node, index) => (
+            {searchResults.map((node, index) => (
               <li key={node.id} data-index={index}>
                 <EuiButtonEmpty
                   size="xs"
                   flush="left"
-                  onClick={() => handleGoToNode(node)}
+                  onClick={() => centerMapOnNode(node)}
                   data-test-subj={`serviceMapGoToService-${node.id}`}
                   css={
                     index === selectedIndex
@@ -475,9 +486,33 @@ export function ServiceMapControlsPanelContent({
 
       {/* Show only services with active alerts */}
       <EuiSwitch
-        label={i18n.translate('xpack.apm.serviceMap.controls.showOnlyActiveAlerts', {
-          defaultMessage: 'Show only active alerts',
-        })}
+        label={
+          <span
+            css={css`
+              display: inline-flex;
+              align-items: center;
+              gap: ${euiTheme.size.s};
+              flex-wrap: wrap;
+            `}
+          >
+            {i18n.translate('xpack.apm.serviceMap.controls.showOnlyActiveAlerts', {
+              defaultMessage: 'Show only active alerts',
+            })}
+            <EuiBadge
+              color={servicesWithActiveAlertsCount === 0 ? 'subdued' : 'hollow'}
+              title={i18n.translate(
+                'xpack.apm.serviceMap.controls.activeAlertsServiceCountBadgeTitle',
+                {
+                  defaultMessage:
+                    '{count, plural, one {# service with active alerts} other {# services with active alerts}}',
+                  values: { count: servicesWithActiveAlertsCount },
+                }
+              )}
+            >
+              {servicesWithActiveAlertsCount}
+            </EuiBadge>
+          </span>
+        }
         checked={controlState.showOnlyActiveAlerts}
         onChange={(e) => onControlStateChange({ showOnlyActiveAlerts: e.target.checked })}
         data-test-subj="serviceMapShowOnlyActiveAlerts"

@@ -135,8 +135,12 @@
     "@kbn/css-utils",
     "@kbn/agent-builder-plugin",
     "@kbn/controls-constants",
+<<<<<<< cps-testing-enable-apm-and-infra
     "@kbn/cps-utils",
     "@kbn/cps"
+=======
+    "@kbn/es-query-constants"
+>>>>>>> main
   ],
   "exclude": ["target/**/*"]
 }

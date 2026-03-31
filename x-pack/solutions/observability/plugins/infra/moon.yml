@@ -141,6 +141,8 @@ dependsOn:
   - '@kbn/css-utils'
   - '@kbn/agent-builder-plugin'
   - '@kbn/controls-constants'
+  - '@kbn/cps-utils'
+  - '@kbn/cps'
 tags:
   - plugin
   - prod

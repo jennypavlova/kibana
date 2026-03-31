@@ -152,6 +152,8 @@ dependsOn:
   - '@kbn/slo-plugin'
   - '@kbn/slo-schema'
   - '@kbn/shared-ux-column-presets'
+  - '@kbn/cps'
+  - '@kbn/cps-utils'
 tags:
   - plugin
   - prod

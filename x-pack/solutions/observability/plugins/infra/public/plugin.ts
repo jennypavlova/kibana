@@ -309,8 +309,10 @@ export class Plugin implements InfraClientPluginClass {
   }
 
   start(core: InfraClientCoreStart, plugins: InfraClientStartDeps) {
-    plugins.cps?.cpsManager?.registerAppAccess('logs', () => ProjectRoutingAccess.EDITABLE);
-    plugins.cps?.cpsManager?.registerAppAccess('metrics', () => ProjectRoutingAccess.EDITABLE);
+    if (this.config.featureFlags.infraCPSEnabled) {
+      plugins.cps?.cpsManager?.registerAppAccess('logs', () => ProjectRoutingAccess.EDITABLE);
+      plugins.cps?.cpsManager?.registerAppAccess('metrics', () => ProjectRoutingAccess.EDITABLE);
+    }
 
     const { http } = core;
     const inventoryViews = this.inventoryViews.start({ http });

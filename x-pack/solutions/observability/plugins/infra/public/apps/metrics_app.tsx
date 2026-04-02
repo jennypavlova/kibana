@@ -89,6 +89,7 @@ const MetricsApp: React.FC<{
       plugins={plugins}
       theme$={theme$}
       kibanaEnvironment={kibanaEnvironment}
+      infraCPSEnabled={pluginConfig.featureFlags.infraCPSEnabled}
     >
       <CommonInfraProviders
         appName="Metrics UI"

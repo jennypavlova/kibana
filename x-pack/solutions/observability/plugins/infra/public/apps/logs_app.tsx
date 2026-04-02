@@ -15,6 +15,7 @@ import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { type LogsLocatorParams, LOGS_LOCATOR_ID } from '@kbn/logs-shared-plugin/common';
 import { LinkToLogsPage } from '../pages/link_to/link_to_logs';
 import { LogsPage } from '../pages/logs';
+import type { InfraPublicConfig } from '../../common/plugin_config_types';
 import type { InfraClientStartDeps, InfraClientStartExports } from '../types';
 import { CommonInfraProviders, CoreProviders } from './common_providers';
 import { prepareMountElement } from './common_styles';
@@ -25,7 +26,8 @@ export const renderApp = (
   plugins: InfraClientStartDeps,
   pluginStart: InfraClientStartExports,
   isLogsExplorerAccessible: boolean,
-  { element, history, setHeaderActionMenu, theme$ }: AppMountParameters
+  { element, history, setHeaderActionMenu, theme$ }: AppMountParameters,
+  pluginConfig: InfraPublicConfig
 ) => {
   const storage = new Storage(window.localStorage);
 
@@ -41,6 +43,7 @@ export const renderApp = (
       setHeaderActionMenu={setHeaderActionMenu}
       theme$={theme$}
       isLogsExplorerAccessible={isLogsExplorerAccessible}
+      pluginConfig={pluginConfig}
     />,
     element
   );
@@ -59,6 +62,7 @@ const LogsApp: React.FC<{
   storage: Storage;
   theme$: AppMountParameters['theme$'];
   isLogsExplorerAccessible: boolean;
+  pluginConfig: InfraPublicConfig;
 }> = ({
   core,
   history,
@@ -68,11 +72,18 @@ const LogsApp: React.FC<{
   storage,
   theme$,
   isLogsExplorerAccessible,
+  pluginConfig,
 }) => {
   const { logs } = core.application.capabilities;
 
   return (
-    <CoreProviders core={core} pluginStart={pluginStart} plugins={plugins} theme$={theme$}>
+    <CoreProviders
+      core={core}
+      pluginStart={pluginStart}
+      plugins={plugins}
+      theme$={theme$}
+      infraCPSEnabled={pluginConfig.featureFlags.infraCPSEnabled}
+    >
       <CommonInfraProviders
         appName="Logs UI"
         setHeaderActionMenu={setHeaderActionMenu}

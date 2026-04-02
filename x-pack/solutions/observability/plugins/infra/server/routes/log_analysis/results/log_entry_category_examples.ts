@@ -10,6 +10,7 @@ import { createRouteValidationFunction } from '@kbn/io-ts-utils';
 import { logAnalysisResultsV1 } from '../../../../common/http_api';
 
 import type { InfraBackendLibs } from '../../../lib/infra_types';
+import { getProjectRoutingFromRequest } from '../../../lib/helpers/get_project_routing_from_request';
 import { getLogEntryCategoryExamples } from '../../../lib/log_analysis';
 import { isMlPrivilegesError } from '../../../lib/log_analysis/errors';
 import { assertHasInfraMlPlugins } from '../../../utils/request_context';
@@ -62,7 +63,8 @@ export const initGetLogEntryCategoryExamplesRoute = ({
             endTime,
             categoryId,
             exampleCount,
-            resolvedLogView
+            resolvedLogView,
+            getProjectRoutingFromRequest(request)
           );
 
           return response.ok({

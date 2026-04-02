@@ -24,6 +24,7 @@ import type { TimeseriesVisData } from '@kbn/vis-type-timeseries-plugin/server';
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
 import type { TSVBMetricModel } from '@kbn/metrics-data-access-plugin/common';
 import type { InfraConfig, InfraPluginRequestHandlerContext } from '../../../types';
+import { getProjectRoutingFromRequest } from '../../helpers/get_project_routing_from_request';
 import type {
   CallWithRequestParams,
   InfraDatabaseGetIndicesAliasResponse,
@@ -206,6 +207,9 @@ export class KibanaFramework {
       frozenIndicesParams.ignore_throttled = false;
     }
 
+    const projectRouting = getProjectRoutingFromRequest(request);
+    const projectRoutingParams = projectRouting ? { project_routing: projectRouting } : {};
+
     let apiResult;
     switch (endpoint) {
       case 'search':
@@ -215,6 +219,7 @@ export class KibanaFramework {
               {
                 ...params,
                 ...frozenIndicesParams,
+                ...projectRoutingParams,
               } as estypes.SearchRequest,
               { signal }
             ),
@@ -228,6 +233,7 @@ export class KibanaFramework {
               {
                 ...params,
                 ...frozenIndicesParams,
+                ...projectRoutingParams,
               } as estypes.MsearchRequest,
               { signal }
             ),

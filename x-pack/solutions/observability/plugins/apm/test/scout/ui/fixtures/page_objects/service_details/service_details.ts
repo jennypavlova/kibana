@@ -10,13 +10,11 @@ import { testData } from '../..';
 import { DependenciesTab } from './dependencies_tab';
 import { OverviewTab } from './overview_tab';
 
-
 export class ServiceDetailsPage {
   public readonly SERVICE_NAME = 'opbeans-java';
 
   public readonly dependenciesTab: DependenciesTab;
   public readonly overviewTab: OverviewTab;
-
 
   constructor(private readonly page: ScoutPage, private readonly kbnUrl: KibanaUrl) {
     this.dependenciesTab = createLazyPageObject(

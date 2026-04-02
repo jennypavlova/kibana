@@ -38,6 +38,9 @@ export async function getApmEventClient({
       }),
     ]);
 
+    const header = request.headers['x-project-routing'];
+    const projectRouting = Array.isArray(header) ? header[0] : header;
+
     return new APMEventClient({
       esClient: coreContext.elasticsearch.client.asCurrentUser,
       debug: params.query._inspect,
@@ -47,6 +50,7 @@ export async function getApmEventClient({
         includeFrozen: uiSettings.includeFrozen,
         excludedDataTiers: uiSettings.excludedDataTiers,
         inspectableEsQueriesMap,
+        projectRouting,
       },
     });
   });

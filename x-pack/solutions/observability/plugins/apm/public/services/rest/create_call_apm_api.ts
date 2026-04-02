@@ -14,6 +14,7 @@ import type {
 } from '@kbn/server-route-repository';
 import { formatRequest } from '@kbn/server-route-repository-utils';
 import type { InspectResponse } from '@kbn/observability-plugin/typings/common';
+import type { ICPSManager } from '@kbn/cps-utils';
 import type { FetchOptions } from '../../../common/fetch_options';
 import type { CallApi } from './call_api';
 import { callApi } from './call_api';
@@ -53,6 +54,12 @@ export let callApmApi: APMClient = () => {
   throw new Error('callApmApi has to be initialized before used. Call createCallApmApi first.');
 };
 
+let cpsManagerRef: ICPSManager | undefined;
+
+export function setApmApiCpsManager(cpsManager: ICPSManager | undefined) {
+  cpsManagerRef = cpsManager;
+}
+
 export function createCallApmApi(core: CoreStart | CoreSetup) {
   callApmApi = ((endpoint, options) => {
     const { params } = options as unknown as {
@@ -60,6 +67,7 @@ export function createCallApmApi(core: CoreStart | CoreSetup) {
     };
 
     const { method, pathname, version } = formatRequest(endpoint, params?.path);
+    const projectRouting = cpsManagerRef?.getProjectRouting();
 
     return callApi(core, {
       ...options,
@@ -68,6 +76,10 @@ export function createCallApmApi(core: CoreStart | CoreSetup) {
       body: params?.body,
       query: params?.query,
       version,
+      headers: {
+        ...(options as any)?.headers,
+        ...(projectRouting ? { 'x-project-routing': projectRouting } : {}),
+      },
     } as unknown as Parameters<CallApi>[1]);
   }) as APMClient;
 }

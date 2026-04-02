@@ -207,7 +207,14 @@ export class Plugin implements InfraClientPluginClass {
         );
 
         const { renderApp } = await import('./apps/logs_app');
-        return renderApp(coreStart, plugins, pluginStart, isLogsExplorerAccessible, params);
+        return renderApp(
+          coreStart,
+          plugins,
+          pluginStart,
+          isLogsExplorerAccessible,
+          params,
+          this.config
+        );
       },
     });
 

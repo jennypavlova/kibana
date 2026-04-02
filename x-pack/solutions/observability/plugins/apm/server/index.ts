@@ -79,7 +79,7 @@ const configSchema = schema.object({
     profilingIntegrationAvailable: schema.boolean({ defaultValue: false }),
     ruleFormV2Enabled: schema.boolean({ defaultValue: false }),
     // to be removed after cps is fully enabled
-    apmCPSEnabled: schema.boolean({ defaultValue: true }),
+    apmCPSEnabled: schema.boolean({ defaultValue: false }),
   }),
   serverless: schema.object({
     enabled: offeringBasedSchema({

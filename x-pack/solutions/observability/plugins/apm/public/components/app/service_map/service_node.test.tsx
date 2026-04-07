@@ -29,6 +29,18 @@ jest.mock('@kbn/custom-icons', () => ({
   getAgentIcon: jest.fn(() => 'mock-icon-url.svg'),
 }));
 
+jest.mock('../../../context/apm_plugin/use_apm_plugin_context', () => ({
+  useApmPluginContext: () => ({
+    core: {
+      application: {
+        capabilities: {
+          slo: { read: true },
+        },
+      },
+    },
+  }),
+}));
+
 // Mock getServiceHealthStatusColor
 jest.mock('../../../../common/service_health_status', () => ({
   ...jest.requireActual('../../../../common/service_health_status'),
@@ -142,6 +154,23 @@ describe('ServiceNode', () => {
       });
       renderServiceNode(data);
       expect(screen.getByText('Test Service')).toBeInTheDocument();
+    });
+  });
+
+  describe('SLO badge (service map only)', () => {
+    it('does not render SLO badge when status is noSLOs', () => {
+      renderServiceNode(
+        createServiceNodeData({ sloStatus: 'noSLOs', sloCount: 0 })
+      );
+      expect(screen.queryByTestId('apmSloBadge')).not.toBeInTheDocument();
+      expect(screen.queryByText('No SLOs')).not.toBeInTheDocument();
+    });
+
+    it('renders SLO badge for healthy status', () => {
+      renderServiceNode(
+        createServiceNodeData({ sloStatus: 'healthy', sloCount: 2 })
+      );
+      expect(screen.getByTestId('apmSloBadge')).toBeInTheDocument();
     });
   });
 });

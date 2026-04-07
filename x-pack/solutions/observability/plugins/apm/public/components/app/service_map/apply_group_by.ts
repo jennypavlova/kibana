@@ -5,14 +5,15 @@
  * 2.0.
  */
 
-import type { ServiceMapNode, ServiceMapEdge, ServiceNodeData, SubflowGroupNodeData } from '../../../../common/service_map';
+import type {
+  ServiceMapNode,
+  ServiceMapEdge,
+  ServiceNodeData,
+  SubflowGroupNodeData,
+} from '../../../../common/service_map';
 import { isServiceNodeData } from '../../../../common/service_map';
 import { NODE_WIDTH, NODE_HEIGHT } from './constants';
-import {
-  SERVICE_NAME,
-  SERVICE_ENVIRONMENT,
-  AGENT_NAME,
-} from '../../../../common/es_fields/apm';
+import { SERVICE_NAME, SERVICE_ENVIRONMENT, AGENT_NAME } from '../../../../common/es_fields/apm';
 
 const GROUP_PADDING = 40;
 /** Minimum gap between group bounding boxes so groups do not overlap. */

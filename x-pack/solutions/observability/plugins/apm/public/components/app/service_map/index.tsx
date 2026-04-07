@@ -162,10 +162,7 @@ export function ServiceMap({
   );
 
   const serviceNamesForGroupBy = useMemo(
-    () =>
-      filteredNodes
-        .filter((n) => n.type === 'service')
-        .map((n) => n.id),
+    () => filteredNodes.filter((n) => n.type === 'service').map((n) => n.id),
     [filteredNodes]
   );
 
@@ -307,9 +304,7 @@ export function ServiceMap({
               onToggleFullscreen={onToggleFullscreen}
               fullMapHref={fullMapHref}
               controlState={controlState}
-              onControlStateChange={(update) =>
-                setControlState((prev) => ({ ...prev, ...update }))
-              }
+              onControlStateChange={(update) => setControlState((prev) => ({ ...prev, ...update }))}
               serviceGroupByValues={serviceGroupByValues}
               allServiceNodesForCounts={allServiceNodesForCounts}
             />

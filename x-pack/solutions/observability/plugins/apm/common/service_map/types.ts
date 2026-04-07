@@ -310,9 +310,7 @@ export function isServiceNode(node: ServiceMapNode): node is Node<ServiceNodeDat
  */
 export function isExternalNode(node: ServiceMapNode): node is Node<DependencyNodeData> {
   return (
-    node.data.isService === false &&
-    !('isGrouped' in node.data) &&
-    !('isSubflowGroup' in node.data)
+    node.data.isService === false && !('isGrouped' in node.data) && !('isSubflowGroup' in node.data)
   );
 }
 

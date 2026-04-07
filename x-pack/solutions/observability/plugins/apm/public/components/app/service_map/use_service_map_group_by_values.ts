@@ -36,11 +36,7 @@ export function useServiceMapGroupByValues({
 
   const fetcherResult = useFetcher(
     (callApmApi) => {
-      if (
-        !config.serviceMapEnabled ||
-        !groupByField ||
-        serviceNames.length === 0
-      ) {
+      if (!config.serviceMapEnabled || !groupByField || serviceNames.length === 0) {
         return;
       }
 
@@ -57,15 +53,7 @@ export function useServiceMapGroupByValues({
         },
       });
     },
-    [
-      config.serviceMapEnabled,
-      groupByField,
-      serviceNames.join(','),
-      start,
-      end,
-      environment,
-      kuery,
-    ]
+    [config.serviceMapEnabled, groupByField, serviceNames.join(','), start, end, environment, kuery]
   );
 
   const { data, status } = fetcherResult;

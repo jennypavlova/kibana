@@ -159,17 +159,13 @@ describe('ServiceNode', () => {
 
   describe('SLO badge (service map only)', () => {
     it('does not render SLO badge when status is noSLOs', () => {
-      renderServiceNode(
-        createServiceNodeData({ sloStatus: 'noSLOs', sloCount: 0 })
-      );
+      renderServiceNode(createServiceNodeData({ sloStatus: 'noSLOs', sloCount: 0 }));
       expect(screen.queryByTestId('apmSloBadge')).not.toBeInTheDocument();
       expect(screen.queryByText('No SLOs')).not.toBeInTheDocument();
     });
 
     it('renders SLO badge for healthy status', () => {
-      renderServiceNode(
-        createServiceNodeData({ sloStatus: 'healthy', sloCount: 2 })
-      );
+      renderServiceNode(createServiceNodeData({ sloStatus: 'healthy', sloCount: 2 }));
       expect(screen.getByTestId('apmSloBadge')).toBeInTheDocument();
     });
   });

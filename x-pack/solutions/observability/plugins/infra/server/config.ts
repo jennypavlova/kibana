@@ -75,7 +75,7 @@ export const config: PluginConfigDescriptor<InfraConfig> = {
       profilingEnabled: schema.boolean({ defaultValue: false }),
       ruleFormV2Enabled: schema.boolean({ defaultValue: false }),
       // to be removed after cps is fully enabled
-      infraCPSEnabled: schema.boolean({ defaultValue: false }),
+      infraCPSEnabled: schema.boolean({ defaultValue: true }),
     }),
   }),
   deprecations: () => [sourceFieldsMessageDeprecation],

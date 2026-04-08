@@ -129,12 +129,22 @@ export class ServiceMapPage {
     return this.serviceMapGraph.locator(`[data-id="${nodeId}"]`);
   }
 
+  /** Wrapper for a service node (icon, badges row, label). `data.id` on the map matches the service name in tests. */
+  getServiceNodeRoot(serviceName: string) {
+    return this.serviceMapGraph.getByTestId(`serviceMapNode-service-${serviceName}`);
+  }
+
   /**
-   * Service nodes are rendered as role="button" with aria-label like "Service: {serviceName}. Agent: {agentName}".
-   * data.label (service name) has no regex-special chars in our test data; use string for substring match.
+   * The clickable/focusable service circle only. Prefer this over role+name: when shown, violated/degrading SLO
+   * badges can also be buttons whose accessible name includes the service name, so `getByRole('button', { name })`
+   * is ambiguous.
    */
   getServiceNode(serviceName: string) {
-    return this.serviceMapGraph.getByRole('button', { name: serviceName });
+    return this.getServiceNodeRoot(serviceName).getByTestId('serviceMapNodeServiceCircle');
+  }
+
+  getServiceNodeAlertsBadge(serviceName: string) {
+    return this.getServiceNodeRoot(serviceName).getByTestId('serviceMapNodeAlertsBadge');
   }
 
   async waitForNodeToLoad(nodeId: string) {
@@ -205,12 +215,17 @@ export class ServiceMapPage {
   async focusNodeAndWaitForFocus(nodeId: string) {
     await this.waitForNodeToLoad(nodeId);
     const node = this.getNodeById(nodeId);
-    const button = node.locator('[role="button"]');
-    await button.focus();
+    const circle = node.getByTestId('serviceMapNodeServiceCircle');
+    if ((await circle.count()) > 0) {
+      await circle.focus();
+    } else {
+      await node.getByRole('button').focus();
+    }
     await this.page.waitForFunction(
       (id) => {
         const nodeEl = document.querySelector(`[data-id="${id}"]`);
-        const buttonEl = nodeEl?.querySelector('[role="button"]');
+        const circleEl = nodeEl?.querySelector('[data-test-subj="serviceMapNodeServiceCircle"]');
+        const buttonEl = circleEl ?? nodeEl?.querySelector('[role="button"]');
         return (
           buttonEl === document.activeElement ||
           nodeEl === document.activeElement ||
@@ -256,8 +271,12 @@ export class ServiceMapPage {
   async openPopoverWithKeyboard(nodeId: string, key: 'Enter' | ' ') {
     await this.focusNodeAndWaitForFocus(nodeId);
     const node = this.getNodeById(nodeId);
-    const button = node.locator('[role="button"]');
-    await button.press(key === ' ' ? 'Space' : key);
+    const circle = node.getByTestId('serviceMapNodeServiceCircle');
+    if ((await circle.count()) > 0) {
+      await circle.press(key === ' ' ? 'Space' : key);
+    } else {
+      await node.getByRole('button').press(key === ' ' ? 'Space' : key);
+    }
     await this.waitForPopoverToBeVisible();
   }
 

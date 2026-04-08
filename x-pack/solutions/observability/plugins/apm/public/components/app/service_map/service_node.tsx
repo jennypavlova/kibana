@@ -155,7 +155,9 @@ export const ServiceNode = memo(
     // `alerting:show` is enforced when opening linked views; badge is display-only here).
     const showAlertsBadge = data.alertsCount !== undefined && data.alertsCount > 0;
 
-    const showSloBadge = canReadSlos && data.sloStatus !== undefined && data.sloStatus !== 'noSLOs';
+    // Map: only surface SLOs that need attention (inventory still shows full status, including healthy).
+    const showSloBadge =
+      canReadSlos && (data.sloStatus === 'violated' || data.sloStatus === 'degrading');
 
     const alertsTooltip = i18n.translate('xpack.apm.serviceMap.serviceNode.alertsBadgeTooltip', {
       defaultMessage: '{count, plural, one {# active alert} other {# active alerts}}',
@@ -173,6 +175,7 @@ export const ServiceNode = memo(
         <EuiFlexItem grow={false} css={containerStyles}>
           <Handle type="target" position={targetPosition ?? Position.Left} css={handleStyles} />
           <div
+            data-test-subj="serviceMapNodeServiceCircle"
             css={circleStyles}
             role="button"
             tabIndex={0}

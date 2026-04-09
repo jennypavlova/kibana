@@ -121,8 +121,57 @@ export class ServiceMapPage {
     await this.zoomOutBtnControl.click();
   }
 
+  /**
+   * After fit view, the map animates; merging alert/SLO badges can also re-run layout + fitView (see graph.tsx).
+   * Wait briefly so clicks target the final node positions.
+   */
+  async settleServiceMapLayout() {
+    await this.serviceMapGraph.waitFor({ state: 'visible' });
+    await new Promise<void>((resolve) => setTimeout(resolve, 800));
+  }
+
   async clickFitView() {
     await this.fitViewBtn.click();
+    await this.settleServiceMapLayout();
+  }
+
+  /**
+   * Click handlers can no-op while nodes remount or the viewport is still animating after fit view / badge merge.
+   * Retries: dismiss, settle, click, until popover content is visible.
+   */
+  private async clickUntilPopoverVisible(clickFn: () => Promise<void>) {
+    const maxAttempts = 4;
+    for (let attempt = 0; attempt < maxAttempts; attempt++) {
+      await this.dismissPopoverIfOpen();
+      await this.settleServiceMapLayout();
+      try {
+        await clickFn();
+        await this.serviceMapPopoverContent.waitFor({ state: 'visible', timeout: 15000 });
+        return;
+      } catch (err) {
+        if (attempt === maxAttempts - 1) {
+          throw err;
+        }
+      }
+    }
+  }
+
+  async openServiceNodePopover(serviceName: string) {
+    await this.clickUntilPopoverVisible(async () => {
+      await this.clickServiceNode(serviceName);
+    });
+  }
+
+  async openNodePopover(nodeId: string) {
+    await this.clickUntilPopoverVisible(async () => {
+      await this.clickNode(nodeId);
+    });
+  }
+
+  async openEdgePopover(edgeId: string) {
+    await this.clickUntilPopoverVisible(async () => {
+      await this.clickEdge(edgeId);
+    });
   }
 
   getNodeById(nodeId: string) {
@@ -152,18 +201,45 @@ export class ServiceMapPage {
   }
 
   async waitForServiceNodeToLoad(serviceName: string) {
-    await this.getServiceNode(serviceName).waitFor({
-      state: 'visible',
-      timeout: EXTENDED_TIMEOUT,
-    });
+    const circle = this.getServiceNode(serviceName);
+    await circle.waitFor({ state: 'attached', timeout: EXTENDED_TIMEOUT });
+    await circle.waitFor({ state: 'visible', timeout: EXTENDED_TIMEOUT });
   }
 
+  /**
+   * Stable handle on the edge stroke path (see `ServiceMapEdge` + `BaseEdge`); avoids the React Flow
+   * wrapper `[data-id]` which can detach briefly while the graph re-renders after fit view / badge merge.
+   */
   getEdgeById(edgeId: string) {
-    return this.serviceMapGraph.locator(`[data-id="${edgeId}"]`);
+    return this.serviceMapGraph.getByTestId(`serviceMapEdge-${edgeId}`);
   }
 
   async waitForEdgeToLoad(edgeId: string) {
-    await this.getEdgeById(edgeId).waitFor({ state: 'visible', timeout: EXTENDED_TIMEOUT });
+    const edge = this.getEdgeById(edgeId);
+    await edge.waitFor({ state: 'attached', timeout: EXTENDED_TIMEOUT });
+    await edge.waitFor({ state: 'visible', timeout: EXTENDED_TIMEOUT });
+  }
+
+  /**
+   * Nodes and edges can unmount/remount while the map settles (fit view animation, badge API merge).
+   * Re-resolve locators each attempt to avoid "not attached to the DOM" flakes.
+   */
+  private async runWithDomRetry<T>(
+    description: string,
+    run: () => Promise<T>,
+    timeoutMs: number = EXTENDED_TIMEOUT
+  ): Promise<T> {
+    const start = Date.now();
+    let lastError: Error | undefined;
+    while (Date.now() - start < timeoutMs) {
+      try {
+        return await run();
+      } catch (e) {
+        lastError = e instanceof Error ? e : new Error(String(e));
+        await new Promise((resolve) => setTimeout(resolve, 200));
+      }
+    }
+    throw lastError ?? new Error(`runWithDomRetry failed: ${description}`);
   }
 
   /**
@@ -172,36 +248,46 @@ export class ServiceMapPage {
    * passes through to the pane and never opens the popover.
    */
   async clickNode(nodeId: string) {
-    const node = this.getNodeById(nodeId);
-    await node.scrollIntoViewIfNeeded();
-    await node.waitFor({ state: 'visible', timeout: EXTENDED_TIMEOUT });
-    const circle = node.getByTestId('serviceMapNodeServiceCircle');
-    const diamond = node.getByTestId('serviceMapNodeDiamondHit');
-    if ((await circle.count()) > 0) {
-      await circle.scrollIntoViewIfNeeded();
-      await circle.click({ force: true });
-    } else if ((await diamond.count()) > 0) {
-      await diamond.scrollIntoViewIfNeeded();
-      await diamond.click({ force: true });
-    } else {
-      await node.click({ force: true });
-    }
+    await this.runWithDomRetry(`clickNode ${nodeId}`, async () => {
+      const node = this.getNodeById(nodeId);
+      await node.waitFor({ state: 'attached', timeout: 10000 });
+      await node.waitFor({ state: 'visible', timeout: 10000 });
+      const circle = node.getByTestId('serviceMapNodeServiceCircle');
+      const diamond = node.getByTestId('serviceMapNodeDiamondHit');
+      if ((await circle.count()) > 0) {
+        const hit = circle;
+        await hit.scrollIntoViewIfNeeded();
+        await hit.click({ force: true, timeout: 15000 });
+      } else if ((await diamond.count()) > 0) {
+        const hit = diamond;
+        await hit.scrollIntoViewIfNeeded();
+        await hit.click({ force: true, timeout: 15000 });
+      } else {
+        await node.scrollIntoViewIfNeeded();
+        await node.click({ force: true, timeout: 15000 });
+      }
+    });
   }
 
   /** Click a service node by its service name (uses role + aria-label). */
   async clickServiceNode(serviceName: string) {
-    const button = this.getServiceNode(serviceName);
-    await button.scrollIntoViewIfNeeded();
-    await button.waitFor({ state: 'visible', timeout: EXTENDED_TIMEOUT });
-    await button.click({ force: true });
+    await this.runWithDomRetry(`clickServiceNode ${serviceName}`, async () => {
+      const button = this.getServiceNode(serviceName);
+      await button.waitFor({ state: 'attached', timeout: 10000 });
+      await button.waitFor({ state: 'visible', timeout: 10000 });
+      await button.scrollIntoViewIfNeeded();
+      await button.click({ force: true, timeout: 15000 });
+    });
   }
 
   async clickEdge(edgeId: string) {
-    const edge = this.getEdgeById(edgeId);
-    await edge.scrollIntoViewIfNeeded();
-    await edge.waitFor({ state: 'visible', timeout: EXTENDED_TIMEOUT });
-    await edge.focus();
-    await edge.click({ force: true });
+    await this.runWithDomRetry(`clickEdge ${edgeId}`, async () => {
+      const edge = this.getEdgeById(edgeId);
+      await edge.waitFor({ state: 'attached', timeout: 10000 });
+      await edge.waitFor({ state: 'visible', timeout: 10000 });
+      await edge.scrollIntoViewIfNeeded();
+      await edge.click({ force: true, timeout: 15000 });
+    });
   }
 
   async waitForPopoverToBeVisible() {

@@ -93,6 +93,7 @@ function createServiceMapAlertBadgeTest(alertIndex: string) {
       });
       await serviceMapPage.waitForMapToLoad();
       await serviceMapPage.dismissPopoverIfOpen();
+      await serviceMapPage.settleServiceMapLayout();
       await serviceMapPage.clickFitView();
       await serviceMapPage.waitForServiceNodeToLoad(SERVICE_OPBEANS_JAVA);
       const badge = serviceMapPage.getServiceNodeAlertsBadge(SERVICE_OPBEANS_JAVA);

@@ -87,6 +87,7 @@ import type { KqlPluginSetup, KqlPluginStart } from '@kbn/kql/public';
 import type { SLOPublicStart } from '@kbn/slo-plugin/public';
 import type { CPSPluginStart } from '@kbn/cps/public';
 import { ProjectRoutingAccess } from '@kbn/cps-utils';
+import { setCpsManager } from './services/rest/create_call_apm_api';
 import type { ConfigSchema } from '.';
 import {
   getApmEnrollmentFlyoutData,
@@ -524,6 +525,10 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
 
     if (config.featureFlags.apmCPSEnabled) {
       plugins.cps?.cpsManager?.registerAppAccess('apm', () => ProjectRoutingAccess.EDITABLE);
+
+      if (plugins.cps?.cpsManager) {
+        setCpsManager(plugins.cps.cpsManager);
+      }
     }
 
     plugins.observabilityAIAssistant?.service.register(async ({ registerRenderFunction }) => {

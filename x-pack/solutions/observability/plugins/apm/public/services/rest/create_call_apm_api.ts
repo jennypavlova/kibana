@@ -15,6 +15,7 @@ import type {
 import { formatRequest } from '@kbn/server-route-repository-utils';
 import type { InspectResponse } from '@kbn/observability-plugin/typings/common';
 import type { ICPSManager } from '@kbn/cps-utils';
+import { createGetterSetter } from '@kbn/kibana-utils-plugin/public';
 import type { FetchOptions } from '../../../common/fetch_options';
 import type { CallApi } from './call_api';
 import { callApi } from './call_api';
@@ -54,14 +55,16 @@ export let callApmApi: APMClient = () => {
   throw new Error('callApmApi has to be initialized before used. Call createCallApmApi first.');
 };
 
-export function createCallApmApi(core: CoreStart | CoreSetup, cpsManager?: ICPSManager) {
+export const [getCpsManager, setCpsManager] = createGetterSetter<ICPSManager>('CpsManager', false);
+
+export function createCallApmApi(core: CoreStart | CoreSetup) {
   callApmApi = ((endpoint, options) => {
     const { params } = options as unknown as {
       params?: Partial<Record<string, any>>;
     };
 
     const { method, pathname, version } = formatRequest(endpoint, params?.path);
-    const projectRouting = cpsManager?.getProjectRouting();
+    const projectRouting = getCpsManager()?.getProjectRouting();
 
     return callApi(core, {
       ...options,

@@ -56,11 +56,11 @@ export let callApmApi: APMClient = () => {
 
 let cpsManagerRef: ICPSManager | undefined;
 
-export function setApmApiCpsManager(cpsManager: ICPSManager | undefined) {
-  cpsManagerRef = cpsManager;
-}
+export function createCallApmApi(core: CoreStart | CoreSetup, cpsManager?: ICPSManager) {
+  if (cpsManager) {
+    cpsManagerRef = cpsManager;
+  }
 
-export function createCallApmApi(core: CoreStart | CoreSetup) {
   callApmApi = ((endpoint, options) => {
     const { params } = options as unknown as {
       params?: Partial<Record<string, any>>;

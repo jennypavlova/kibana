@@ -72,7 +72,7 @@ export const renderApp = ({
   // render APM feedback link in global help menu
   setHelpExtension(coreStart);
   setReadonlyBadge(coreStart);
-  createCallApmApi(coreStart);
+  createCallApmApi(coreStart, pluginsStart.cps?.cpsManager);
 
   // add .kbnAppWrappers class to root element
   element.classList.add(APP_WRAPPER_CLASS);

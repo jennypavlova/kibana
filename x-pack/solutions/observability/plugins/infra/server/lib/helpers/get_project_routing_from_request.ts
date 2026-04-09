@@ -15,6 +15,6 @@ export function getProjectRoutingFromRequest(request?: KibanaRequest): string | 
   if (!request) {
     return undefined;
   }
-  const header = request.headers['x-project-routing'];
-  return Array.isArray(header) ? header[0] : header;
+  const rawProjectRouting = request.headers['x-project-routing'];
+  return Array.isArray(rawProjectRouting) ? rawProjectRouting[0] : rawProjectRouting;
 }

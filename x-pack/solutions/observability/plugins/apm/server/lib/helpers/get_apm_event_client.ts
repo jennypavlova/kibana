@@ -38,8 +38,10 @@ export async function getApmEventClient({
       }),
     ]);
 
-    const header = request.headers['x-project-routing'];
-    const projectRouting = Array.isArray(header) ? header[0] : header;
+    const rawProjectRouting = request.headers['x-project-routing'];
+    const projectRouting = Array.isArray(rawProjectRouting)
+      ? rawProjectRouting[0]
+      : rawProjectRouting;
 
     return new APMEventClient({
       esClient: coreContext.elasticsearch.client.asCurrentUser,

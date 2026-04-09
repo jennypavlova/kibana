@@ -524,10 +524,6 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
 
     if (config.featureFlags.apmCPSEnabled) {
       plugins.cps?.cpsManager?.registerAppAccess('apm', () => ProjectRoutingAccess.EDITABLE);
-
-      import('./services/rest/create_call_apm_api').then(({ setApmApiCpsManager }) => {
-        setApmApiCpsManager(plugins.cps?.cpsManager);
-      });
     }
 
     plugins.observabilityAIAssistant?.service.register(async ({ registerRenderFunction }) => {

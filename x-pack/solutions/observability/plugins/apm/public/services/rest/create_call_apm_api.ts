@@ -54,20 +54,14 @@ export let callApmApi: APMClient = () => {
   throw new Error('callApmApi has to be initialized before used. Call createCallApmApi first.');
 };
 
-let cpsManagerRef: ICPSManager | undefined;
-
 export function createCallApmApi(core: CoreStart | CoreSetup, cpsManager?: ICPSManager) {
-  if (cpsManager) {
-    cpsManagerRef = cpsManager;
-  }
-
   callApmApi = ((endpoint, options) => {
     const { params } = options as unknown as {
       params?: Partial<Record<string, any>>;
     };
 
     const { method, pathname, version } = formatRequest(endpoint, params?.path);
-    const projectRouting = cpsManagerRef?.getProjectRouting();
+    const projectRouting = cpsManager?.getProjectRouting();
 
     return callApi(core, {
       ...options,

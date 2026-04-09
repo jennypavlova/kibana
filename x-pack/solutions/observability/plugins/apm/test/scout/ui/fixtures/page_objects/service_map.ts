@@ -166,12 +166,26 @@ export class ServiceMapPage {
     await this.getEdgeById(edgeId).waitFor({ state: 'visible', timeout: EXTENDED_TIMEOUT });
   }
 
+  /**
+   * Clicks the node's real hit target (service circle or dependency diamond), not the React Flow
+   * wrapper. The wrapper's center often lands on `NodeLabel` (`pointer-events: none`), so the click
+   * passes through to the pane and never opens the popover.
+   */
   async clickNode(nodeId: string) {
     const node = this.getNodeById(nodeId);
     await node.scrollIntoViewIfNeeded();
     await node.waitFor({ state: 'visible', timeout: EXTENDED_TIMEOUT });
-    await node.focus();
-    await node.click({ force: true });
+    const circle = node.getByTestId('serviceMapNodeServiceCircle');
+    const diamond = node.getByTestId('serviceMapNodeDiamondHit');
+    if ((await circle.count()) > 0) {
+      await circle.scrollIntoViewIfNeeded();
+      await circle.click({ force: true });
+    } else if ((await diamond.count()) > 0) {
+      await diamond.scrollIntoViewIfNeeded();
+      await diamond.click({ force: true });
+    } else {
+      await node.click({ force: true });
+    }
   }
 
   /** Click a service node by its service name (uses role + aria-label). */
@@ -216,8 +230,11 @@ export class ServiceMapPage {
     await this.waitForNodeToLoad(nodeId);
     const node = this.getNodeById(nodeId);
     const circle = node.getByTestId('serviceMapNodeServiceCircle');
+    const diamond = node.getByTestId('serviceMapNodeDiamondHit');
     if ((await circle.count()) > 0) {
       await circle.focus();
+    } else if ((await diamond.count()) > 0) {
+      await diamond.focus();
     } else {
       await node.getByRole('button').focus();
     }
@@ -225,7 +242,8 @@ export class ServiceMapPage {
       (id) => {
         const nodeEl = document.querySelector(`[data-id="${id}"]`);
         const circleEl = nodeEl?.querySelector('[data-test-subj="serviceMapNodeServiceCircle"]');
-        const buttonEl = circleEl ?? nodeEl?.querySelector('[role="button"]');
+        const diamondEl = nodeEl?.querySelector('[data-test-subj="serviceMapNodeDiamondHit"]');
+        const buttonEl = circleEl ?? diamondEl ?? nodeEl?.querySelector('[role="button"]');
         return (
           buttonEl === document.activeElement ||
           nodeEl === document.activeElement ||
@@ -272,8 +290,11 @@ export class ServiceMapPage {
     await this.focusNodeAndWaitForFocus(nodeId);
     const node = this.getNodeById(nodeId);
     const circle = node.getByTestId('serviceMapNodeServiceCircle');
+    const diamond = node.getByTestId('serviceMapNodeDiamondHit');
     if ((await circle.count()) > 0) {
       await circle.press(key === ' ' ? 'Space' : key);
+    } else if ((await diamond.count()) > 0) {
+      await diamond.press(key === ' ' ? 'Space' : key);
     } else {
       await node.getByRole('button').press(key === ' ' ? 'Space' : key);
     }

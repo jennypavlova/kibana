@@ -7,10 +7,10 @@
 
 import Boom from '@hapi/boom';
 import { createRouteValidationFunction } from '@kbn/io-ts-utils';
+import { getProjectRoutingFromRequest } from '@kbn/observability-utils-server/es/get_project_routing_from_request';
 import { logAnalysisResultsV1 } from '../../../../common/http_api';
 
 import type { InfraBackendLibs } from '../../../lib/infra_types';
-import { getProjectRoutingFromRequest } from '../../../lib/helpers/get_project_routing_from_request';
 import { getLogEntryCategoryExamples } from '../../../lib/log_analysis';
 import { isMlPrivilegesError } from '../../../lib/log_analysis/errors';
 import { assertHasInfraMlPlugins } from '../../../utils/request_context';

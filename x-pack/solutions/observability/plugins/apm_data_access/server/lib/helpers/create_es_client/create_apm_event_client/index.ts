@@ -335,6 +335,7 @@ export class APMEventClient {
     const requestParams: Omit<APMEventTermsEnumRequest, 'apm'> & { index: string } = {
       ...omit(params, 'apm'),
       index: index.join(','),
+      ...(this.projectRouting ? { project_routing: this.projectRouting } : {}),
       index_filter: getDataTierFilterCombined({
         filter: params.index_filter,
         excludedDataTiers: this.excludedDataTiers,

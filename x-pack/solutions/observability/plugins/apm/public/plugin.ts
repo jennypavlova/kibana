@@ -86,8 +86,9 @@ import type {
 import type { KqlPluginSetup, KqlPluginStart } from '@kbn/kql/public';
 import type { SLOPublicStart } from '@kbn/slo-plugin/public';
 import type { CPSPluginStart } from '@kbn/cps/public';
+import type { ICPSManager } from '@kbn/cps-utils';
 import { ProjectRoutingAccess } from '@kbn/cps-utils';
-import { setCpsManager } from './services/rest/create_call_apm_api';
+import { createGetterSetter } from '@kbn/kibana-utils-plugin/public';
 import type { ConfigSchema } from '.';
 import {
   getApmEnrollmentFlyoutData,
@@ -133,6 +134,13 @@ export interface ApmServices {
   securityService: SecurityServiceStart;
   telemetry: ITelemetryClient;
 }
+
+export interface ApmInternalServices {
+  cpsManager?: ICPSManager;
+}
+
+export const [getApmInternalServices, setApmInternalServices] =
+  createGetterSetter<ApmInternalServices>('ApmInternalServices', false);
 
 export interface ApmPluginStartDeps {
   alerting?: AlertingPluginPublicStart;
@@ -525,11 +533,11 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
 
     if (config.featureFlags.apmCPSEnabled) {
       plugins.cps?.cpsManager?.registerAppAccess('apm', () => ProjectRoutingAccess.EDITABLE);
-
-      if (plugins.cps?.cpsManager) {
-        setCpsManager(plugins.cps.cpsManager);
-      }
     }
+
+    setApmInternalServices({
+      cpsManager: plugins.cps?.cpsManager,
+    });
 
     plugins.observabilityAIAssistant?.service.register(async ({ registerRenderFunction }) => {
       const mod = await import('./assistant_functions');

@@ -20,27 +20,20 @@ import type { InfraClientStartServicesAccessor } from './types';
 
 export const createMetricsHasData =
   (getStartServices: InfraClientStartServicesAccessor) => async () => {
-    const [coreServices, pluginsStart] = await getStartServices();
+    const [coreServices] = await getStartServices();
     const { http } = coreServices;
-    const projectRouting = pluginsStart.cps?.cpsManager?.getProjectRouting();
     const results = await http.get<{
       hasData: boolean;
       configuration: InfraStaticSourceConfiguration;
-    }>('/api/metrics/source/default/hasData', {
-      ...(projectRouting ? { headers: { 'x-project-routing': projectRouting } } : {}),
-    });
+    }>('/api/metrics/source/default/hasData');
     return { hasData: results.hasData, indices: results.configuration.metricAlias! };
   };
 
 export const createMetricsFetchData =
   (getStartServices: InfraClientStartServicesAccessor) =>
   async ({ absoluteTime, intervalString }: FetchDataParams): Promise<MetricsFetchDataResponse> => {
-    const [coreServices, pluginsStart] = await getStartServices();
+    const [coreServices] = await getStartServices();
     const { http } = coreServices;
-    const projectRouting = pluginsStart.cps?.cpsManager?.getProjectRouting();
-    const projectRoutingHeaders = projectRouting
-      ? { headers: { 'x-project-routing': projectRouting } }
-      : {};
 
     const makeRequest = async (overrides: Partial<TopNodesRequest> = {}) => {
       const { start, end } = absoluteTime;
@@ -57,7 +50,6 @@ export const createMetricsFetchData =
       };
       const results = await http.post<TopNodesResponse>('/api/metrics/overview/top', {
         body: JSON.stringify(overviewRequest),
-        ...projectRoutingHeaders,
       });
       return {
         appLink: `/app/metrics/inventory?waffleTime=(currentTime:${end},isAutoReloading:!f)`,

@@ -136,7 +136,6 @@
     "@kbn/agent-builder-plugin",
     "@kbn/controls-constants",
     "@kbn/cps-utils",
-    "@kbn/cps-server-utils",
     "@kbn/es-query-constants",
     "@kbn/cps"
   ],

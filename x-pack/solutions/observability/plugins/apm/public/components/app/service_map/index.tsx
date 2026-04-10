@@ -132,10 +132,10 @@ export function ServiceMap({
   });
 
   const serviceNamesOnMap = useMemo(() => {
-    if (status !== FETCH_STATUS.SUCCESS) {
-      return [];
-    }
     const names: string[] = [];
+    if (status !== FETCH_STATUS.SUCCESS) {
+      return names;
+    }
     for (const node of data.nodes) {
       if (isServiceNode(node)) {
         names.push(node.data.label);

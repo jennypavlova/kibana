@@ -37,7 +37,7 @@ export const ServiceMapEdge = memo(
         style={style}
         markerEnd={markerEnd}
         markerStart={markerStart}
-        {...({ 'data-test-subj': `serviceMapEdge-${id}` } as Record<string, string>)}
+        data-test-subj={`serviceMapEdge-${id}`}
       />
     );
   }

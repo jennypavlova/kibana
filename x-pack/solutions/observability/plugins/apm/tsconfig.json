@@ -154,6 +154,7 @@
     "@kbn/shared-ux-column-presets",
     "@kbn/cps",
     "@kbn/cps-utils",
+    "@kbn/cps-server-utils",
   ],
   "exclude": ["target/**/*"]
 }

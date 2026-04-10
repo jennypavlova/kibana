@@ -23,6 +23,7 @@ import { UI_SETTINGS } from '@kbn/data-plugin/server';
 import type { TimeseriesVisData } from '@kbn/vis-type-timeseries-plugin/server';
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
 import type { TSVBMetricModel } from '@kbn/metrics-data-access-plugin/common';
+import { getSpaceNPRE } from '@kbn/cps-server-utils';
 import type { InfraConfig, InfraPluginRequestHandlerContext } from '../../../types';
 import { getProjectRoutingFromRequest } from '../../helpers/get_project_routing_from_request';
 import type {
@@ -207,7 +208,10 @@ export class KibanaFramework {
       frozenIndicesParams.ignore_throttled = false;
     }
 
-    const projectRouting = getProjectRoutingFromRequest(request);
+    const headerProjectRouting = getProjectRoutingFromRequest(request);
+    const projectRouting =
+      headerProjectRouting ??
+      (this.config.featureFlags.infraCPSEnabled && request ? getSpaceNPRE(request) : undefined);
     const projectRoutingParams = projectRouting ? { project_routing: projectRouting } : {};
 
     let apiResult;

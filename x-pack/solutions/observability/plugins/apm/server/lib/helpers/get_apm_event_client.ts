@@ -8,6 +8,7 @@
 import { UI_SETTINGS } from '@kbn/data-plugin/common';
 import type { DataTier } from '@kbn/observability-shared-plugin/common';
 import { searchExcludedDataTiers } from '@kbn/observability-plugin/common/ui_settings_keys';
+import { getSpaceNPRE } from '@kbn/cps-server-utils';
 import { APMEventClient } from './create_es_client/create_apm_event_client';
 import { withApmSpan } from '../../utils/with_apm_span';
 import type { MinimalAPMRouteHandlerResources } from '../../routes/apm_routes/register_apm_server_routes';
@@ -18,10 +19,10 @@ export async function getApmEventClient({
   params,
   getApmIndices,
   request,
-}: Pick<
-  MinimalAPMRouteHandlerResources,
-  'context' | 'params' | 'getApmIndices' | 'request'
->): Promise<APMEventClient> {
+  config,
+}: Pick<MinimalAPMRouteHandlerResources, 'context' | 'params' | 'getApmIndices' | 'request'> & {
+  config?: Pick<MinimalAPMRouteHandlerResources['config'], 'featureFlags'>;
+}): Promise<APMEventClient> {
   return withApmSpan('get_apm_event_client', async () => {
     const coreContext = await context.core;
     const [indices, uiSettings] = await Promise.all([
@@ -39,9 +40,13 @@ export async function getApmEventClient({
     ]);
 
     const rawProjectRouting = request.headers['x-project-routing'];
-    const projectRouting = Array.isArray(rawProjectRouting)
+    const headerProjectRouting = Array.isArray(rawProjectRouting)
       ? rawProjectRouting[0]
       : rawProjectRouting;
+
+    const projectRouting =
+      headerProjectRouting ??
+      (config?.featureFlags.apmCPSEnabled ? getSpaceNPRE(request) : undefined);
 
     return new APMEventClient({
       esClient: coreContext.elasticsearch.client.asCurrentUser,

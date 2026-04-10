@@ -39,7 +39,8 @@ const suggestionsRoute = createApmServerRoute({
     const coreContext = await context.core;
     const size = await coreContext.uiSettings.client.get<number>(maxSuggestions);
 
-    if (!serviceName) {
+    // terms_enum doesn't support project_routing, so skip it when CPS is active
+    if (!serviceName && !apmEventClient.isCrossProjectSearch) {
       const suggestions = await getSuggestionsWithTermsEnum({
         fieldName,
         fieldValue,

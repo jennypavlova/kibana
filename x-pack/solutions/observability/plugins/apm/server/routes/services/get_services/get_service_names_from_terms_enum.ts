@@ -24,7 +24,8 @@ export async function getServiceNamesFromTermsEnum({
   start: number;
   end: number;
 }) {
-  if (environment !== ENVIRONMENT_ALL.value) {
+  // terms_enum doesn't support project_routing, so skip it when CPS is active
+  if (environment !== ENVIRONMENT_ALL.value || apmEventClient.isCrossProjectSearch) {
     return [];
   }
   const response = await apmEventClient.termsEnum('get_services_from_terms_enum', {

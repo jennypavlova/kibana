@@ -104,6 +104,10 @@ export class APMEventClient {
   private readonly inspectableEsQueriesMap?: WeakMap<KibanaRequest, InspectResponse>;
   private readonly projectRouting?: string;
 
+  public get isCrossProjectSearch(): boolean {
+    return !!this.projectRouting;
+  }
+
   constructor(config: APMEventClientConfig) {
     this.esClient = config.esClient;
     this.debug = config.debug;

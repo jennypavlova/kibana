@@ -16,7 +16,10 @@ import { ServiceHealthStatus } from '../../../../common/service_health_status';
 import type { SloStatus } from '../../../../common/service_inventory';
 import type { ServiceMapNode, ServiceNodeData } from '../../../../common/service_map';
 import { isServiceNodeData } from '../../../../common/service_map';
-import { getServiceNodeAlertCountForStatus } from './apply_service_map_visibility';
+import {
+  getNormalizedSloStatusForMapFilters,
+  getServiceNodeAlertCountForStatus,
+} from './apply_service_map_visibility';
 
 const ALERT_STATUSES: AlertStatus[] = [
   ALERT_STATUS_ACTIVE,
@@ -45,7 +48,7 @@ function getAlertStatusServiceCounts(serviceNodes: ServiceMapNode[]): Record<Ale
   return counts;
 }
 
-/** Count services by SLO status (sloStatus ?? 'noData'). */
+/** Count services by SLO status (see `getNormalizedSloStatusForMapFilters`). */
 function getSloStatusCounts(serviceNodes: ServiceMapNode[]): Record<SloStatus, number> {
   const counts: Record<SloStatus, number> = {
     healthy: 0,
@@ -55,8 +58,8 @@ function getSloStatusCounts(serviceNodes: ServiceMapNode[]): Record<SloStatus, n
   };
   for (const node of serviceNodes) {
     if (node.type !== 'service' || !isServiceNodeData(node.data)) continue;
-    const status = (node.data as ServiceNodeData).sloStatus ?? 'noData';
-    if (status in counts) counts[status as SloStatus]++;
+    const status = getNormalizedSloStatusForMapFilters(node.data as ServiceNodeData);
+    counts[status]++;
   }
   return counts;
 }

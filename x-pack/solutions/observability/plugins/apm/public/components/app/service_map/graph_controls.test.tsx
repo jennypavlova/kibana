@@ -272,7 +272,7 @@ describe('ServiceMapGraph - Controls', () => {
     );
 
     await act(async () => {
-      fireEvent.click(screen.getByTestId('dscHideSidebarButton'));
+      fireEvent.click(screen.getByTestId('serviceMapHideControlsButton'));
     });
     expect(screen.queryByTestId('serviceMapControlsSearch')).not.toBeInTheDocument();
 

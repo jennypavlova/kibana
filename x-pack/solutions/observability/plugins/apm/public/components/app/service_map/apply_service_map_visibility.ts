@@ -29,6 +29,18 @@ export const DEFAULT_SERVICE_MAP_VIEW_FILTERS: ServiceMapViewFilters = {
   anomalyStatusFilter: [],
 };
 
+/**
+ * SLO bucket for map filters and option counts: `undefined` or `noSLOs` (no SLO summary on the node)
+ * is treated as **`noData`** so tallies and combo options stay aligned with `SloStatus`.
+ */
+export function getNormalizedSloStatusForMapFilters(data: ServiceNodeData): SloStatus {
+  const raw = data.sloStatus;
+  if (raw === undefined || raw === 'noSLOs') {
+    return 'noData';
+  }
+  return raw;
+}
+
 /** Alert count for a status on one service (used by filters and filter-option counts). */
 export function getServiceNodeAlertCountForStatus(
   data: ServiceNodeData,
@@ -55,8 +67,8 @@ function serviceMatchesFilters(data: ServiceNodeData, filters: ServiceMapViewFil
   }
 
   if (filters.sloStatusFilter.length > 0) {
-    const slo = data.sloStatus ?? 'noData';
-    if (!filters.sloStatusFilter.includes(slo as SloStatus)) {
+    const slo = getNormalizedSloStatusForMapFilters(data);
+    if (!filters.sloStatusFilter.includes(slo)) {
       return false;
     }
   }
@@ -90,24 +102,33 @@ export function applyServiceMapVisibility(
     }
   }
 
-  let changed = true;
-  while (changed) {
-    changed = false;
-    for (const edge of edges) {
-      for (const endpointId of [edge.source, edge.target]) {
-        if (visibleIds.has(endpointId)) {
-          continue;
-        }
-        const endpoint = nodeById.get(endpointId);
-        if (!endpoint || isServiceNode(endpoint)) {
-          continue;
-        }
-        const otherId = endpointId === edge.source ? edge.target : edge.source;
-        if (visibleIds.has(otherId)) {
-          visibleIds.add(endpointId);
-          changed = true;
-        }
+  const adjacency = new Map<string, string[]>();
+  const link = (a: string, b: string) => {
+    let na = adjacency.get(a);
+    if (!na) {
+      na = [];
+      adjacency.set(a, na);
+    }
+    na.push(b);
+  };
+  for (const edge of edges) {
+    link(edge.source, edge.target);
+    link(edge.target, edge.source);
+  }
+
+  const queue = [...visibleIds];
+  for (let i = 0; i < queue.length; i++) {
+    const id = queue[i]!;
+    for (const neighborId of adjacency.get(id) ?? []) {
+      if (visibleIds.has(neighborId)) {
+        continue;
       }
+      const neighbor = nodeById.get(neighborId);
+      if (!neighbor || isServiceNode(neighbor)) {
+        continue;
+      }
+      visibleIds.add(neighborId);
+      queue.push(neighborId);
     }
   }
 

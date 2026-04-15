@@ -295,7 +295,7 @@ export function ServiceMapOptionsPanel({
             aria-expanded={false}
             title={toggleLabel}
             aria-label={toggleLabel}
-            data-test-subj="dscShowSidebarButton"
+            data-test-subj="serviceMapShowControlsButton"
           />
         </EuiFlexGroup>
       </EuiPanel>
@@ -324,7 +324,7 @@ export function ServiceMapOptionsPanel({
             aria-expanded={true}
             title={toggleLabel}
             aria-label={toggleLabel}
-            data-test-subj="dscHideSidebarButton"
+            data-test-subj="serviceMapHideControlsButton"
           />
         </EuiFlexItem>
         <EuiFlexItem grow>

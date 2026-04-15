@@ -74,15 +74,15 @@ test.describe(
         /[1-9][0-9]*\/[1-9][0-9]*/
       );
 
-      await page.getByTestId('dscHideSidebarButton').click();
+      await page.getByTestId('serviceMapHideControlsButton').click();
       await expect(serviceMapPage.serviceMapFindInPageInput).toBeHidden();
       await serviceMapPage.openFindInPageWithKeyboardShortcut();
       await expect(serviceMapPage.serviceMapFindInPageInput).toBeVisible();
       await expect(serviceMapPage.serviceMapFindInPageInput).toBeFocused();
 
-      await page.getByTestId('dscHideSidebarButton').click();
+      await page.getByTestId('serviceMapHideControlsButton').click();
       await expect(serviceMapPage.serviceMapFindInPageInput).toBeHidden();
-      await page.getByTestId('dscShowSidebarButton').click();
+      await page.getByTestId('serviceMapShowControlsButton').click();
       await expect(serviceMapPage.serviceMapFindInPageInput).toBeVisible();
     });
   }

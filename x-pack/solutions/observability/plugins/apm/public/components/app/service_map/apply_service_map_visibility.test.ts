@@ -116,4 +116,55 @@ describe('applyServiceMapVisibility', () => {
     expect(outNodes.every((n) => !n.hidden)).toBe(true);
     expect(outEdges.every((e) => !e.hidden)).toBe(true);
   });
+
+  it('treats sloStatus noSLOs like noData for SLO filter', () => {
+    const nodes: ServiceMapNode[] = [
+      mkService('a', { sloStatus: 'noSLOs' }),
+      mkService('b', { sloStatus: 'healthy' }),
+    ];
+    const edges: ServiceMapEdge[] = [mkEdge('e1', 'a', 'b')];
+    const { nodes: onlyNoData } = applyServiceMapVisibility(nodes, edges, {
+      ...DEFAULT_SERVICE_MAP_VIEW_FILTERS,
+      sloStatusFilter: ['noData'],
+    });
+    const byId = Object.fromEntries(onlyNoData.map((n) => [n.id, n.hidden]));
+    expect(byId.a).toBe(false);
+    expect(byId.b).toBe(true);
+
+    const { nodes: onlyHealthy } = applyServiceMapVisibility(nodes, edges, {
+      ...DEFAULT_SERVICE_MAP_VIEW_FILTERS,
+      sloStatusFilter: ['healthy'],
+    });
+    const byIdH = Object.fromEntries(onlyHealthy.map((n) => [n.id, n.hidden]));
+    expect(byIdH.a).toBe(true);
+    expect(byIdH.b).toBe(false);
+  });
+
+  it('pulls a multi-hop dependency chain into view in one pass', () => {
+    const nodes: ServiceMapNode[] = [
+      mkService('svc', { alertsCount: 1 }),
+      {
+        id: 'd1',
+        type: 'dependency',
+        position: { x: 0, y: 0 },
+        data: { id: 'd1', label: 'd1', isService: false },
+      },
+      {
+        id: 'd2',
+        type: 'dependency',
+        position: { x: 0, y: 0 },
+        data: { id: 'd2', label: 'd2', isService: false },
+      },
+    ];
+    const edges: ServiceMapEdge[] = [mkEdge('e1', 'svc', 'd1'), mkEdge('e2', 'd1', 'd2')];
+    const { nodes: out } = applyServiceMapVisibility(
+      nodes,
+      edges,
+      DEFAULT_SERVICE_MAP_VIEW_FILTERS
+    );
+    const hidden = Object.fromEntries(out.map((n) => [n.id, n.hidden]));
+    expect(hidden.svc).toBe(false);
+    expect(hidden.d1).toBe(false);
+    expect(hidden.d2).toBe(false);
+  });
 });

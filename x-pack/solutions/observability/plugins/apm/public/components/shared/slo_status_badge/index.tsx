@@ -15,7 +15,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiText,
-  useEuiBreakpoint,
+  useEuiMinBreakpoint,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { SloStatus } from '../../../../common/service_inventory';
@@ -142,7 +142,8 @@ export function SloStatusBadge({
    */
   compactLabelOnNarrowScreens?: boolean;
 }) {
-  const mUpMedia = useEuiBreakpoint(['m', 'l', 'xl']);
+  /** Min-width `m` only — avoid `useEuiBreakpoint(['m','l','xl'])`, which can cap at `xl` and hide the wide label on larger viewports. */
+  const mUpMedia = useEuiMinBreakpoint('m');
   const config = SLO_STATUS_CONFIG[sloStatus];
   const cappedCount =
     config.showCount && sloCount
@@ -157,15 +158,15 @@ export function SloStatusBadge({
   const responsiveCompactRowStyles = useNarrowCompact
     ? css`
         .apmSloBadgeNarrowCount {
-          display: none;
-          ${mUpMedia} {
-            display: block;
-          }
-        }
-        .apmSloBadgeWideLabel {
           display: block;
           ${mUpMedia} {
             display: none;
+          }
+        }
+        .apmSloBadgeWideLabel {
+          display: none;
+          ${mUpMedia} {
+            display: block;
           }
         }
       `
@@ -180,7 +181,13 @@ export function SloStatusBadge({
         ? { onClick, onClickAriaLabel: config.ariaLabel(serviceName) }
         : { 'aria-label': config.ariaLabel(serviceName) })}
     >
-      <EuiFlexGroup alignItems="center" gutterSize="s" css={responsiveCompactRowStyles}>
+      <EuiFlexGroup
+        alignItems="center"
+        gutterSize="s"
+        responsive={false}
+        wrap={false}
+        css={responsiveCompactRowStyles}
+      >
         <EuiFlexItem grow={false}>
           <EuiIcon type="chartGauge" aria-hidden={true} />
         </EuiFlexItem>

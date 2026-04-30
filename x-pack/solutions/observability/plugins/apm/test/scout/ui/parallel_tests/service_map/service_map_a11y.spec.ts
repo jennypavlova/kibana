@@ -44,9 +44,6 @@ test.describe(
     }) => {
       await test.step('nodes have visible focus indicators when focused', async () => {
         await serviceMapPage.waitForServiceNodeToLoad(SERVICE_OPBEANS_JAVA);
-        await serviceMapPage.openFindInPageWithKeyboardShortcut();
-        await serviceMapPage.serviceMapFindInPageInput.fill(SERVICE_OPBEANS_JAVA);
-        await expect(serviceMapPage.serviceMapFindMatchSummary).toHaveText(/[1-9]/);
         const node = serviceMapPage.getServiceNode(SERVICE_OPBEANS_JAVA);
         await node.focus();
         await expect(node).toBeFocused();

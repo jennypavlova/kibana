@@ -52,7 +52,7 @@ globalSetupHook(
     // Generate AWS Lambda service data for cold start chart tests
     const awsLambdaData = awsLambda({
       from: new Date(testData.OPBEANS_START_DATE).getTime(),
-      to: new Date(testData.OPBEANS_START_DATE).getTime(),
+      to: new Date(testData.OPBEANS_END_DATE).getTime(),
     });
     await apmSynthtraceEsClient.index(awsLambdaData);
     log.info('AWS Lambda service data indexed');

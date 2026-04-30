@@ -37,10 +37,13 @@ const testServersConfig = {
   serverless: true,
   http2: false,
   projectType: 'oblt' as ServerlessProjectType,
+  productTier: 'complete' as const,
   isCloud: true,
   license: 'trial',
   cloudUsersFilePath: '/path/to/users',
 };
+
+const expectedSerializedConfig = JSON.stringify(testServersConfig, null, 2);
 
 jest.mock('path', () => ({
   ...jest.requireActual('path'),
@@ -76,7 +79,7 @@ describe('saveScoutTestConfigOnDisk', () => {
     expect(Fs.existsSync).toHaveBeenCalledWith(MOCKED_SCOUT_SERVERS_ROOT);
     expect(writeFileSyncMock).toHaveBeenCalledWith(
       mockConfigFilePath,
-      JSON.stringify(testServersConfig, null, 2),
+      expectedSerializedConfig,
       'utf-8'
     );
     expect(mockLog.info).toHaveBeenCalledWith(
@@ -120,7 +123,7 @@ describe('saveScoutTestConfigOnDisk', () => {
     expect(mkdirSyncMock).toHaveBeenCalledWith(MOCKED_SCOUT_SERVERS_ROOT, { recursive: true });
     expect(writeFileSyncMock).toHaveBeenCalledWith(
       mockConfigFilePath,
-      JSON.stringify(testServersConfig, null, 2),
+      expectedSerializedConfig,
       'utf-8'
     );
     expect(mockLog.debug).toHaveBeenCalledWith(

@@ -96,6 +96,7 @@ import {
   WATCHLISTS_URL,
   WATCHLISTS_INDICES_URL,
   WATCHLISTS_CSV_UPLOAD_URL,
+  WATCHLISTS_PRIVILEGES_URL,
 } from '../../../common/entity_analytics/watchlists/constants';
 import type { UploadWatchlistCsvResponse } from '../../../common/api/entity_analytics/watchlists/csv_upload/csv_upload.gen';
 import {
@@ -135,7 +136,7 @@ const getMaintainerRouteWithId = (route: string, id: string): string =>
 export const useEntityAnalyticsRoutes = () => {
   const { http, uiSettings } = useKibana().services;
   const isEntityStoreV2UiSettingEnabled =
-    uiSettings?.get<boolean>(FF_ENABLE_ENTITY_STORE_V2, false) ?? false;
+    uiSettings?.get<boolean>(FF_ENABLE_ENTITY_STORE_V2) ?? true;
   const isEntityAnalyticsEntityStoreV2Enabled = useIsExperimentalFeatureEnabled(
     'entityAnalyticsEntityStoreV2'
   );
@@ -190,7 +191,7 @@ export const useEntityAnalyticsRoutes = () => {
       params: FetchEntitiesListParams;
     }) =>
       http.fetch<ListEntitiesResponse>(LIST_ENTITIES_URL, {
-        version: API_VERSIONS.public.v1,
+        version: API_VERSIONS.internal.v1,
         method: 'GET',
         query: {
           entity_types: params.entityTypes,
@@ -662,10 +663,8 @@ export const useEntityAnalyticsRoutes = () => {
         method: 'GET',
       });
 
-    // TODO: switch to WATCHLISTS privileges API when backend route lands; https://github.com/elastic/security-team/issues/16102
-    // Keeping this separate from privmon to allow safe removal of privmon later.
-    const fetchWatchlistPrivileges = (): Promise<PrivMonPrivilegesResponse> =>
-      http.fetch<PrivMonPrivilegesResponse>(PRIVMON_PRIVILEGE_CHECK_API, {
+    const fetchWatchlistsPrivileges = (): Promise<EntityAnalyticsPrivileges> =>
+      http.fetch<EntityAnalyticsPrivileges>(WATCHLISTS_PRIVILEGES_URL, {
         version: API_VERSIONS.public.v1,
         method: 'GET',
       });
@@ -933,7 +932,7 @@ export const useEntityAnalyticsRoutes = () => {
       updatePrivMonMonitoredIndices,
       fetchPrivilegeMonitoringEngineStatus,
       fetchPrivilegeMonitoringPrivileges,
-      fetchWatchlistPrivileges,
+      fetchWatchlistsPrivileges,
       createWatchlist,
       getWatchlist,
       updateWatchlist,

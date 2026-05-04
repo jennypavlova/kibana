@@ -155,9 +155,16 @@ export class EuiComboBoxWrapper {
     await this.comboBoxMainInput.click();
     await this.typeValueInSearch(value);
     // Prefer a specific test subj when option text is ambiguous.
+    // Async combos (e.g. throttled suggestion APIs) need a visible option wait; allow ~45s
+    // like other Scout EXTENDED flows so CI serverless budgets don’t flake on defaults.
+    const trimmedValue = value.trim();
     const optionLocator = options.optionTestSubj
       ? this.page.testSubj.locator(options.optionTestSubj)
-      : this.page.getByRole('option', { name: options.optionRoleName ?? value, exact: false });
+      : this.page
+          .getByRole('option', { name: options.optionRoleName ?? value, exact: false })
+          .or(this.page.locator(`.euiFilterSelectItem[title="${trimmedValue}"]`));
+
+    await optionLocator.waitFor({ state: 'visible', timeout: 45_000 });
     await optionLocator.click();
     expect(await this.getSelectedValue()).toBe(value);
   }

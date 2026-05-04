@@ -25,3 +25,20 @@ export async function waitForApmSettingsHeaderLink(page: ScoutPage): Promise<voi
 export async function waitForApmMainContainer(page: ScoutPage): Promise<void> {
   await page.testSubj.waitForSelector('apmMainContainer', { timeout: EXTENDED_TIMEOUT });
 }
+
+/**
+ * Close global EUI toasts when present — they intercept pointer events and break
+ * interactions (e.g. Investigate menu) while still visible (#246662 CI flakes).
+ */
+export async function dismissGlobalToastsIfPresent(page: ScoutPage): Promise<void> {
+  const closeButtons = page.locator('.euiGlobalToastList .euiToast__closeButton');
+
+  for (let attempt = 0; attempt < 8; attempt++) {
+    const buttons = await closeButtons.all();
+    if (buttons.length === 0) {
+      return;
+    }
+
+    await buttons[0].click({ timeout: EXTENDED_TIMEOUT });
+  }
+}

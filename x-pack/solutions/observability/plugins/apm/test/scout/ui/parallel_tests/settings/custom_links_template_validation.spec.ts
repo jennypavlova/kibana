@@ -22,10 +22,8 @@ const templateUrl =
 const getExpectedUrl = (serviceName: string, environment: string) =>
   `http://scoutURLExample.com/ftw/app/apm/services/${serviceName}/transactions/view?comparisonEnabled=true&environment=${environment}`;
 
-// When unskipping, consider this used to be `test.describe.serial`
-// but there's no skip that preserves that. Consider not using serial.
-// Flaky: https://github.com/elastic/kibana/issues/262047
-test.describe.skip(
+// Serial: tests share a custom link (`uniqueLabel`) created in the first test (see #262047, #263641).
+test.describe.serial(
   'Custom links template validation',
   { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
   () => {
@@ -52,7 +50,9 @@ test.describe.skip(
       // Add additional filter (explicitly adds new filter row)
       await customLinksPage.addAdditionalFilter('service.environment', PRODUCTION_ENVIRONMENT);
 
-      await expect(page.getByTestId('preview-url')).toContainText(expectedUrl);
+      await expect(page.getByTestId('preview-url')).toContainText(expectedUrl, {
+        timeout: EXTENDED_TIMEOUT,
+      });
 
       await expect(customLinksPage.saveButton).toBeEnabled();
       await customLinksPage.clickSave();
@@ -166,7 +166,9 @@ test.describe.skip(
       await customLinksPage.fillUrl(templateUrl);
 
       // Verify preview URL shows correctly populated template variables
-      await expect(page.getByTestId('preview-url')).toContainText(expectedUrl);
+      await expect(page.getByTestId('preview-url')).toContainText(expectedUrl, {
+        timeout: EXTENDED_TIMEOUT,
+      });
 
       // Save the custom link
       await expect(customLinksPage.saveButton).toBeEnabled();

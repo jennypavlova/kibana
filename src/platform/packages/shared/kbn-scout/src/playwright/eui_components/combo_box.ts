@@ -174,7 +174,7 @@ export class EuiComboBoxWrapper {
     await this.comboBoxMainInput.click();
     await this.typeValueInSearch(value);
     await this.page.keyboard.press('Enter');
-    expect(await this.getSelectedValue()).toBe(value);
+    await expect.poll(async () => await this.getSelectedValue(), { timeout: 45_000 }).toBe(value);
   }
 
   async getSelectedValue() {

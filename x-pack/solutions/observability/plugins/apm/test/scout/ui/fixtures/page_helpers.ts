@@ -31,7 +31,7 @@ export async function waitForApmMainContainer(page: ScoutPage): Promise<void> {
  * interactions (e.g. Investigate menu) while still visible (#246662 CI flakes).
  */
 export async function dismissGlobalToastsIfPresent(page: ScoutPage): Promise<void> {
-  const closeButtons = page.locator('.euiGlobalToastList .euiToast__closeButton');
+  const closeButtons = page.getByTestId('toastCloseButton');
 
   for (let attempt = 0; attempt < 8; attempt++) {
     const buttons = await closeButtons.all();

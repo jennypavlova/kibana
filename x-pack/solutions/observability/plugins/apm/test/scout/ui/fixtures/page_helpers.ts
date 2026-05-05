@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ScoutPage } from '@kbn/scout-oblt';
+import { EuiToastWrapper, type ScoutPage } from '@kbn/scout-oblt';
 import { EXTENDED_TIMEOUT } from './constants';
 
 /**
@@ -31,14 +31,6 @@ export async function waitForApmMainContainer(page: ScoutPage): Promise<void> {
  * interactions (e.g. Investigate menu) while still visible (#246662 CI flakes).
  */
 export async function dismissGlobalToastsIfPresent(page: ScoutPage): Promise<void> {
-  const closeButtons = page.getByTestId('toastCloseButton');
-
-  for (let attempt = 0; attempt < 8; attempt++) {
-    const buttons = await closeButtons.all();
-    if (buttons.length === 0) {
-      return;
-    }
-
-    await buttons[0].click({ timeout: EXTENDED_TIMEOUT });
-  }
+  const toast = new EuiToastWrapper(page, { locator: '.euiToast' });
+  await toast.closeAllToasts();
 }

@@ -149,14 +149,17 @@ export class EuiComboBoxWrapper {
   // Select a single option in the comboBox
   async selectSingleOption(
     value: string,
-    options: { optionTestSubj?: string; optionRoleName?: string } = {}
+    options: {
+      optionTestSubj?: string;
+      optionRoleName?: string;
+      /** Use for combos backed by slow suggestion APIs so other suites keep default waits. */
+      optionVisibilityTimeoutMs?: number;
+    } = {}
   ) {
     await this.clear();
     await this.comboBoxMainInput.click();
     await this.typeValueInSearch(value);
     // Prefer a specific test subj when option text is ambiguous.
-    // Async combos (e.g. throttled suggestion APIs) need a visible option wait; allow ~45s
-    // like other Scout EXTENDED flows so CI serverless budgets don’t flake on defaults.
     const trimmedValue = value.trim();
     const optionLocator = options.optionTestSubj
       ? this.page.testSubj.locator(options.optionTestSubj)
@@ -164,17 +167,32 @@ export class EuiComboBoxWrapper {
           .getByRole('option', { name: options.optionRoleName ?? value, exact: false })
           .or(this.page.locator(`.euiFilterSelectItem[title="${trimmedValue}"]`));
 
-    await optionLocator.waitFor({ state: 'visible', timeout: 45_000 });
+    await optionLocator.waitFor({
+      state: 'visible',
+      ...(options.optionVisibilityTimeoutMs !== undefined
+        ? { timeout: options.optionVisibilityTimeoutMs }
+        : {}),
+    });
     await optionLocator.click();
     expect(await this.getSelectedValue()).toBe(value);
   }
 
-  async setCustomSingleOption(value: string) {
+  async setCustomSingleOption(
+    value: string,
+    options: {
+      /** Use when confirming selection may lag after Enter (slow suggestions / CI). */
+      settleTimeoutMs?: number;
+    } = {}
+  ) {
     await this.clear();
     await this.comboBoxMainInput.click();
     await this.typeValueInSearch(value);
     await this.page.keyboard.press('Enter');
-    await expect.poll(async () => await this.getSelectedValue(), { timeout: 45_000 }).toBe(value);
+    await expect
+      .poll(async () => await this.getSelectedValue(), {
+        ...(options.settleTimeoutMs !== undefined ? { timeout: options.settleTimeoutMs } : {}),
+      })
+      .toBe(value);
   }
 
   async getSelectedValue() {

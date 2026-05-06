@@ -164,15 +164,16 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
           `Expected status to be '200', got '${fieldValuePairsResponse.status}'`
         );
 
-        // Identified 374 fieldValuePairs.
+        // Field value pair count depends on field cap mappings and correlation candidate filters
+        // (e.g. exclusions in `FIELDS_TO_EXCLUDE_AS_CANDIDATE`); assert a stable baseline for this archiver.
         expect(fieldValuePairsResponse.body?.fieldValuePairs.length).to.eql(
-          374,
-          `Expected field value pairs length to be '374', got '${fieldValuePairsResponse.body?.fieldValuePairs.length}'`
+          373,
+          `Expected field value pairs length to be '373', got '${fieldValuePairsResponse.body?.fieldValuePairs.length}'`
         );
 
         // This replicates the code used in the `useLatencyCorrelations` hook to chunk requests for correlation analysis.
         // Tests turned out to be flaky and occasionally overload ES with a `search_phase_execution_exception`
-        // when all 374 field value pairs from above are queried in parallel.
+        // when all field value pairs from above are queried in parallel.
         // The chunking sends 10 field value pairs with each request to the Kibana API endpoint.
         // Kibana itself will then run those 10 requests in parallel against ES.
         const latencyCorrelations: LatencyCorrelation[] = [];
@@ -233,7 +234,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
         expect(finalRawResponse?.percentileThresholdValue).to.be(1309695.875);
         expect(finalRawResponse?.overallHistogram?.length).to.be(101);
 
-        // Identified 13 significant correlations out of 374 field/value pairs.
+        // Identified 13 significant correlations out of fetched field/value pairs.
         expect(finalRawResponse?.latencyCorrelations?.length).to.eql(
           13,
           `Expected 13 identified correlations, got ${finalRawResponse?.latencyCorrelations?.length}.`

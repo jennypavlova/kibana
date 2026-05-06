@@ -105,9 +105,9 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
           ruleTypeId: ApmRuleType.TransactionDuration,
           consumer: 'apm',
           roleAuthc,
-          schedule: { interval: '1s' },
         });
 
+        expect(createdRule.id).to.be.ok();
         ruleId = createdRule.id;
         await alertingApi.runRule(roleAuthc, ruleId);
         await alertingApi.waitForAlertInIndex({

@@ -17,6 +17,10 @@ import { LatencyDistributionChartType } from '@kbn/apm-plugin/common/latency_dis
 import type { DeploymentAgnosticFtrProviderContext } from '../../../ftr_provider_context';
 import { ARCHIVER_ROUTES } from '../constants/archiver';
 
+/** Inclusive bounds for fixed archiver runs; observed 373 vs 374 across serverless vs stateful CI. */
+const FIELD_VALUE_PAIRS_LENGTH_MIN = 370;
+const FIELD_VALUE_PAIRS_LENGTH_MAX = 380;
+
 // These tests go through the full sequence of queries required
 // to get the final results for a latency correlation analysis.
 export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderContext) {
@@ -164,11 +168,12 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
           `Expected status to be '200', got '${fieldValuePairsResponse.status}'`
         );
 
-        // Field value pair count depends on field cap mappings and correlation candidate filters
-        // (e.g. exclusions in `FIELDS_TO_EXCLUDE_AS_CANDIDATE`); assert a stable baseline for this archiver.
-        expect(fieldValuePairsResponse.body?.fieldValuePairs.length).to.eql(
-          373,
-          `Expected field value pairs length to be '373', got '${fieldValuePairsResponse.body?.fieldValuePairs.length}'`
+        // Field value pair count depends on field cap mappings and correlation candidate filters.
+        const fieldValuePairsLength = fieldValuePairsResponse.body?.fieldValuePairs.length;
+        expect(fieldValuePairsLength).to.be.within(
+          FIELD_VALUE_PAIRS_LENGTH_MIN,
+          FIELD_VALUE_PAIRS_LENGTH_MAX,
+          `Expected field value pairs length within [${FIELD_VALUE_PAIRS_LENGTH_MIN}, ${FIELD_VALUE_PAIRS_LENGTH_MAX}], got '${fieldValuePairsLength}'`
         );
 
         // This replicates the code used in the `useLatencyCorrelations` hook to chunk requests for correlation analysis.

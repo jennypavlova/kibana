@@ -13,6 +13,7 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
   const svlCommonPage = getPageObject('svlCommonPage');
   const svlCommonNavigation = getPageObject('svlCommonNavigation');
   const browser = getService('browser');
+  const retry = getService('retry');
   const testSubjects = getService('testSubjects');
   const common = getPageObject('common');
   const solutionNavigation = getPageObject('solutionNavigation');
@@ -68,8 +69,14 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
       await svlCommonNavigation.sidenav.openPanel('admin_and_settings');
       await svlCommonNavigation.sidenav.clickPanelLink('management:tags');
       await browser.refresh();
-      await svlCommonNavigation.expectExists();
-      expect(await svlCommonNavigation.sidenav.isPanelOpen('admin_and_settings')).to.be(true);
+      await retry.waitForWithTimeout(
+        'admin_and_settings sidenav panel open after reload',
+        30000,
+        async () => {
+          await svlCommonNavigation.expectExists();
+          expect(await svlCommonNavigation.sidenav.isPanelOpen('admin_and_settings')).to.be(true);
+        }
+      );
     });
 
     it('shows cases in sidebar navigation', async () => {

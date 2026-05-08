@@ -13,21 +13,25 @@ import { esResourcesEndpoint } from '../../common/fixtures/constants';
 
 apiTest.describe('Collector integration is not installed', { tag: tags.stateful.classic }, () => {
   let viewerApiCreditials: RoleApiCredentials;
-  apiTest.beforeAll(async ({ requestAuth, profilingSetup }) => {
+
+  apiTest.beforeAll(async ({ requestAuth, profilingSetup, profilingHelper }) => {
     await profilingSetup.cleanup();
+    await profilingHelper.installPolicies();
+    await profilingSetup.setupResources();
     viewerApiCreditials = await requestAuth.getApiKey('viewer');
   });
+
   apiTest.afterAll(async ({ profilingHelper }) => {
-    profilingHelper.cleanupPolicies();
+    await profilingHelper.cleanupPolicies();
   });
 
   apiTest('collector integration missing', async ({ profilingHelper, apiServices, apiClient }) => {
-    const ids = await profilingHelper.getPoliciyIds();
+    const ids = await profilingHelper.getPolicyIds();
     const collectorId = ids.collectorId;
 
-    await apiServices.fleet.package_policies.delete(collectorId!);
-
     expect(collectorId).toBeDefined();
+
+    await apiServices.fleet.package_policies.delete(collectorId!);
 
     const adminRes = await apiClient.get(esResourcesEndpoint);
     const adminStatus = adminRes.body;
@@ -52,13 +56,13 @@ apiTest.describe('Collector integration is not installed', { tag: tags.stateful.
   apiTest(
     'Symbolizer integration is not installed',
     async ({ profilingHelper, apiClient, apiServices }) => {
-      const ids = await profilingHelper.getPoliciyIds();
+      const ids = await profilingHelper.getPolicyIds();
 
       const symbolizerId = ids.symbolizerId;
 
-      await apiServices.fleet.package_policies.delete(symbolizerId!);
-
       expect(symbolizerId).toBeDefined();
+
+      await apiServices.fleet.package_policies.delete(symbolizerId!);
 
       const adminRes = await apiClient.get(esResourcesEndpoint, {
         headers: {

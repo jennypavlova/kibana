@@ -38,7 +38,7 @@ import { ServiceMapFindInPage } from './service_map_find_in_page';
 
 export type ServiceMapOrientation = 'horizontal' | 'vertical';
 
-const CONNECTION_FILTER_OPTIONS: { value: ConnectionFilter; label: string }[] = [
+export const CONNECTION_FILTER_OPTIONS: { value: ConnectionFilter; label: string }[] = [
   {
     value: 'orphaned',
     label: i18n.translate('xpack.apm.serviceMap.controls.connectionOrphaned', {
@@ -53,7 +53,7 @@ const CONNECTION_FILTER_OPTIONS: { value: ConnectionFilter; label: string }[] = 
   },
 ];
 
-const ALERT_STATUS_OPTIONS: { value: AlertStatus; label: string }[] = [
+export const ALERT_STATUS_OPTIONS: { value: AlertStatus; label: string }[] = [
   {
     value: ALERT_STATUS_ACTIVE,
     label: i18n.translate('xpack.apm.serviceMap.controls.alertStatusActive', {
@@ -80,7 +80,7 @@ const ALERT_STATUS_OPTIONS: { value: AlertStatus; label: string }[] = [
   },
 ];
 
-const SLO_STATUS_OPTIONS: { value: SloStatus; label: string }[] = [
+export const SLO_STATUS_OPTIONS: { value: SloStatus; label: string }[] = [
   {
     value: 'healthy',
     label: i18n.translate('xpack.apm.serviceMap.controls.sloHealthy', {
@@ -107,7 +107,7 @@ const SLO_STATUS_OPTIONS: { value: SloStatus; label: string }[] = [
   },
 ];
 
-const ANOMALY_SEVERITY_OPTIONS: { value: ML_ANOMALY_SEVERITY; label: string }[] = [
+export const ANOMALY_SEVERITY_OPTIONS: { value: ML_ANOMALY_SEVERITY; label: string }[] = [
   {
     value: ML_ANOMALY_SEVERITY.CRITICAL,
     label: i18n.translate('xpack.apm.serviceMap.controls.anomalySeverityCritical', {

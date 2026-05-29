@@ -5,13 +5,9 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo, useState } from 'react';
-import {
-  EuiButtonIcon,
-  EuiContextMenuPanel,
-  EuiContextMenuItem,
-  EuiPopover,
-} from '@elastic/eui';
+import React, { useCallback, useState } from 'react';
+import type { SerializedStyles } from '@emotion/react';
+import { EuiButtonIcon, EuiContextMenuItem, EuiContextMenuPanel, EuiPopover } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { EmbeddablePackageState } from '@kbn/embeddable-plugin/public';
 import type { Filter } from '@kbn/es-query';
@@ -38,6 +34,8 @@ interface AddToDashboardButtonProps {
   viewFilters: ServiceMapViewFilters;
   /** Current find-in-page query — captured into the dashboard panel state. */
   searchQuery: string;
+  /** Shared toolbar icon sizing so the button matches the surrounding map controls. */
+  controlIconCss?: SerializedStyles;
 }
 
 /** Serialize a single string value as a quoted KQL phrase. */
@@ -152,6 +150,7 @@ export function AddToDashboardButton({
   mapOrientation,
   viewFilters,
   searchQuery,
+  controlIconCss,
 }: AddToDashboardButtonProps) {
   const { services } = useKibana<ApmPluginStartDeps>();
   const embeddable = services?.embeddable;
@@ -240,50 +239,50 @@ export function AddToDashboardButton({
     defaultMessage: 'Service map',
   });
 
-  const menuLabel = i18n.translate('xpack.apm.serviceMap.panelActions.menuLabel', {
-    defaultMessage: 'More actions',
+  const copyToDashboardLabel = i18n.translate('xpack.apm.serviceMap.copyToDashboardLabel', {
+    defaultMessage: 'Copy to dashboard',
   });
 
-  const menuItems = useMemo(
-    () => [
-      <EuiContextMenuItem
-        key="copyToDashboard"
-        icon="addToDashboard"
-        onClick={() => {
-          setIsMenuOpen(false);
-          setIsModalOpen(true);
-        }}
-        data-test-subj="apmServiceMapCopyToDashboardMenuItem"
-      >
-        {i18n.translate('xpack.apm.serviceMap.copyToDashboardMenuItem', {
-          defaultMessage: 'Copy to dashboard',
-        })}
-      </EuiContextMenuItem>,
-    ],
-    []
-  );
+  const menuLabel = i18n.translate('xpack.apm.serviceMap.panelActions.menuLabel', {
+    defaultMessage: 'Share',
+  });
+
+  const menuItems = [
+    <EuiContextMenuItem
+      key="copyToDashboard"
+      icon="addToDashboard"
+      onClick={() => {
+        setIsMenuOpen(false);
+        setIsModalOpen(true);
+      }}
+      data-test-subj="apmServiceMapCopyToDashboardMenuItem"
+    >
+      {copyToDashboardLabel}
+    </EuiContextMenuItem>,
+  ];
 
   return (
     <>
       <EuiPopover
-        anchorPosition="downRight"
+        anchorPosition="rightUp"
         panelPaddingSize="none"
         isOpen={isMenuOpen}
         closePopover={() => setIsMenuOpen(false)}
         button={
           <EuiButtonIcon
-            iconType="boxesHorizontal"
+            iconType="share"
+            display="empty"
             color="text"
-            display="base"
             size="s"
             aria-label={menuLabel}
             title={menuLabel}
             onClick={() => setIsMenuOpen((open) => !open)}
-            data-test-subj="apmServiceMapPanelActionsButton"
+            data-test-subj="apmServiceMapShareButton"
+            css={controlIconCss}
           />
         }
       >
-        <EuiContextMenuPanel size="s" items={menuItems} />
+        <EuiContextMenuPanel items={menuItems} />
       </EuiPopover>
       {isModalOpen && (
         <SavedObjectSaveModalDashboard

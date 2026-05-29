@@ -626,11 +626,13 @@ function GraphInner({
             <Background gap={24} size={1} color={euiTheme.colors.lightShade} />
             <Panel position="top-left" css={topLeftToolbarStyles}>
               <div css={topLeftToolbarColumnStyles}>
-                <ServiceMapOptionsPanelToggle
-                  isExpanded={panelExpanded}
-                  onExpandedChange={setPanelExpanded}
-                  hasActiveControls={hasActiveControls}
-                />
+                {!isEmbedded && (
+                  <ServiceMapOptionsPanelToggle
+                    isExpanded={panelExpanded}
+                    onExpandedChange={setPanelExpanded}
+                    hasActiveControls={hasActiveControls}
+                  />
+                )}
                 <EuiPanel
                   hasBorder
                   hasShadow={false}
@@ -709,6 +711,36 @@ function GraphInner({
                     )}
                   </EuiFlexGroup>
                 </EuiPanel>
+                {!isEmbedded && (
+                  <EuiPanel
+                    hasBorder
+                    hasShadow={false}
+                    paddingSize="none"
+                    borderRadius="m"
+                    grow={false}
+                  >
+                    <EuiFlexGroup
+                      direction="column"
+                      gutterSize="none"
+                      alignItems="center"
+                      justifyContent="center"
+                      responsive={false}
+                    >
+                      <AddToDashboardButton
+                        environment={environment}
+                        kuery={kuery}
+                        start={start}
+                        end={end}
+                        serviceName={serviceName}
+                        serviceGroupId={serviceGroupId}
+                        mapOrientation={mapOrientation}
+                        viewFilters={viewFilters}
+                        searchQuery={searchQuery}
+                        controlIconCss={mapToolbarControlIconCss}
+                      />
+                    </EuiFlexGroup>
+                  </EuiPanel>
+                )}
                 <EuiPanel
                   hasBorder
                   hasShadow={false}
@@ -719,7 +751,7 @@ function GraphInner({
                   <ServiceMapLegend controlIconCss={mapToolbarControlIconCss} />
                 </EuiPanel>
               </div>
-              {panelExpanded && (
+              {!isEmbedded && panelExpanded && (
                 <ServiceMapOptionsPanel
                   nodes={nodesAfterFilters}
                   filterOptionCounts={filterOptionCounts}
@@ -746,21 +778,6 @@ function GraphInner({
                 />
               )}
             </Panel>
-            {!isEmbedded && (
-              <Panel position="top-right">
-                <AddToDashboardButton
-                  environment={environment}
-                  kuery={kuery}
-                  start={start}
-                  end={end}
-                  serviceName={serviceName}
-                  serviceGroupId={serviceGroupId}
-                  mapOrientation={mapOrientation}
-                  viewFilters={viewFilters}
-                  searchQuery={searchQuery}
-                />
-              </Panel>
-            )}
             {!isEmbedded && <ServiceMapMinimap />}
           </ReactFlow>
           <MapPopover

@@ -226,10 +226,19 @@ export const getServiceMapEmbeddableFactory = (deps: EmbeddableDeps) => {
                       }
                       customStateManager.api.setKuery(newState.kuery);
                       customStateManager.api.setServiceName(newState.service_name);
-                      // map_orientation is managed via the in-panel options toggle, not the
-                      // editor flyout; leave the persisted value untouched.
+                      if (newState.map_orientation !== undefined) {
+                        customStateManager.api.setMapOrientation(newState.map_orientation);
+                      }
                       customStateManager.api.setSyncWithDashboardFilters(
                         newState.sync_with_dashboard_filters
+                      );
+                      // View filters live in the flyout now (the in-panel embeddable is a minimal
+                      // preview), so push them through on save.
+                      customStateManager.api.setConnectionFilter(newState.connection_filter);
+                      customStateManager.api.setAlertStatusFilter(newState.alert_status_filter);
+                      customStateManager.api.setSloStatusFilter(newState.slo_status_filter);
+                      customStateManager.api.setAnomalySeverityFilter(
+                        newState.anomaly_severity_filter
                       );
                       closeFlyout();
                     }}

@@ -8,6 +8,7 @@
 import {
   EuiButton,
   EuiButtonEmpty,
+  EuiButtonGroup,
   EuiComboBox,
   EuiFlexGroup,
   EuiFlexItem,
@@ -16,16 +17,21 @@ import {
   EuiFlyoutHeader,
   EuiForm,
   EuiFormRow,
+  EuiHorizontalRule,
   EuiLink,
   EuiSkeletonText,
   EuiSwitch,
+  EuiText,
   EuiTitle,
+  htmlIdGenerator,
 } from '@elastic/eui';
-import type { EuiComboBoxOptionOption } from '@elastic/eui';
+import type { EuiButtonGroupOptionProps, EuiComboBoxOptionOption } from '@elastic/eui';
 import React, { useCallback, useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { SERVICE_NAME, SERVICE_ENVIRONMENT } from '@kbn/apm-types';
+import type { AlertStatus } from '@kbn/rule-data-utils';
+import type { ML_ANOMALY_SEVERITY } from '@kbn/ml-anomaly-utils/anomaly_severity';
 import type { Query, TimeRange } from '@kbn/es-query';
 import datemath from '@kbn/datemath';
 import {
@@ -34,7 +40,16 @@ import {
   getEnvironmentLabel,
 } from '../../../common/environment_filter_values';
 import type { Environment } from '../../../common/environment_rt';
+import type { SloStatus } from '../../../common/service_inventory';
 import type { ServiceMapEmbeddableState } from '../../../server/lib/embeddables/service_map_embeddable_schema';
+import type { ConnectionFilter } from '../../components/app/service_map/apply_service_map_visibility';
+import {
+  ALERT_STATUS_OPTIONS,
+  ANOMALY_SEVERITY_OPTIONS,
+  CONNECTION_FILTER_OPTIONS,
+  SLO_STATUS_OPTIONS,
+} from '../../components/app/service_map/service_map_options_panel';
+import type { ServiceMapOrientation } from '../../components/app/service_map/service_map_options_panel';
 import type { EmbeddableDeps } from '../types';
 import { useSuggestions } from './use_suggestions';
 import { useAdHocApmDataView } from '../../hooks/use_adhoc_apm_data_view';
@@ -118,6 +133,54 @@ function KueryInput({ kuery, onChange, deps }: KueryInputProps) {
   );
 }
 
+interface FilterComboBoxProps<T extends string> {
+  label: string;
+  placeholder: string;
+  options: ReadonlyArray<{ value: T; label: string }>;
+  selected: T[];
+  onChange: (next: T[]) => void;
+  dataTestSubj: string;
+}
+
+/** Static multi-select for a single persisted map filter. No live counts — the flyout has no map data. */
+function FilterComboBox<T extends string>({
+  label,
+  placeholder,
+  options,
+  selected,
+  onChange,
+  dataTestSubj,
+}: FilterComboBoxProps<T>) {
+  const comboOptions = useMemo<Array<EuiComboBoxOptionOption<T>>>(
+    () => options.map((opt) => ({ label: opt.label, value: opt.value })),
+    [options]
+  );
+  const selectedOptions = useMemo<Array<EuiComboBoxOptionOption<T>>>(
+    () =>
+      selected.map((value) => {
+        const opt = options.find((o) => o.value === value);
+        return { label: opt?.label ?? value, value };
+      }),
+    [options, selected]
+  );
+
+  return (
+    <EuiFormRow label={label} fullWidth>
+      <EuiComboBox
+        aria-label={label}
+        placeholder={placeholder}
+        options={comboOptions}
+        selectedOptions={selectedOptions}
+        onChange={(changed) => onChange(changed.map((s) => (s.value ?? s.label) as T))}
+        fullWidth
+        compressed
+        isClearable
+        data-test-subj={dataTestSubj}
+      />
+    </EuiFormRow>
+  );
+}
+
 export interface ServiceMapEditorFlyoutProps {
   onCancel: () => void;
   onSave: (state: ServiceMapEmbeddableState) => void;
@@ -180,6 +243,45 @@ export function ServiceMapEditorFlyout({
   const [serviceName, setServiceName] = useState(initialState?.service_name ?? '');
   const [syncWithDashboardFilters, setSyncWithDashboardFilters] = useState<boolean>(
     initialState?.sync_with_dashboard_filters ?? false
+  );
+
+  const [connectionFilter, setConnectionFilter] = useState<ConnectionFilter[]>(
+    (initialState?.connection_filter ?? []) as ConnectionFilter[]
+  );
+  const [alertStatusFilter, setAlertStatusFilter] = useState<AlertStatus[]>(
+    (initialState?.alert_status_filter ?? []) as AlertStatus[]
+  );
+  const [sloStatusFilter, setSloStatusFilter] = useState<SloStatus[]>(
+    (initialState?.slo_status_filter ?? []) as SloStatus[]
+  );
+  const [anomalySeverityFilter, setAnomalySeverityFilter] = useState<ML_ANOMALY_SEVERITY[]>(
+    (initialState?.anomaly_severity_filter ?? []) as ML_ANOMALY_SEVERITY[]
+  );
+  const [mapOrientation, setMapOrientation] = useState<ServiceMapOrientation>(
+    initialState?.map_orientation ?? 'horizontal'
+  );
+
+  const orientationIdPrefix = useMemo(() => htmlIdGenerator()(), []);
+  const orientationOptions: EuiButtonGroupOptionProps[] = useMemo(
+    () => [
+      {
+        id: `${orientationIdPrefix}horizontal`,
+        label: i18n.translate('xpack.apm.serviceMapEditor.layoutHorizontal', {
+          defaultMessage: 'Horizontal',
+        }),
+        iconType: 'arrowRight',
+        'data-test-subj': 'apmServiceMapEditorLayoutHorizontal',
+      },
+      {
+        id: `${orientationIdPrefix}vertical`,
+        label: i18n.translate('xpack.apm.serviceMapEditor.layoutVertical', {
+          defaultMessage: 'Vertical',
+        }),
+        iconType: 'arrowDown',
+        'data-test-subj': 'apmServiceMapEditorLayoutVertical',
+      },
+    ],
+    [orientationIdPrefix]
   );
 
   const [selectedServiceOption, setSelectedServiceOption] = useState<
@@ -256,9 +358,33 @@ export function ServiceMapEditorFlyout({
       kuery: kuery.trim() ? kuery : undefined,
       service_name: serviceName || undefined,
       sync_with_dashboard_filters: syncWithDashboardFilters,
+      connection_filter: connectionFilter.length
+        ? (connectionFilter as ServiceMapEmbeddableState['connection_filter'])
+        : undefined,
+      alert_status_filter: alertStatusFilter.length
+        ? (alertStatusFilter as ServiceMapEmbeddableState['alert_status_filter'])
+        : undefined,
+      slo_status_filter: sloStatusFilter.length
+        ? (sloStatusFilter as ServiceMapEmbeddableState['slo_status_filter'])
+        : undefined,
+      anomaly_severity_filter: anomalySeverityFilter.length
+        ? (anomalySeverityFilter as ServiceMapEmbeddableState['anomaly_severity_filter'])
+        : undefined,
+      map_orientation: mapOrientation,
     };
     onSave(state);
-  }, [environment, kuery, serviceName, syncWithDashboardFilters, onSave]);
+  }, [
+    environment,
+    kuery,
+    serviceName,
+    syncWithDashboardFilters,
+    connectionFilter,
+    alertStatusFilter,
+    sloStatusFilter,
+    anomalySeverityFilter,
+    mapOrientation,
+    onSave,
+  ]);
 
   return (
     <div style={serviceMapFlyoutShellStyle}>
@@ -346,6 +472,110 @@ export function ServiceMapEditorFlyout({
           </EuiFormRow>
 
           <KueryInput kuery={kuery} onChange={setKuery} deps={deps} />
+
+          <EuiHorizontalRule margin="m" />
+
+          <EuiText size="xs">
+            <h3>
+              {i18n.translate('xpack.apm.serviceMapEditor.filtersHeading', {
+                defaultMessage: 'Filters',
+              })}
+            </h3>
+          </EuiText>
+
+          <FilterComboBox<ConnectionFilter>
+            label={i18n.translate('xpack.apm.serviceMapEditor.dependenciesFilterLabel', {
+              defaultMessage: 'Dependencies',
+            })}
+            placeholder={i18n.translate(
+              'xpack.apm.serviceMapEditor.dependenciesFilterPlaceholder',
+              {
+                defaultMessage: 'All dependencies',
+              }
+            )}
+            options={CONNECTION_FILTER_OPTIONS}
+            selected={connectionFilter}
+            onChange={setConnectionFilter}
+            dataTestSubj="apmServiceMapEditorConnectionFilter"
+          />
+
+          <FilterComboBox<AlertStatus>
+            label={i18n.translate('xpack.apm.serviceMapEditor.alertStatusFilterLabel', {
+              defaultMessage: 'Alert status',
+            })}
+            placeholder={i18n.translate('xpack.apm.serviceMapEditor.alertStatusFilterPlaceholder', {
+              defaultMessage: 'All alert statuses',
+            })}
+            options={ALERT_STATUS_OPTIONS}
+            selected={alertStatusFilter}
+            onChange={setAlertStatusFilter}
+            dataTestSubj="apmServiceMapEditorAlertStatusFilter"
+          />
+
+          <FilterComboBox<SloStatus>
+            label={i18n.translate('xpack.apm.serviceMapEditor.sloStatusFilterLabel', {
+              defaultMessage: 'SLO status',
+            })}
+            placeholder={i18n.translate('xpack.apm.serviceMapEditor.sloStatusFilterPlaceholder', {
+              defaultMessage: 'All SLO statuses',
+            })}
+            options={SLO_STATUS_OPTIONS}
+            selected={sloStatusFilter}
+            onChange={setSloStatusFilter}
+            dataTestSubj="apmServiceMapEditorSloStatusFilter"
+          />
+
+          <FilterComboBox<ML_ANOMALY_SEVERITY>
+            label={i18n.translate('xpack.apm.serviceMapEditor.anomalySeverityFilterLabel', {
+              defaultMessage: 'Anomaly severity',
+            })}
+            placeholder={i18n.translate(
+              'xpack.apm.serviceMapEditor.anomalySeverityFilterPlaceholder',
+              {
+                defaultMessage: 'All severities',
+              }
+            )}
+            options={ANOMALY_SEVERITY_OPTIONS}
+            selected={anomalySeverityFilter}
+            onChange={setAnomalySeverityFilter}
+            dataTestSubj="apmServiceMapEditorAnomalySeverityFilter"
+          />
+
+          <EuiHorizontalRule margin="m" />
+
+          <EuiText size="xs">
+            <h3>
+              {i18n.translate('xpack.apm.serviceMapEditor.presentationHeading', {
+                defaultMessage: 'Presentation',
+              })}
+            </h3>
+          </EuiText>
+
+          <EuiFormRow
+            label={i18n.translate('xpack.apm.serviceMapEditor.layoutLabel', {
+              defaultMessage: 'Layout',
+            })}
+            fullWidth
+          >
+            <EuiButtonGroup
+              isFullWidth
+              legend={i18n.translate('xpack.apm.serviceMapEditor.layoutLegend', {
+                defaultMessage: 'Map layout orientation',
+              })}
+              buttonSize="compressed"
+              options={orientationOptions}
+              idSelected={`${orientationIdPrefix}${mapOrientation}`}
+              onChange={(optionId) => {
+                const suffix = optionId.slice(orientationIdPrefix.length);
+                if (suffix === 'horizontal' || suffix === 'vertical') {
+                  setMapOrientation(suffix);
+                }
+              }}
+              data-test-subj="apmServiceMapEditorLayoutOrientationButtonGroup"
+            />
+          </EuiFormRow>
+
+          <EuiHorizontalRule margin="m" />
 
           <EuiFormRow
             helpText={i18n.translate('xpack.apm.serviceMapEditor.syncFiltersHelpText', {

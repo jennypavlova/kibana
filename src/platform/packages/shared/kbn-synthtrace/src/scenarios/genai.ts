@@ -261,8 +261,49 @@ const REALWORLD_INPUT_MESSAGES = JSON.stringify([
   },
   {
     role: 'user',
-    content:
-      "I'm building a Node.js REST API with Express and TypeScript. How should I structure error handling so that all errors are caught and returned as consistent JSON responses?",
+    content: `I'm setting up a Node.js REST API with Express and TypeScript. Here's my current entry point:
+
+\`\`\`typescript
+// src/app.ts
+import express, { Request, Response, NextFunction } from 'express';
+
+const app = express();
+app.use(express.json());
+
+app.get('/users/:id', async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const user = await db.users.findById(req.params.id);
+    if (!user) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+    res.json(user);
+  } catch (err) {
+    console.error('[ERROR]', err);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+app.post('/users', async (req: Request, res: Response) => {
+  // TODO: validate req.body before trusting it
+  const user = await db.users.create(req.body);
+  res.status(201).json(user);
+});
+
+export default app;
+\`\`\`
+
+Problems I'm running into:
+
+1. **Repetitive try/catch** — every route has the same boilerplate. I want a centralised way to catch async errors.
+2. **Inconsistent response shape** — some routes return \`{ error: string }\`, others throw or send plain strings.
+3. **No validation** — \`POST /users\` trusts \`req.body\` completely, no schema enforcement at all.
+
+Our constraints:
+- TypeScript \`strict: true\` — all solutions must compile without \`any\` casts
+- We're on **Express 4.x** (not Express 5 beta)
+- Error responses must always be \`{ error: { code, message, statusCode } }\`
+
+How should I redesign the error handling architecture to cover all three concerns?`,
   },
   {
     role: 'assistant',
@@ -364,8 +405,41 @@ app.use(errorMiddleware); // MUST be last
   },
   {
     role: 'user',
-    content:
-      'Great. How do I validate request bodies? I want to reject bad payloads before they hit my route logic.',
+    content: `That makes sense for errors. For validation, I tried writing my own Zod middleware but I'm hitting TypeScript type issues. Here's what I have:
+
+\`\`\`typescript
+// src/middleware/validate.ts
+import { AnyZodObject } from 'zod';
+import { Request, Response, NextFunction } from 'express';
+
+// TypeScript error: Parameter 'req' implicitly has an 'any' type
+function validate(schema: AnyZodObject) {
+  return function(req, res, next) {
+    const result = schema.safeParse(req.body);
+    if (!result.success) {
+      return res.status(400).json({ errors: result.error.flatten() });
+    }
+    req.body = result.data;
+    next();
+  };
+}
+\`\`\`
+
+The specific issues I'm hitting:
+
+- \`req.body\` loses its inferred Zod type — downstream handlers still see \`any\`
+- I can't thread the parsed type through \`req.body\` without explicit casting in every route handler
+- If I use a generic \`ParsedBody<T>\` augmentation, every route must repeat the type parameter manually
+
+| What works | What breaks |
+|---|---|
+| \`schema.parse(data)\` infers the type correctly | \`req.body = result.data\` then loses the type |
+| Explicit \`req: Request<{}, {}, z.infer<typeof Schema>>\` | Must be repeated in every route handler |
+| \`express-zod-api\` solves this neatly | We want to avoid additional wrapper libraries |
+
+> **Constraint:** No additional wrapper libraries — raw Express + Zod only. The inferred type must flow through automatically without manual casting in route handlers.
+
+How do I make this work?`,
   },
   {
     role: 'assistant',
@@ -447,7 +521,46 @@ export default router;
   },
   {
     role: 'user',
-    content: 'How should I write integration tests for these routes with Jest and supertest?',
+    content: `Before we add tests, here's our current setup and our team's requirements:
+
+### What I've started
+
+\`\`\`typescript
+// tests/users.test.ts
+import request from 'supertest';
+import { app } from '../src/app';
+
+describe('POST /users', () => {
+  it('creates a user with valid payload', async () => {
+    const res = await request(app)
+      .post('/users')
+      .send({ email: 'alice@example.com', name: 'Alice' });
+    expect(res.status).toBe(201);
+    expect(res.body.data).toMatchObject({ email: 'alice@example.com' });
+  });
+});
+\`\`\`
+
+### Team requirements
+
+| Requirement | Detail |
+|---|---|
+| Database | Real Postgres — mocks are banned after a prod incident last quarter |
+| Isolation | Each test must not bleed state into the next |
+| Auth | Routes require a valid JWT — no middleware mocking allowed |
+| Coverage | Must cover the \`INTERNAL_SERVER_ERROR\` branch in \`errorMiddleware\` |
+| CI environment | Docker Compose — DB available at \`localhost:5432\` |
+
+### Specific questions
+
+1. **Transaction isolation** — how do I wrap each test in a DB transaction that rolls back automatically after?
+2. **JWT signing** — how do I generate a valid token in \`beforeAll\` without hitting a real auth service?
+3. **Test data seeding** — what's the right pattern for creating prerequisite records while keeping tests independent?
+4. **Forcing the error path** — how do I deliberately trigger an unhandled error to cover the 500 branch?
+
+> 🔒 The JWT secret must NOT be hardcoded in test files. It should be injected via \`process.env.TEST_JWT_SECRET\`.
+
+Can you update the Jest + supertest example to address all of these constraints?`,
   },
   {
     role: 'assistant',
@@ -533,8 +646,39 @@ describe('POST /users', () => {
   },
   {
     role: 'user',
-    content:
-      'Last question: how do I containerise this app and make sure the health check works in Kubernetes?',
+    content: `We're deploying on Kubernetes. Before I containerise the app, here's our \`package.json\` (relevant parts):
+
+\`\`\`json
+{
+  "name": "my-api",
+  "version": "1.0.0",
+  "scripts": {
+    "build": "tsc --outDir dist",
+    "start": "node dist/server.js",
+    "dev": "ts-node-dev src/server.ts"
+  },
+  "dependencies": {
+    "express": "^4.18.2",
+    "zod": "^3.22.4"
+  },
+  "devDependencies": {
+    "typescript": "^5.3.3",
+    "@types/express": "^4.17.21",
+    "ts-node-dev": "^2.0.0"
+  }
+}
+\`\`\`
+
+Deployment requirements:
+
+- **Multi-stage Docker build** — Alpine base, final image must be as small as possible
+- **Non-root user** — security policy requires the process to run as a non-root user inside the container
+- **Separate health probes** — a lightweight liveness ping *and* a deeper readiness check that verifies DB connectivity
+- **Kubernetes Secrets** — \`DATABASE_URL\` and \`JWT_SECRET\` must come from K8s Secrets, not baked into the image
+
+> ⚠️ **Common mistake I want to avoid:** I've seen teams put the DB health check in the *liveness* probe, which causes a restart loop when the database is temporarily unreachable. How do I structure the probes to avoid that?
+
+Can you give me the complete Dockerfile and a Kubernetes Deployment manifest?`,
   },
 ]);
 
@@ -1061,7 +1205,7 @@ const scenario: Scenario<ApmOtelFields> = async () => {
         .otelService({
           name: 'genai-realworld-service',
           namespace: ENVIRONMENT,
-          sdkLanguage: 'typescript',
+          sdkLanguage: 'python',
           sdkName: 'opentelemetry',
           distro: 'elastic',
         })
@@ -1082,16 +1226,17 @@ const scenario: Scenario<ApmOtelFields> = async () => {
               'attributes.gen_ai.provider.name': 'openai',
               'attributes.gen_ai.request.model': 'gpt-4o',
               'attributes.gen_ai.response.model': 'gpt-4o-2024-08-06',
-              'attributes.gen_ai.usage.input_tokens': 3840,
+              'attributes.gen_ai.usage.input_tokens': 7240,
               'attributes.gen_ai.usage.output_tokens': 1260,
               'attributes.gen_ai.request.temperature': 0.2,
               'attributes.gen_ai.request.top_p': 0.95,
               'attributes.gen_ai.request.max_tokens': 4096,
+              'attributes.gen_ai.request.seed': 42,
               'attributes.gen_ai.response.id': 'chatcmpl-realworld-001',
               'attributes.gen_ai.response.finish_reasons': ['stop'],
               'attributes.gen_ai.conversation.id': 'conv-realworld-001',
               'attributes.gen_ai.system_instructions':
-                'You are a senior TypeScript engineer. You write clean, well-typed, production-ready code.',
+                'You are a senior software engineer. You write clean, well-typed, production-ready code.',
               'attributes.gen_ai.input.messages': REALWORLD_INPUT_MESSAGES,
               'attributes.gen_ai.output.messages': REALWORLD_OUTPUT_MESSAGES,
             })

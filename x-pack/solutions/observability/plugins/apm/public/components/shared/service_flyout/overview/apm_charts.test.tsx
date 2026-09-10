@@ -20,7 +20,9 @@ jest.mock('../../../../context/apm_plugin/use_apm_plugin_context', () => ({
 }));
 
 jest.mock('../../../../context/time_range_metadata/time_range_metadata_context', () => ({
-  TimeRangeMetadataContextProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>,
+  TimeRangeMetadataContextProvider: ({ children }: { children: React.ReactNode }) => (
+    <>{children}</>
+  ),
 }));
 
 const mockLatencyChart = jest.fn();

@@ -929,6 +929,7 @@ function GraphInner({
               initialRangeFrom={flyoutOptions?.rangeFrom ?? start}
               initialRangeTo={flyoutOptions?.rangeTo ?? end}
               initialTransactionType={flyoutOptions?.initialTransactionType}
+              initialLatencyAggregationType={flyoutOptions?.latencyAggregationType}
               onView={handleServiceFlyoutView}
               onClose={handlePopoverClose}
             />

@@ -144,6 +144,14 @@ describe('service flyout chart_configs', () => {
       );
       // the y-axis value must match the STATS output column so Lens can resolve it
       expect(latency.layers[0].yAxis[0].value).toBe('AVG(duration_ms)');
+      expect(latency.layers[0].yAxis[0]).toEqual(
+        expect.objectContaining({
+          format: 'duration',
+          fromUnit: 'milliseconds',
+          toUnit: 'humanizePrecise',
+          compactValues: true,
+        })
+      );
     });
 
     it('uses the percentile aggregation for p95 / p99 latency', () => {

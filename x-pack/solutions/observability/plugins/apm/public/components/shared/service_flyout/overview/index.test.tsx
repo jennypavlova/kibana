@@ -10,6 +10,7 @@ import { render, screen } from '@testing-library/react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import type { ServiceFlyoutTransactionsSection } from '@kbn/apm-ui-shared';
 import type { ServiceNodeData } from '../../../../../common/service_map';
+import { LatencyAggregationType } from '../../../../../common/latency_aggregation_types';
 import { ServiceFlyoutOverview } from '.';
 
 const mockUseServiceHasSystemMetrics = jest.fn<
@@ -51,6 +52,13 @@ jest.mock('./lens_chart', () => ({
   ServiceFlyoutLensChart: () => <div data-test-subj="lensChartMock" />,
 }));
 
+const mockServiceFlyoutApmCharts = jest.fn((_props: unknown) => (
+  <div data-test-subj="apmChartsMock" />
+));
+jest.mock('./apm_charts', () => ({
+  ServiceFlyoutApmCharts: (props: unknown) => mockServiceFlyoutApmCharts(props as never),
+}));
+
 const service: ServiceNodeData = {
   id: 'opbeans-java',
   label: 'opbeans-java',
@@ -66,6 +74,7 @@ const defaultProps = {
   rangeTo: 'now',
   transactionType: 'request',
   refreshToken: 0,
+  initialLatencyAggregationType: undefined as LatencyAggregationType | undefined,
   onEnvironmentChange: jest.fn(),
   onRangeChange: jest.fn(),
   onRefresh: jest.fn(),
@@ -171,5 +180,35 @@ describe('ServiceFlyoutOverview infrastructure section visibility', () => {
     renderOverview();
 
     expect(screen.getByTestId('serviceFlyoutSection-keyMetrics')).toBeInTheDocument();
+  });
+});
+
+describe('ServiceFlyoutOverview key metrics chart implementation', () => {
+  beforeEach(() => {
+    mockUseServiceHasSystemMetrics.mockReturnValue({ hasSystemMetrics: false, isLoading: false });
+  });
+
+  it('renders the shared APM chart components for classic APM services', () => {
+    renderOverview();
+
+    expect(screen.getByTestId('apmChartsMock')).toBeInTheDocument();
+    expect(screen.queryByTestId('lensChartMock')).not.toBeInTheDocument();
+  });
+
+  it('keeps ES|QL Lens charts for OpenTelemetry services', () => {
+    renderOverview({
+      service: { ...service, agentName: 'otlp' as ServiceNodeData['agentName'] },
+    });
+
+    expect(screen.queryByTestId('apmChartsMock')).not.toBeInTheDocument();
+    expect(screen.getAllByTestId('lensChartMock').length).toBeGreaterThan(0);
+  });
+
+  it('forwards an inherited latency aggregation type to the APM charts', () => {
+    renderOverview({ initialLatencyAggregationType: LatencyAggregationType.p95 });
+
+    expect(mockServiceFlyoutApmCharts).toHaveBeenCalledWith(
+      expect.objectContaining({ latencyAggregationType: LatencyAggregationType.p95 })
+    );
   });
 });

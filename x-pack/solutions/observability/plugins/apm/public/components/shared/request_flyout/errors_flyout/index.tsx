@@ -28,12 +28,10 @@ import { useLogsIndexPattern } from '../../../../hooks/use_logs_index_pattern';
 import { getApmInternalServices } from '../../../../plugin';
 import { useServiceErrorsFromLogs } from '../../../app/error_group_overview/errors_from_logs/use_service_errors_from_logs';
 import { useRequestFlyoutContext } from '../request_flyout_context';
-import type { RequestFlyoutChildSession } from '../request_flyout_content';
 import { groupLogErrors, type LogErrorGroup } from './group_log_errors';
 
 interface Props {
   bucket: FailedCallBucket;
-  session: RequestFlyoutChildSession;
   historyKey: symbol;
   onClose: () => void;
 }
@@ -53,12 +51,12 @@ interface SelectedDoc {
 }
 
 /**
- * Child flyout opened from the top error of a failed-calls bucket. Mirrors the
+ * Flyout opened from the top error of a failed-calls bucket. Mirrors the
  * errors page: APM error groups (grouped by error.grouping_key) plus error logs
  * (grouped client side for now). Built from props-only pieces because the errors
  * page components read route params and throw outside their routes.
  */
-export function RequestFlyoutErrorsFlyout({ bucket, session, historyKey, onClose }: Props) {
+export function RequestFlyoutErrorsFlyout({ bucket, historyKey, onClose }: Props) {
   const {
     connection: { sourceServiceName, targetServiceName },
     filters: { environment, start, end, rangeFrom, rangeTo },
@@ -208,7 +206,9 @@ export function RequestFlyoutErrorsFlyout({ bucket, session, historyKey, onClose
       ownFocus={false}
       size="fill"
       paddingSize="m"
-      session={session}
+      // Always a new session: this flyout opens the doc viewer as its own child, and EUI
+      // allows only one main + one child per session, so it can't itself be a child.
+      session="start"
       historyKey={historyKey}
       flyoutMenuDisplayMode="always"
       flyoutMenuProps={{ title: serviceName }}

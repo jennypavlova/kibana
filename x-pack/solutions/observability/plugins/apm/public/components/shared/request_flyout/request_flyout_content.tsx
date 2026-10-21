@@ -105,7 +105,6 @@ export function RequestFlyoutContent({ childSession, historyKey }: RequestFlyout
             return (
               <RequestFlyoutErrorsFlyout
                 bucket={child.bucket}
-                session={childSession}
                 historyKey={historyKey}
                 onClose={close}
               />

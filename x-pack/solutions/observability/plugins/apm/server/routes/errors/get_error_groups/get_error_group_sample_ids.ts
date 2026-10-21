@@ -73,13 +73,14 @@ export async function getErrorGroupSampleIds({
     ] as const),
   });
 
-  const errorSampleIds = resp.hits.hits.map((item) => {
-    const event = accessKnownApmEventFields(item.fields).requireFields(requiredFields);
-    return event[ERROR_ID] ?? event._id;
-  });
+  const events = resp.hits.hits.map((item) => ({
+    event: accessKnownApmEventFields(item.fields).requireFields(requiredFields),
+    index: item._index,
+  }));
 
   return {
-    errorSampleIds,
+    errorSampleIds: events.map(({ event }) => event[ERROR_ID] ?? event._id),
+    errorSampleDocs: events.map(({ event, index }) => ({ id: event._id, index })),
     occurrencesCount: resp.hits.total.value,
   };
 }

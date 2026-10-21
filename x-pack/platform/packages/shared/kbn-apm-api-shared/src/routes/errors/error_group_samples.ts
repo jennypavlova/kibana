@@ -11,6 +11,11 @@ import { kuerySchema, rangeSchema } from '../../default_api_types';
 
 export interface ErrorGroupSampleIdsResponse {
   errorSampleIds: string[];
+  /**
+   * The Elasticsearch `_id` and `_index` of the same samples, in the same order. `errorSampleIds`
+   * holds `error.id`, which can differ from `_id`, so use these to fetch the document itself.
+   */
+  errorSampleDocs?: Array<{ id: string; index: string }>;
   occurrencesCount: number;
 }
 

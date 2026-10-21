@@ -109,9 +109,13 @@ export function RequestFlyoutErrorsFlyout({ bucket, historyKey, onClose }: Props
   const { callApmApiForSample } = useSampleLookup({ serviceName, environment, start, end });
 
   const openApmGroup = async (group: ApmErrorGroupRow) => {
-    const docId = await callApmApiForSample(group.groupId);
-    if (docId) {
-      setSelectedDoc({ docId, traceId: group.traceId ?? bucket.sampleTraceId ?? '' });
+    const doc = await callApmApiForSample(group.groupId);
+    if (doc) {
+      setSelectedDoc({
+        docId: doc.id,
+        docIndex: doc.index,
+        traceId: group.traceId ?? bucket.sampleTraceId ?? '',
+      });
     }
   };
 
@@ -204,7 +208,8 @@ export function RequestFlyoutErrorsFlyout({ bucket, historyKey, onClose }: Props
       data-test-subj="requestFlyoutErrorsFlyout"
       onClose={onClose}
       ownFocus={false}
-      size="fill"
+      // Not `fill`: EUI rejects a `fill` child (the doc viewer) under a `fill` parent.
+      size="m"
       paddingSize="m"
       // Always a new session: this flyout opens the doc viewer as its own child, and EUI
       // allows only one main + one child per session, so it can't itself be a child.
@@ -306,7 +311,9 @@ function useSampleLookup({
 }) {
   const { callApmApi } = getApmInternalServices();
   return {
-    callApmApiForSample: async (groupId: string): Promise<string | undefined> => {
+    callApmApiForSample: async (
+      groupId: string
+    ): Promise<{ id: string; index: string } | undefined> => {
       const res = await callApmApi(
         'GET /internal/apm/services/{serviceName}/errors/{groupId}/samples',
         {
@@ -317,7 +324,8 @@ function useSampleLookup({
           signal: null,
         }
       );
-      return res.errorSampleIds[0];
+      // `errorSampleIds` holds error.id; the doc viewer fetches by the Elasticsearch _id.
+      return res.errorSampleDocs?.[0];
     },
   };
 }

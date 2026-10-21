@@ -9,6 +9,13 @@
  * All the data identifying a single connection in the service map.
  * Derived from ServiceMapEdgeData at the call site in graph.tsx.
  */
+export interface GroupedResource {
+  /** span.destination.service.resource of the resource. */
+  resource: string;
+  spanType?: string;
+  spanSubtype?: string;
+}
+
 export interface RequestFlyoutConnection {
   /** service.name of the source (caller) service. */
   sourceServiceName: string;
@@ -34,6 +41,11 @@ export interface RequestFlyoutConnection {
   dependencyName?: string;
   /** True when this edge aggregates multiple outgoing edges into a synthetic "Externals" group. */
   isGrouped?: boolean;
+  /**
+   * The resources behind a grouped edge (e.g. 6 redis instances). The grouped
+   * flyout lists them; each one opens a child flyout scoped to that resource.
+   */
+  groupedResources?: GroupedResource[];
   /**
    * True when this edge represents a messaging-queue consumer edge (dependency → service).
    * No metrics are available for these edges.

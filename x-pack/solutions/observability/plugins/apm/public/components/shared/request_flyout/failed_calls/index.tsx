@@ -28,6 +28,8 @@ import { useApmIndexSettingsContext } from '../../../../context/apm_index_settin
 import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
 import { getESQLQuery } from '../../links/discover_links/get_esql_query';
 import { useApmRouter } from '../../../../hooks/use_apm_router';
+import { ExpandableNameCell } from '../expandable_name_cell';
+import { useRequestFlyoutChild } from '../request_flyout_child';
 import { useRequestFlyoutContext } from '../request_flyout_context';
 import { useRequestFlyoutFailedCalls } from './use_request_flyout_failed_calls';
 
@@ -88,6 +90,7 @@ export function RequestFlyoutFailedCalls() {
   } = useRequestFlyoutContext();
 
   const { link } = useApmRouter();
+  const { toggleChild, isChildSelected } = useRequestFlyoutChild();
   const { buckets, totalFailed, totalCalls, isSampled, isLoading } = useRequestFlyoutFailedCalls();
 
   // Discover link — built per-row using getESQLQuery (pure function).
@@ -126,27 +129,6 @@ export function RequestFlyoutFailedCalls() {
       discoverLocator,
     ]
   );
-
-  /**
-   * Build a deep link to a specific APM error group page.
-   * Only called when topErrorGroupId is non-null (i.e. the error came from a real APM doc).
-   * server bucket → target service; everything else → source service.
-   */
-  function errorGroupHref(bucketType: FailedCallBucket['type'], groupId: string): string {
-    const serviceName =
-      bucketType === 'server' && targetServiceName ? targetServiceName : sourceServiceName;
-    return link('/services/{serviceName}/errors/{groupId}', {
-      path: { serviceName, groupId },
-      query: {
-        environment,
-        rangeFrom,
-        rangeTo,
-        kuery: '',
-        serviceGroup: '',
-        comparisonEnabled: false,
-      },
-    });
-  }
 
   const columns: Array<EuiBasicTableColumn<FailedCallBucket>> = [
     {
@@ -191,23 +173,25 @@ export function RequestFlyoutFailedCalls() {
         // Only link when we have a real APM error group — status-code labels (gRPC/HTTP)
         // have no corresponding error doc to link to.
         if (item.topErrorGroupId) {
-          const href = errorGroupHref(item.type, item.topErrorGroupId);
-          return truncated !== topError ? (
-            <EuiToolTip content={topError}>
-              <EuiLink data-test-subj="apmColumnsLink" href={href}>
-                {truncated}
-              </EuiLink>
-            </EuiToolTip>
-          ) : (
-            <EuiLink data-test-subj="apmColumnsLink" href={href}>
-              {topError}
-            </EuiLink>
+          // Opens the errors child flyout (APM error groups + error logs) instead of
+          // navigating to the error group page.
+          const child = { kind: 'error' as const, bucket: item };
+          const cell = (
+            <ExpandableNameCell
+              data-test-subj="requestFlyoutTopErrorLink"
+              name={truncated}
+              isExpanded={isChildSelected(child)}
+              onClick={() => toggleChild(child)}
+            />
           );
+          return truncated !== topError ? <EuiToolTip content={topError}>{cell}</EuiToolTip> : cell;
         }
         return truncated !== topError ? (
           <EuiToolTip content={topError}>
             {/* tabIndex makes the non-interactive EuiText focusable for a11y */}
-            <EuiText size="s" tabIndex={0}>{truncated}</EuiText>
+            <EuiText size="s" tabIndex={0}>
+              {truncated}
+            </EuiText>
           </EuiToolTip>
         ) : (
           <EuiText size="s">{topError}</EuiText>
@@ -378,10 +362,9 @@ export function RequestFlyoutFailedCalls() {
                     defaultMessage: 'No failed calls found for this connection.',
                   })
             }
-            tableCaption={i18n.translate(
-              'xpack.apm.requestFlyout.failedCalls.tableCaption',
-              { defaultMessage: 'Failed calls broken down by where they failed' }
-            )}
+            tableCaption={i18n.translate('xpack.apm.requestFlyout.failedCalls.tableCaption', {
+              defaultMessage: 'Failed calls broken down by where they failed',
+            })}
             data-test-subj="requestFlyoutFailedCallsTable"
           />
         </>

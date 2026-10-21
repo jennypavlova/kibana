@@ -35,7 +35,13 @@ export function ExpandableNameCell({
       });
 
   return (
-    <EuiFlexGroup alignItems="center" gutterSize="xs" responsive={false}>
+    <EuiFlexGroup
+      alignItems="center"
+      gutterSize="xs"
+      responsive={false}
+      // Keeps the name readable: table columns would otherwise shrink it to a stub.
+      css={{ minWidth: 180 }}
+    >
       <EuiFlexItem grow={false}>
         <EuiToolTip content={label} disableScreenReaderOutput>
           <EuiButtonIcon

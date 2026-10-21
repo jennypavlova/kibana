@@ -189,7 +189,7 @@ export function RequestFlyoutOperationDetailFlyout({
         defaultMessage: 'Duration',
       }),
       align: 'right' as const,
-      render: (duration: number) => asMillisecondDuration(duration / 1000),
+      render: (duration: number) => asMillisecondDuration(duration),
     },
     {
       field: 'outcome',

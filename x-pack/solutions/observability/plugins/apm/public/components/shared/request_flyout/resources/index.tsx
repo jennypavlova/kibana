@@ -57,10 +57,10 @@ export function RequestFlyoutResources() {
   const columns: Array<EuiBasicTableColumn<ResourceRow>> = [
     {
       field: 'resource',
+      width: '38%',
       name: i18n.translate('xpack.apm.requestFlyout.resources.column.resource', {
         defaultMessage: 'Resource',
       }),
-      truncateText: true,
       render: (resource: string) => {
         const child = { kind: 'resource' as const, resource };
         return (
@@ -78,7 +78,7 @@ export function RequestFlyoutResources() {
       name: i18n.translate('xpack.apm.requestFlyout.resources.column.type', {
         defaultMessage: 'Type',
       }),
-      width: '100px',
+      width: '12%',
       render: (subtype: string | undefined) =>
         subtype ? <EuiBadge color="hollow">{subtype}</EuiBadge> : '—',
     },

@@ -29,12 +29,12 @@ import { useRequestFlyoutOperations } from './use_request_flyout_operations';
  * "Operations" tab in the edge flyout.
  *
  * Shows the exit-span operations from the source service to the target
- * dependency: the span type, name (opens the operation detail child flyout), call
+ * dependency: the name (opens the operation detail child flyout), span type, call
  * latency, calls, failure rate and impact (time consumed share) — all
  * measured on the source side.
  *
  * Column names are unified with the Transactions tab:
- *   Type · Name · Avg time · Calls · Failed · Time consumed
+ *   Name · Type · Avg time · Calls · Failed · Time consumed
  */
 export function RequestFlyoutOperations() {
   const {
@@ -77,20 +77,11 @@ export function RequestFlyoutOperations() {
 
   const columns: Array<EuiBasicTableColumn<DependencyOperation>> = [
     {
-      field: 'spanType',
-      name: i18n.translate('xpack.apm.requestFlyout.operations.column.spanType', {
-        defaultMessage: 'Type',
-      }),
-      width: '100px',
-      render: (spanType: string | undefined) =>
-        spanType ? <EuiBadge color="hollow">{spanType}</EuiBadge> : <span>—</span>,
-    },
-    {
       field: 'spanName',
+      width: '38%',
       name: i18n.translate('xpack.apm.requestFlyout.operations.column.spanName', {
         defaultMessage: 'Name',
       }),
-      truncateText: true,
       render: (spanName: string) => {
         if (!resolvedDependencyName) {
           // Service→service edges use span names as-is; no operation detail.
@@ -112,6 +103,15 @@ export function RequestFlyoutOperations() {
           />
         );
       },
+    },
+    {
+      field: 'spanType',
+      name: i18n.translate('xpack.apm.requestFlyout.operations.column.spanType', {
+        defaultMessage: 'Type',
+      }),
+      width: '14%',
+      render: (spanType: string | undefined) =>
+        spanType ? <EuiBadge color="hollow">{spanType}</EuiBadge> : <span>—</span>,
     },
     {
       field: 'latency',

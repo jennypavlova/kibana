@@ -35,13 +35,7 @@ export function ExpandableNameCell({
       });
 
   return (
-    <EuiFlexGroup
-      alignItems="center"
-      gutterSize="xs"
-      responsive={false}
-      // Keeps the name readable: table columns would otherwise shrink it to a stub.
-      css={{ minWidth: 180 }}
-    >
+    <EuiFlexGroup alignItems="center" gutterSize="xs" responsive={false}>
       <EuiFlexItem grow={false}>
         <EuiToolTip content={label} disableScreenReaderOutput>
           <EuiButtonIcon
@@ -55,8 +49,13 @@ export function ExpandableNameCell({
         </EuiToolTip>
       </EuiFlexItem>
       <EuiFlexItem css={{ minWidth: 0 }}>
-        <EuiLink data-test-subj={dataTestSubj} onClick={onClick} css={{ textAlign: 'left' }}>
-          <span className="eui-textTruncate">{name}</span>
+        {/* Wraps instead of truncating: the child flyouts are narrow and a truncated name is useless. */}
+        <EuiLink
+          data-test-subj={dataTestSubj}
+          onClick={onClick}
+          css={{ textAlign: 'left', overflowWrap: 'anywhere' }}
+        >
+          {name}
         </EuiLink>
       </EuiFlexItem>
     </EuiFlexGroup>

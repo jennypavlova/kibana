@@ -91,10 +91,10 @@ export function RequestFlyoutAffectedEndpoints() {
   const columns: Array<EuiBasicTableColumn<ConnectionTransactionGroup>> = [
     {
       field: 'name',
+      width: '38%',
       name: i18n.translate('xpack.apm.requestFlyout.affectedEndpoints.column.transaction', {
         defaultMessage: 'Name',
       }),
-      truncateText: true,
       render: (name: string, item: ConnectionTransactionGroup) => (
         <ExpandableNameCell
           data-test-subj={`requestFlyoutTransactionNameLink-${name}`}

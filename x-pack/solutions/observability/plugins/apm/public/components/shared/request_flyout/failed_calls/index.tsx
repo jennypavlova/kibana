@@ -156,6 +156,7 @@ export function RequestFlyoutFailedCalls() {
     },
     {
       field: 'topError',
+      width: '38%',
       name: i18n.translate('xpack.apm.requestFlyout.failedCalls.column.topError', {
         defaultMessage: 'Top error',
       }),

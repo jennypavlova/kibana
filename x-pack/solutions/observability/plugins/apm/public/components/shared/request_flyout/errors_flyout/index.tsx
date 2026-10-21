@@ -11,7 +11,6 @@ import {
   EuiCallOut,
   EuiFlyout,
   EuiFlyoutBody,
-  EuiLink,
   EuiSpacer,
   EuiText,
   EuiTitle,
@@ -25,8 +24,9 @@ import { asInteger } from '../../../../../common/utils/formatters';
 import { useAdHocApmDataView } from '../../../../hooks/use_adhoc_apm_data_view';
 import { isPending, useFetcher } from '../../../../hooks/use_fetcher';
 import { useLogsIndexPattern } from '../../../../hooks/use_logs_index_pattern';
-import { getApmInternalServices } from '../../../../plugin';
 import { useServiceErrorsFromLogs } from '../../../app/error_group_overview/errors_from_logs/use_service_errors_from_logs';
+import { RequestFlyoutApmErrorGroupFlyout } from '../apm_error_group_flyout';
+import { ExpandableNameCell } from '../expandable_name_cell';
 import { useRequestFlyoutContext } from '../request_flyout_context';
 import { groupLogErrors, type LogErrorGroup } from './group_log_errors';
 
@@ -44,11 +44,10 @@ interface ApmErrorGroupRow {
   traceId?: string;
 }
 
-interface SelectedDoc {
-  docId: string;
-  docIndex?: string;
-  traceId: string;
-}
+/** The single child flyout of the errors flyout: an APM error group or a log error document. */
+type SelectedChild =
+  | { kind: 'apm'; groupId: string; name: string }
+  | { kind: 'log'; key: string; docId: string; docIndex?: string; traceId: string };
 
 /**
  * Flyout opened from the top error of a failed-calls bucket. Mirrors the
@@ -66,7 +65,9 @@ export function RequestFlyoutErrorsFlyout({ bucket, historyKey, onClose }: Props
   const serviceName =
     bucket.type === 'server' && targetServiceName ? targetServiceName : sourceServiceName;
 
-  const [selectedDoc, setSelectedDoc] = useState<SelectedDoc | null>(null);
+  const [selected, setSelected] = useState<SelectedChild | null>(null);
+  const toggle = (child: SelectedChild) =>
+    setSelected((prev) => (isSameChild(prev, child) ? null : child));
   const { dataView, apmIndices } = useAdHocApmDataView();
   const { logsIndexPattern } = useLogsIndexPattern();
   const indexes = useMemo(
@@ -106,34 +107,24 @@ export function RequestFlyoutErrorsFlyout({ bucket, historyKey, onClose }: Props
   });
   const logGroups = useMemo(() => groupLogErrors(logRows), [logRows]);
 
-  const { callApmApiForSample } = useSampleLookup({ serviceName, environment, start, end });
-
-  const openApmGroup = async (group: ApmErrorGroupRow) => {
-    const doc = await callApmApiForSample(group.groupId);
-    if (doc) {
-      setSelectedDoc({
-        docId: doc.id,
-        docIndex: doc.index,
-        traceId: group.traceId ?? bucket.sampleTraceId ?? '',
-      });
-    }
-  };
-
   const apmColumns: Array<EuiBasicTableColumn<ApmErrorGroupRow>> = [
     {
       field: 'name',
+      width: '40%',
       name: i18n.translate('xpack.apm.requestFlyout.errors.apm.column.name', {
         defaultMessage: 'Error',
       }),
-      truncateText: true,
-      render: (name: string, group: ApmErrorGroupRow) => (
-        <EuiLink
-          data-test-subj="requestFlyoutApmErrorGroupLink"
-          onClick={() => openApmGroup(group)}
-        >
-          {name}
-        </EuiLink>
-      ),
+      render: (name: string, group: ApmErrorGroupRow) => {
+        const child: SelectedChild = { kind: 'apm', groupId: group.groupId, name };
+        return (
+          <ExpandableNameCell
+            data-test-subj="requestFlyoutApmErrorGroupLink"
+            name={name}
+            isExpanded={isSameChild(selected, child)}
+            onClick={() => toggle(child)}
+          />
+        );
+      },
     },
     {
       field: 'occurrences',
@@ -156,24 +147,27 @@ export function RequestFlyoutErrorsFlyout({ bucket, historyKey, onClose }: Props
   const logColumns: Array<EuiBasicTableColumn<LogErrorGroup>> = [
     {
       field: 'message',
+      width: '40%',
       name: i18n.translate('xpack.apm.requestFlyout.errors.logs.column.message', {
         defaultMessage: 'Error',
       }),
-      truncateText: true,
-      render: (message: string, group: LogErrorGroup) => (
-        <EuiLink
-          data-test-subj="requestFlyoutLogErrorGroupLink"
-          onClick={() =>
-            setSelectedDoc({
-              docId: group.sample.id,
-              docIndex: group.sample.index,
-              traceId: group.sample.traceId ?? '',
-            })
-          }
-        >
-          {message || group.type}
-        </EuiLink>
-      ),
+      render: (message: string, group: LogErrorGroup) => {
+        const child: SelectedChild = {
+          kind: 'log',
+          key: group.key,
+          docId: group.sample.id,
+          docIndex: group.sample.index,
+          traceId: group.sample.traceId ?? '',
+        };
+        return (
+          <ExpandableNameCell
+            data-test-subj="requestFlyoutLogErrorGroupLink"
+            name={message || group.type}
+            isExpanded={isSameChild(selected, child)}
+            onClick={() => toggle(child)}
+          />
+        );
+      },
     },
     {
       field: 'type',
@@ -208,10 +202,11 @@ export function RequestFlyoutErrorsFlyout({ bucket, historyKey, onClose }: Props
       data-test-subj="requestFlyoutErrorsFlyout"
       onClose={onClose}
       ownFocus={false}
-      // Not `fill`: EUI rejects a `fill` child (the doc viewer) under a `fill` parent.
+      // Not `fill`: EUI rejects a `fill` child (the APM error group or the doc viewer) under a
+      // `fill` parent.
       size="m"
       paddingSize="m"
-      // Always a new session: this flyout opens the doc viewer as its own child, and EUI
+      // Always a new session: this flyout opens its details as its own child, and EUI
       // allows only one main + one child per session, so it can't itself be a child.
       session="start"
       historyKey={historyKey}
@@ -279,15 +274,25 @@ export function RequestFlyoutErrorsFlyout({ bucket, historyKey, onClose }: Props
         />
       </EuiFlyoutBody>
 
-      {selectedDoc && dataView && (
+      {selected?.kind === 'apm' && (
+        <RequestFlyoutApmErrorGroupFlyout
+          serviceName={serviceName}
+          groupId={selected.groupId}
+          groupName={selected.name}
+          historyKey={historyKey}
+          onClose={() => setSelected(null)}
+        />
+      )}
+
+      {selected?.kind === 'log' && dataView && (
         <UnifiedDocViewerObservabilityTraceDocFlyout
           type="log"
-          docId={selectedDoc.docId}
-          docIndex={selectedDoc.docIndex}
-          traceId={selectedDoc.traceId}
+          docId={selected.docId}
+          docIndex={selected.docIndex}
+          traceId={selected.traceId}
           dataView={dataView}
           indexes={indexes}
-          onCloseFlyout={() => setSelectedDoc(null)}
+          onCloseFlyout={() => setSelected(null)}
           dataTestSubj="requestFlyoutErrorDocFlyout"
           size="fill"
           historyKey={historyKey}
@@ -297,35 +302,7 @@ export function RequestFlyoutErrorsFlyout({ bucket, historyKey, onClose }: Props
   );
 }
 
-/** Resolves the first sample error id of an APM error group. */
-function useSampleLookup({
-  serviceName,
-  environment,
-  start,
-  end,
-}: {
-  serviceName: string;
-  environment: string;
-  start: string;
-  end: string;
-}) {
-  const { callApmApi } = getApmInternalServices();
-  return {
-    callApmApiForSample: async (
-      groupId: string
-    ): Promise<{ id: string; index: string } | undefined> => {
-      const res = await callApmApi(
-        'GET /internal/apm/services/{serviceName}/errors/{groupId}/samples',
-        {
-          params: {
-            path: { serviceName, groupId },
-            query: { environment, start, end, kuery: '' },
-          },
-          signal: null,
-        }
-      );
-      // `errorSampleIds` holds error.id; the doc viewer fetches by the Elasticsearch _id.
-      return res.errorSampleDocs?.[0];
-    },
-  };
-}
+const isSameChild = (a: SelectedChild | null, b: SelectedChild) =>
+  !!a &&
+  a.kind === b.kind &&
+  (a.kind === 'apm' ? a.groupId === (b as typeof a).groupId : a.key === (b as typeof a).key);

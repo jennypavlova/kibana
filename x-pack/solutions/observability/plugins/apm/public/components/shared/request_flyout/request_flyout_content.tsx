@@ -34,8 +34,6 @@ import { RequestFlyoutChildProvider } from './request_flyout_child';
 import { useRequestFlyoutContext } from './request_flyout_context';
 import { RequestFlyoutAffectedEndpoints } from './transactions';
 
-type TabId = 'operations' | 'affectedEndpoints';
-
 export type RequestFlyoutChildSession = 'inherit' | 'start';
 
 interface RequestFlyoutContentProps {
@@ -60,7 +58,6 @@ export function RequestFlyoutContent({ childSession, historyKey }: RequestFlyout
   const [latencyAggregationType, setLatencyAggregationType] = useState<LatencyAggregationType>(
     LatencyAggregationTypeEnum.avg
   );
-  const [activeTab, setActiveTab] = useState<TabId>('operations');
 
   const envLabel =
     environment === ENVIRONMENT_ALL_VALUE
@@ -68,6 +65,7 @@ export function RequestFlyoutContent({ childSession, historyKey }: RequestFlyout
       : environment;
 
   const isGroupedEdge = !!connection.groupedResources?.length;
+  const isServiceToService = !!connection.targetServiceName;
 
   return (
     <RequestFlyoutChildProvider
@@ -159,42 +157,38 @@ export function RequestFlyoutContent({ childSession, historyKey }: RequestFlyout
           <RequestFlyoutResources />
         ) : (
           <>
-            {/* service→dependency: Operations only.
-                service→service: Operations + source transactions. */}
+            {/* service→dependency: the Operations table (what the source calls on the dependency).
+                service→service: the Transactions table (which source transactions call the target). */}
             <EuiTabs size="s">
               <EuiTab
-                isSelected={activeTab === 'operations'}
-                onClick={() => setActiveTab('operations')}
-                data-test-subj="requestFlyoutTabOperations"
+                isSelected
+                data-test-subj={
+                  isServiceToService
+                    ? 'requestFlyoutTabAffectedEndpoints'
+                    : 'requestFlyoutTabOperations'
+                }
               >
-                {i18n.translate('xpack.apm.requestFlyout.tabs.operations', {
-                  defaultMessage: 'Operations',
-                })}
+                {isServiceToService
+                  ? i18n.translate('xpack.apm.requestFlyout.tabs.affectedEndpoints', {
+                      defaultMessage: 'Transactions',
+                    })
+                  : i18n.translate('xpack.apm.requestFlyout.tabs.operations', {
+                      defaultMessage: 'Operations',
+                    })}
               </EuiTab>
-              {connection.targetServiceName && (
-                <EuiTab
-                  isSelected={activeTab === 'affectedEndpoints'}
-                  onClick={() => setActiveTab('affectedEndpoints')}
-                  data-test-subj="requestFlyoutTabAffectedEndpoints"
-                >
-                  {i18n.translate('xpack.apm.requestFlyout.tabs.affectedEndpoints', {
-                    defaultMessage: 'Transactions',
-                  })}
-                </EuiTab>
-              )}
             </EuiTabs>
 
             <EuiText size="xs" color="subdued" style={{ marginTop: 4 }}>
-              {activeTab === 'operations'
-                ? i18n.translate('xpack.apm.requestFlyout.tabs.operations.caption', {
-                    defaultMessage: 'What {source} calls on {target}',
+              {isServiceToService
+                ? i18n.translate('xpack.apm.requestFlyout.tabs.affectedEndpoints.caption', {
+                    defaultMessage: '{source} transactions that call {target}',
                     values: {
                       source: connection.sourceLabel,
                       target: connection.targetLabel,
                     },
                   })
-                : i18n.translate('xpack.apm.requestFlyout.tabs.affectedEndpoints.caption', {
-                    defaultMessage: '{source} transactions that call {target}',
+                : i18n.translate('xpack.apm.requestFlyout.tabs.operations.caption', {
+                    defaultMessage: 'What {source} calls on {target}',
                     values: {
                       source: connection.sourceLabel,
                       target: connection.targetLabel,
@@ -203,10 +197,7 @@ export function RequestFlyoutContent({ childSession, historyKey }: RequestFlyout
             </EuiText>
             <EuiSpacer size="s" />
 
-            {activeTab === 'operations' && <RequestFlyoutOperations />}
-            {activeTab === 'affectedEndpoints' && connection.targetServiceName && (
-              <RequestFlyoutAffectedEndpoints />
-            )}
+            {isServiceToService ? <RequestFlyoutAffectedEndpoints /> : <RequestFlyoutOperations />}
 
             <EuiSpacer size="l" />
 

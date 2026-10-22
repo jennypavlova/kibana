@@ -21,7 +21,7 @@ import {
 import { DISCOVER_APP_LOCATOR } from '@kbn/deeplinks-analytics';
 import { i18n } from '@kbn/i18n';
 import type { FailedCallBucket } from '@kbn/apm-api-shared';
-import React, { useCallback } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import { ActionsContextMenu, type ActionGroups } from '../../actions_context_menu';
 import { asPercent } from '../../../../../common/utils/formatters';
 import { useApmIndexSettingsContext } from '../../../../context/apm_index_settings/use_apm_index_settings_context';
@@ -130,33 +130,16 @@ export function RequestFlyoutFailedCalls() {
     ]
   );
 
+  // Highest Failed % first. The failure rate is count / totalCalls, so ordering by count is the same.
+  const bucketsByFailureRate = useMemo(
+    () => [...buckets].sort((a, b) => b.count - a.count),
+    [buckets]
+  );
+
   const columns: Array<EuiBasicTableColumn<FailedCallBucket>> = [
     {
-      field: 'type',
-      name: i18n.translate('xpack.apm.requestFlyout.failedCalls.column.failedAt', {
-        defaultMessage: 'Failed at',
-      }),
-      render: (type: FailedCallBucket['type']) => {
-        const { primary, hint } = getBucketLabel(type, sourceLabel, targetLabel);
-        return (
-          <EuiFlexGroup direction="column" gutterSize="none">
-            <EuiFlexItem grow={false}>
-              <EuiText size="s">{primary}</EuiText>
-            </EuiFlexItem>
-            {hint && (
-              <EuiFlexItem grow={false}>
-                <EuiText size="xs" color="subdued">
-                  {hint}
-                </EuiText>
-              </EuiFlexItem>
-            )}
-          </EuiFlexGroup>
-        );
-      },
-    },
-    {
       field: 'topError',
-      width: '38%',
+      width: '30%',
       name: i18n.translate('xpack.apm.requestFlyout.failedCalls.column.topError', {
         defaultMessage: 'Top error',
       }),
@@ -196,6 +179,30 @@ export function RequestFlyoutFailedCalls() {
           </EuiToolTip>
         ) : (
           <EuiText size="s">{topError}</EuiText>
+        );
+      },
+    },
+    {
+      field: 'type',
+      width: '42%',
+      name: i18n.translate('xpack.apm.requestFlyout.failedCalls.column.failedAt', {
+        defaultMessage: 'Failed at',
+      }),
+      render: (type: FailedCallBucket['type']) => {
+        const { primary, hint } = getBucketLabel(type, sourceLabel, targetLabel);
+        return (
+          <EuiFlexGroup direction="column" gutterSize="none">
+            <EuiFlexItem grow={false}>
+              <EuiText size="s">{primary}</EuiText>
+            </EuiFlexItem>
+            {hint && (
+              <EuiFlexItem grow={false}>
+                <EuiText size="xs" color="subdued">
+                  {hint}
+                </EuiText>
+              </EuiFlexItem>
+            )}
+          </EuiFlexGroup>
         );
       },
     },
@@ -352,7 +359,7 @@ export function RequestFlyoutFailedCalls() {
           )}
           <EuiBasicTable
             columns={columns}
-            items={buckets}
+            items={bucketsByFailureRate}
             loading={isLoading}
             noItemsMessage={
               isLoading

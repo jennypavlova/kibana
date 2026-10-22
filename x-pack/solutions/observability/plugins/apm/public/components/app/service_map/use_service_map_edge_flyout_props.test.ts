@@ -138,20 +138,57 @@ describe('useServiceMapEdgeFlyoutProps', () => {
     });
   });
 
-  it('reports isGrouped true for a grouped edge', () => {
-    const edge = makeEdge({
-      sourceData: SOURCE_SERVICE_NODE,
-      targetData: TARGET_DEPENDENCY_NODE,
-      isGrouped: true,
-      resources: ['redis', 'kafka'],
-    });
-    const { result } = renderHook(() =>
-      useServiceMapEdgeFlyoutProps({ selectedEdgeForFlyout: edge })
-    );
+  describe('grouped edge (service → "N resources" node)', () => {
+    // Real shape built by group_resource_nodes: no sourceData/targetData, the source is the
+    // service node id and the resources are listed in groupedConnections.
+    const groupedEdge = (
+      groupedConnections?: NonNullable<ServiceMapEdge['data']>['groupedConnections']
+    ) =>
+      makeEdge(
+        { isGrouped: true, groupedConnections },
+        { source: 'opbeans-java', target: 'resourceGroup{opbeans-java}' }
+      );
 
-    expect(result.current).not.toBeNull();
-    expect(result.current?.isGrouped).toBe(true);
-    expect(result.current?.dependencies).toEqual(['redis', 'kafka']);
+    it('lists the grouped resources and uses the edge source as the service', () => {
+      const edge = groupedEdge([
+        { id: '>redis-1', label: 'redis-1', spanType: 'db', spanSubtype: 'redis' },
+        { id: '>redis-2', label: 'redis-2', spanType: 'db', spanSubtype: 'redis' },
+      ]);
+      const { result } = renderHook(() =>
+        useServiceMapEdgeFlyoutProps({ selectedEdgeForFlyout: edge })
+      );
+
+      expect(result.current).toMatchObject({
+        sourceServiceName: 'opbeans-java',
+        isGrouped: true,
+        dependencies: ['redis-1', 'redis-2'],
+        groupedResources: [
+          { resource: 'redis-1', spanType: 'db', spanSubtype: 'redis' },
+          { resource: 'redis-2', spanType: 'db', spanSubtype: 'redis' },
+        ],
+      });
+      expect(result.current?.targetLabel).toBe('2 redis resources');
+    });
+
+    it('prefers span.destination.service.resource over the label', () => {
+      const edge = groupedEdge([
+        { id: '>a', label: 'A', [SPAN_DESTINATION_SERVICE_RESOURCE]: 'resource-a' },
+      ]);
+      const { result } = renderHook(() =>
+        useServiceMapEdgeFlyoutProps({ selectedEdgeForFlyout: edge })
+      );
+
+      expect(result.current?.dependencies).toEqual(['resource-a']);
+    });
+
+    it('returns null for a grouped edge without resources (outgoing grouped edge)', () => {
+      const edge = groupedEdge(undefined);
+      const { result } = renderHook(() =>
+        useServiceMapEdgeFlyoutProps({ selectedEdgeForFlyout: edge })
+      );
+
+      expect(result.current).toBeNull();
+    });
   });
 
   it('reports isMessagingConsumer true when sourceData is a messaging exit span that also carries a service name', () => {

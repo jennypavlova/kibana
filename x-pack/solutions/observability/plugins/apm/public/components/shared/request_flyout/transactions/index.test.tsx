@@ -7,6 +7,7 @@
 
 import React from 'react';
 import { fireEvent, render, screen } from '@testing-library/react';
+import { RequestFlyoutChildProvider } from '../request_flyout_child';
 import { RequestFlyoutContextProvider } from '../request_flyout_context';
 import type { RequestFlyoutContextValue } from '../request_flyout_context';
 import { RequestFlyoutAffectedEndpoints } from '.';
@@ -65,14 +66,19 @@ const SAMPLE_ITEMS = [
   },
 ];
 
-function renderComponent(
-  contextOverrides: Partial<RequestFlyoutContextValue> = {},
-  onTransactionSelect?: jest.Mock
-) {
+function renderComponent(contextOverrides: Partial<RequestFlyoutContextValue> = {}) {
   const ctx = { ...BASE_CONTEXT, ...contextOverrides };
   return render(
     <RequestFlyoutContextProvider value={ctx}>
-      <RequestFlyoutAffectedEndpoints onTransactionSelect={onTransactionSelect} />
+      <RequestFlyoutChildProvider
+        render={(child) => (
+          <div data-test-subj="openChild">
+            {child.kind === 'transaction' ? `${child.name}|${child.transactionType}` : child.kind}
+          </div>
+        )}
+      >
+        <RequestFlyoutAffectedEndpoints />
+      </RequestFlyoutChildProvider>
     </RequestFlyoutContextProvider>
   );
 }
@@ -114,24 +120,32 @@ describe('RequestFlyoutAffectedEndpoints', () => {
     expect(screen.getByText('Loading transactions…')).toBeInTheDocument();
   });
 
-  it('calls onTransactionSelect with name and type when a transaction name link is clicked', () => {
-    const onTransactionSelect = jest.fn();
-    renderComponent({}, onTransactionSelect);
+  it('opens the transaction child flyout with name and type when a name link is clicked', () => {
+    renderComponent();
 
     fireEvent.click(screen.getByTestId('requestFlyoutTransactionNameLink-GET /api/products'));
 
-    expect(onTransactionSelect).toHaveBeenCalledWith('GET /api/products', 'request');
+    expect(screen.getByTestId('openChild')).toHaveTextContent('GET /api/products|request');
   });
 
-  it('calls onTransactionSelect again when a different name link is clicked', () => {
-    const onTransactionSelect = jest.fn();
-    renderComponent({}, onTransactionSelect);
+  it('switches the child flyout when a different name link is clicked', () => {
+    renderComponent();
 
     fireEvent.click(screen.getByTestId('requestFlyoutTransactionNameLink-GET /api/products'));
     fireEvent.click(screen.getByTestId('requestFlyoutTransactionNameLink-POST /api/orders'));
 
-    expect(onTransactionSelect).toHaveBeenCalledTimes(2);
-    expect(onTransactionSelect).toHaveBeenNthCalledWith(2, 'POST /api/orders', 'request');
+    expect(screen.getByTestId('openChild')).toHaveTextContent('POST /api/orders|request');
+  });
+
+  it('closes the child flyout when the open transaction is clicked again', () => {
+    renderComponent();
+
+    fireEvent.click(screen.getByTestId('requestFlyoutTransactionNameLink-GET /api/products'));
+    fireEvent.click(
+      screen.getByTestId('requestFlyoutTransactionNameLink-GET /api/products-expand')
+    );
+
+    expect(screen.queryByTestId('openChild')).not.toBeInTheDocument();
   });
 
   it('shows the max-transactions warning when isMaxTransactionsReached is true', () => {

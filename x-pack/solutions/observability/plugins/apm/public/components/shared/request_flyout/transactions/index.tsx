@@ -9,7 +9,6 @@ import {
   EuiBasicTable,
   EuiButtonIcon,
   EuiCallOut,
-  EuiLink,
   EuiSpacer,
   type EuiBasicTableColumn,
 } from '@elastic/eui';
@@ -22,13 +21,11 @@ import { useApmIndexSettingsContext } from '../../../../context/apm_index_settin
 import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
 import { getESQLQuery } from '../../links/discover_links/get_esql_query';
 import { ImpactBar } from '../../impact_bar';
+import { ExpandableNameCell } from '../expandable_name_cell';
+import { useRequestFlyoutChild } from '../request_flyout_child';
 import { useRequestFlyoutContext } from '../request_flyout_context';
 import { useRequestFlyoutTransactions } from './use_request_flyout_transactions';
 import type { ConnectionTransactionGroup } from './use_request_flyout_transactions';
-
-interface RequestFlyoutAffectedEndpointsProps {
-  onTransactionSelect?: (name: string, transactionType: string) => void;
-}
 
 /**
  * "Transactions" tab in the edge flyout.
@@ -40,12 +37,11 @@ interface RequestFlyoutAffectedEndpointsProps {
  * Column names are unified with the Operations tab:
  *   Name · Avg time · Calls · Failed · Time consumed
  *
- * TransactionDetailFlyout state is owned by the parent (RequestFlyout) so that
- * EUI can render it as a side panel sibling to the main flyout.
+ * The selected transaction is held by the surrounding RequestFlyoutChildProvider,
+ * which renders TransactionDetailFlyout as a child flyout.
  */
-export function RequestFlyoutAffectedEndpoints({
-  onTransactionSelect,
-}: RequestFlyoutAffectedEndpointsProps) {
+export function RequestFlyoutAffectedEndpoints() {
+  const { toggleChild, isChildSelected } = useRequestFlyoutChild();
   const {
     connection: { sourceServiceName },
     filters: { environment, rangeFrom, rangeTo },
@@ -86,26 +82,33 @@ export function RequestFlyoutAffectedEndpoints({
 
   const onTransactionClick = useCallback(
     (item: ConnectionTransactionGroup) => {
-      if (!item.transactionType || !onTransactionSelect) return;
-      onTransactionSelect(item.name, item.transactionType);
+      if (!item.transactionType) return;
+      toggleChild({ kind: 'transaction', name: item.name, transactionType: item.transactionType });
     },
-    [onTransactionSelect]
+    [toggleChild]
   );
 
   const columns: Array<EuiBasicTableColumn<ConnectionTransactionGroup>> = [
     {
       field: 'name',
+      width: '38%',
       name: i18n.translate('xpack.apm.requestFlyout.affectedEndpoints.column.transaction', {
         defaultMessage: 'Name',
       }),
-      truncateText: true,
       render: (name: string, item: ConnectionTransactionGroup) => (
-        <EuiLink
+        <ExpandableNameCell
           data-test-subj={`requestFlyoutTransactionNameLink-${name}`}
+          name={name}
+          isExpanded={
+            !!item.transactionType &&
+            isChildSelected({
+              kind: 'transaction',
+              name: item.name,
+              transactionType: item.transactionType,
+            })
+          }
           onClick={() => onTransactionClick(item)}
-        >
-          {name}
-        </EuiLink>
+        />
       ),
     },
     {
@@ -238,10 +241,9 @@ export function RequestFlyoutAffectedEndpoints({
           rowProps={(item) => ({
             'data-test-subj': `affectedEndpointRow-${item.name}`,
           })}
-          tableCaption={i18n.translate(
-            'xpack.apm.requestFlyout.affectedEndpoints.tableCaption',
-            { defaultMessage: 'Transactions from source service that call the target' }
-          )}
+          tableCaption={i18n.translate('xpack.apm.requestFlyout.affectedEndpoints.tableCaption', {
+            defaultMessage: 'Transactions from source service that call the target',
+          })}
           data-test-subj="requestFlyoutAffectedEndpointsTable"
         />
       </section>

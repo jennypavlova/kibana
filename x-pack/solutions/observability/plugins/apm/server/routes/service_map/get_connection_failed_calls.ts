@@ -436,7 +436,12 @@ async function getTopErrorForSpans({
         terms: { field: ERROR_GROUP_ID, size: 1 },
         aggs: {
           sample: {
-            top_hits: { size: 1, _source: [ERROR_LOG_MESSAGE, ERROR_EXC_MESSAGE, ERROR_EXC_TYPE] },
+            top_hits: {
+              size: 1,
+              // `fields` returns flat keys; a `_source` filter returns nested objects.
+              _source: false,
+              fields: [ERROR_LOG_MESSAGE, ERROR_EXC_MESSAGE, ERROR_EXC_TYPE],
+            },
           },
         },
       },
@@ -483,7 +488,12 @@ async function getTopErrorForTransactions({
         terms: { field: ERROR_GROUP_ID, size: 1 },
         aggs: {
           sample: {
-            top_hits: { size: 1, _source: [ERROR_LOG_MESSAGE, ERROR_EXC_MESSAGE, ERROR_EXC_TYPE] },
+            top_hits: {
+              size: 1,
+              // `fields` returns flat keys; a `_source` filter returns nested objects.
+              _source: false,
+              fields: [ERROR_LOG_MESSAGE, ERROR_EXC_MESSAGE, ERROR_EXC_TYPE],
+            },
           },
         },
       },
@@ -498,10 +508,13 @@ function extractTopError(
 ): TopErrorDoc | null {
   const topBucket = (response.aggregations as any)?.top_group?.buckets?.[0];
   if (!topBucket) return null;
-  const source = topBucket.sample?.hits?.hits?.[0]?._source;
-  if (!source) return null;
+  const fields = topBucket.sample?.hits?.hits?.[0]?.fields;
+  if (!fields) return null;
   const message: string | null =
-    source[ERROR_LOG_MESSAGE] || source[ERROR_EXC_MESSAGE] || source[ERROR_EXC_TYPE] || null;
+    fields[ERROR_LOG_MESSAGE]?.[0] ||
+    fields[ERROR_EXC_MESSAGE]?.[0] ||
+    fields[ERROR_EXC_TYPE]?.[0] ||
+    null;
   if (!message) return null;
   return { message, groupId: String(topBucket.key) };
 }

@@ -10,7 +10,6 @@ import {
   EuiFlexItem,
   EuiIconTip,
   EuiPanel,
-  EuiSkeletonRectangle,
   EuiSpacer,
   EuiTitle,
   useEuiTheme,
@@ -48,18 +47,6 @@ function useChartsGridCss() {
     grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
     gap: ${euiTheme.size.m};
   `;
-}
-
-function RedMetricsChartsSkeleton() {
-  const chartsGridCss = useChartsGridCss();
-
-  return (
-    <div data-test-subj="requestFlyoutRedMetricsSkeleton" css={chartsGridCss}>
-      <EuiSkeletonRectangle width="100%" height={CHART_HEIGHT} borderRadius="m" />
-      <EuiSkeletonRectangle width="100%" height={CHART_HEIGHT} borderRadius="m" />
-      <EuiSkeletonRectangle width="100%" height={CHART_HEIGHT} borderRadius="m" />
-    </div>
-  );
 }
 
 function FlyoutTimeseriesChartPanel({
@@ -143,29 +130,24 @@ function RequestFlyoutRedMetricsCharts({
     throughputStatus,
     errorRateTimeseries,
     errorRateStatus,
-    isLoading,
     hasError,
   } = useRequestFlyoutRedMetrics({ latencyAggregationType });
 
   const latencyMaxY = getMaxY(latencyTimeseries);
   const latencyFormatter = getDurationFormatter(latencyMaxY);
 
-  if (isLoading) {
-    return <RedMetricsChartsSkeleton />;
-  }
-
-  if (hasError) {
-    return (
-      <KbnWarningCallout
-        size="s"
-        data-test-subj="requestFlyoutRedMetricsError"
-        title={CHARTS_LOAD_ERROR}
-      />
-    );
-  }
-
   return (
     <ChartPointerEventContextProvider>
+      {hasError && (
+        <>
+          <KbnWarningCallout
+            size="s"
+            data-test-subj="requestFlyoutRedMetricsError"
+            title={CHARTS_LOAD_ERROR}
+          />
+          <EuiSpacer size="s" />
+        </>
+      )}
       <div css={chartsGridCss}>
         <FlyoutTimeseriesChartPanel
           id="requestFlyoutRedMetricsChart-latency"
@@ -180,6 +162,7 @@ function RequestFlyoutRedMetricsCharts({
           }
         >
           <TimeseriesChart
+            settings={{ showLegend: false }}
             id="requestFlyoutLatencyChart"
             height={CHART_HEIGHT}
             fetchStatus={latencyStatus}
@@ -206,6 +189,7 @@ function RequestFlyoutRedMetricsCharts({
           }
         >
           <TimeseriesChart
+            settings={{ showLegend: false }}
             id="requestFlyoutThroughputChart"
             height={CHART_HEIGHT}
             fetchStatus={throughputStatus}
@@ -225,6 +209,7 @@ function RequestFlyoutRedMetricsCharts({
           titleTip={<EuiIconTip content={errorRateI18n} position="right" />}
         >
           <TimeseriesChart
+            settings={{ showLegend: false }}
             id="requestFlyoutErrorRateChart"
             height={CHART_HEIGHT}
             fetchStatus={errorRateStatus}

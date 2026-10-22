@@ -20,8 +20,8 @@ import { useApmIndexSettingsContext } from '../../../../context/apm_index_settin
 import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
 import { getESQLQuery } from '../../links/discover_links/get_esql_query';
 import { ImpactBar } from '../../impact_bar';
-import { TransactionTab } from '../../../app/transaction_details/waterfall_with_summary/transaction_tabs';
-import { DependencyOperationDetailLink } from '../../../app/dependency_operation_detail_view/dependency_operation_detail_link';
+import { ExpandableNameCell } from '../expandable_name_cell';
+import { useRequestFlyoutChild } from '../request_flyout_child';
 import { useRequestFlyoutContext } from '../request_flyout_context';
 import { useRequestFlyoutOperations } from './use_request_flyout_operations';
 
@@ -29,18 +29,19 @@ import { useRequestFlyoutOperations } from './use_request_flyout_operations';
  * "Operations" tab in the edge flyout.
  *
  * Shows the exit-span operations from the source service to the target
- * dependency: the span type, name (link to operation detail page), call
+ * dependency: the name (opens the operation detail child flyout), span type, call
  * latency, calls, failure rate and impact (time consumed share) — all
  * measured on the source side.
  *
  * Column names are unified with the Transactions tab:
- *   Type · Name · Avg time · Calls · Failed · Time consumed
+ *   Name · Type · Avg time · Calls · Failed · Time consumed
  */
 export function RequestFlyoutOperations() {
   const {
     connection: { sourceServiceName },
     filters: { environment, rangeFrom, rangeTo },
   } = useRequestFlyoutContext();
+  const { toggleChild, isChildSelected } = useRequestFlyoutChild();
 
   const { items, isLoading, resolvedDependencyName } = useRequestFlyoutOperations();
 
@@ -76,40 +77,41 @@ export function RequestFlyoutOperations() {
 
   const columns: Array<EuiBasicTableColumn<DependencyOperation>> = [
     {
+      field: 'spanName',
+      width: '38%',
+      name: i18n.translate('xpack.apm.requestFlyout.operations.column.spanName', {
+        defaultMessage: 'Name',
+      }),
+      render: (spanName: string) => {
+        if (!resolvedDependencyName) {
+          // Service→service edges use span names as-is; no operation detail.
+          return spanName;
+        }
+        const child = {
+          kind: 'operation' as const,
+          spanName,
+          dependencyName: resolvedDependencyName,
+        };
+        // Opens the operation detail as a child flyout (scoped to the source service)
+        // instead of navigating to the dependency operation page.
+        return (
+          <ExpandableNameCell
+            data-test-subj={`requestFlyoutOperationNameLink-${spanName}`}
+            name={spanName}
+            isExpanded={isChildSelected(child)}
+            onClick={() => toggleChild(child)}
+          />
+        );
+      },
+    },
+    {
       field: 'spanType',
       name: i18n.translate('xpack.apm.requestFlyout.operations.column.spanType', {
         defaultMessage: 'Type',
       }),
-      width: '100px',
+      width: '14%',
       render: (spanType: string | undefined) =>
         spanType ? <EuiBadge color="hollow">{spanType}</EuiBadge> : <span>—</span>,
-    },
-    {
-      field: 'spanName',
-      name: i18n.translate('xpack.apm.requestFlyout.operations.column.spanName', {
-        defaultMessage: 'Name',
-      }),
-      truncateText: true,
-      render: (spanName: string) => {
-        if (!resolvedDependencyName) {
-          // Service→service edges use span names as-is; no operation detail page link.
-          return spanName;
-        }
-        return (
-          <DependencyOperationDetailLink
-            dependencyName={resolvedDependencyName}
-            spanName={spanName}
-            environment={environment}
-            rangeFrom={rangeFrom}
-            rangeTo={rangeTo}
-            // Pre-scope to the source service so the page shows only this caller's data.
-            kuery={`service.name : "${sourceServiceName}"`}
-            comparisonEnabled={false}
-            detailTab={TransactionTab.timeline}
-            showCriticalPath={false}
-          />
-        );
-      },
     },
     {
       field: 'latency',
@@ -215,10 +217,9 @@ export function RequestFlyoutOperations() {
             setPageSize(page.size);
           }
         }}
-        tableCaption={i18n.translate(
-          'xpack.apm.requestFlyout.operations.tableCaption',
-          { defaultMessage: 'Exit span operations from source to target service' }
-        )}
+        tableCaption={i18n.translate('xpack.apm.requestFlyout.operations.tableCaption', {
+          defaultMessage: 'Exit span operations from source to target service',
+        })}
         data-test-subj="requestFlyoutOperationsTable"
       />
     </section>

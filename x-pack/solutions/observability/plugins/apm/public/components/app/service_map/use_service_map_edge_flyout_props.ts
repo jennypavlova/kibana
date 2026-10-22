@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { i18n } from '@kbn/i18n';
 import { useMemo } from 'react';
 import { SERVICE_NAME, SPAN_DESTINATION_SERVICE_RESOURCE } from '../../../../common/es_fields/apm';
 import { isMessagingExitSpan } from '../../../../common/service_map/get_service_map_nodes';
@@ -25,8 +26,42 @@ export function useServiceMapEdgeFlyoutProps({
   return useMemo(() => {
     if (!selectedEdgeForFlyout) return null;
 
-    const { sourceData, targetData, sourceLabel, targetLabel, resources, isGrouped } =
-      selectedEdgeForFlyout.data ?? {};
+    const {
+      sourceData,
+      targetData,
+      sourceLabel,
+      targetLabel,
+      resources,
+      isGrouped,
+      groupedConnections,
+    } = selectedEdgeForFlyout.data ?? {};
+
+    // Grouped edge (service → "N resources" node). It carries no sourceData/targetData:
+    // the source is the service node (its id is the service name) and the resources
+    // come from the grouped node. Outgoing grouped edges have no resources and are
+    // not supported.
+    if (isGrouped) {
+      if (!groupedConnections?.length) return null;
+      const groupedResources = groupedConnections.map((connection) => ({
+        resource: connection[SPAN_DESTINATION_SERVICE_RESOURCE] ?? connection.label,
+        spanType: connection.spanType,
+        spanSubtype: connection.spanSubtype,
+      }));
+      const { spanType, spanSubtype } = groupedResources[0];
+      return {
+        sourceServiceName: selectedEdgeForFlyout.source,
+        sourceLabel: selectedEdgeForFlyout.source,
+        targetLabel: i18n
+          .translate('xpack.apm.requestFlyout.groupedTargetLabel', {
+            defaultMessage: '{count} {type} resources',
+            values: { count: groupedResources.length, type: spanSubtype ?? spanType ?? '' },
+          })
+          .replace(/\s+/g, ' '),
+        dependencies: groupedResources.map(({ resource }) => resource),
+        groupedResources,
+        isGrouped: true,
+      } satisfies RequestFlyoutConnection;
+    }
 
     const sourceServiceName =
       sourceData && SERVICE_NAME in sourceData ? sourceData[SERVICE_NAME] : undefined;

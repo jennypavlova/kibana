@@ -7,8 +7,9 @@
 
 import { i18n } from '@kbn/i18n';
 import { useMemo } from 'react';
-import { FETCH_STATUS, isPending, useFetcher } from '../../../../hooks/use_fetcher';
+import { FETCH_STATUS, useFetcher } from '../../../../hooks/use_fetcher';
 import { ChartType, getTimeSeriesColor } from '../../charts/helper/get_timeseries_color';
+import { getLatencyChartType } from '../../service_flyout/overview/chart_configs/shared/chart_builders';
 import { useRequestFlyoutContext } from '../request_flyout_context';
 import type { LatencyAggregationType } from '../../../../../common/latency_aggregation_types';
 
@@ -50,8 +51,9 @@ export function useRequestFlyoutRedMetrics({
   const { currentPeriodColor: errorRateColor } = getTimeSeriesColor(
     ChartType.FAILED_TRANSACTION_RATE
   );
-  // Use the latency chart colour from transaction-detail flyout pattern.
-  const { currentPeriodColor: latencyColor } = getTimeSeriesColor(ChartType.LATENCY_AVG);
+  const { currentPeriodColor: latencyColor } = getTimeSeriesColor(
+    getLatencyChartType(latencyAggregationType)
+  );
 
   const currentPeriod = data?.currentPeriod;
 
@@ -100,7 +102,6 @@ export function useRequestFlyoutRedMetrics({
     ];
   }, [currentPeriod, errorRateColor]);
 
-  const isLoading = isPending(fetchStatus);
   const hasError = fetchStatus === FETCH_STATUS.FAILURE;
 
   return {
@@ -110,7 +111,6 @@ export function useRequestFlyoutRedMetrics({
     throughputStatus: fetchStatus,
     errorRateTimeseries,
     errorRateStatus: fetchStatus,
-    isLoading,
     hasError,
     error,
   };

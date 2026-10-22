@@ -10,8 +10,6 @@ import {
   EuiFlexItem,
   EuiFlyoutBody,
   EuiSpacer,
-  EuiTab,
-  EuiTabs,
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
@@ -159,35 +157,34 @@ export function RequestFlyoutContent({ childSession, historyKey }: RequestFlyout
           <>
             {/* service→dependency: the Operations table (what the source calls on the dependency).
                 service→service: the Transactions table (which source transactions call the target). */}
-            <EuiTabs size="s">
-              <EuiTab
-                isSelected
+            <EuiTitle size="xs">
+              <h3
                 data-test-subj={
                   isServiceToService
-                    ? 'requestFlyoutTabAffectedEndpoints'
-                    : 'requestFlyoutTabOperations'
+                    ? 'requestFlyoutTransactionsTitle'
+                    : 'requestFlyoutOperationsTitle'
                 }
               >
                 {isServiceToService
-                  ? i18n.translate('xpack.apm.requestFlyout.tabs.affectedEndpoints', {
+                  ? i18n.translate('xpack.apm.requestFlyout.transactionsTitle', {
                       defaultMessage: 'Transactions',
                     })
-                  : i18n.translate('xpack.apm.requestFlyout.tabs.operations', {
+                  : i18n.translate('xpack.apm.requestFlyout.operationsTitle', {
                       defaultMessage: 'Operations',
                     })}
-              </EuiTab>
-            </EuiTabs>
+              </h3>
+            </EuiTitle>
 
-            <EuiText size="xs" color="subdued" style={{ marginTop: 4 }}>
+            <EuiText size="xs" color="subdued">
               {isServiceToService
-                ? i18n.translate('xpack.apm.requestFlyout.tabs.affectedEndpoints.caption', {
+                ? i18n.translate('xpack.apm.requestFlyout.transactionsCaption', {
                     defaultMessage: '{source} transactions that call {target}',
                     values: {
                       source: connection.sourceLabel,
                       target: connection.targetLabel,
                     },
                   })
-                : i18n.translate('xpack.apm.requestFlyout.tabs.operations.caption', {
+                : i18n.translate('xpack.apm.requestFlyout.operationsCaption', {
                     defaultMessage: 'What {source} calls on {target}',
                     values: {
                       source: connection.sourceLabel,

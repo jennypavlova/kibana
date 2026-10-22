@@ -162,6 +162,7 @@ function RequestFlyoutRedMetricsCharts({
           }
         >
           <TimeseriesChart
+            settings={{ showLegend: false }}
             id="requestFlyoutLatencyChart"
             height={CHART_HEIGHT}
             fetchStatus={latencyStatus}
@@ -188,6 +189,7 @@ function RequestFlyoutRedMetricsCharts({
           }
         >
           <TimeseriesChart
+            settings={{ showLegend: false }}
             id="requestFlyoutThroughputChart"
             height={CHART_HEIGHT}
             fetchStatus={throughputStatus}
@@ -207,6 +209,7 @@ function RequestFlyoutRedMetricsCharts({
           titleTip={<EuiIconTip content={errorRateI18n} position="right" />}
         >
           <TimeseriesChart
+            settings={{ showLegend: false }}
             id="requestFlyoutErrorRateChart"
             height={CHART_HEIGHT}
             fetchStatus={errorRateStatus}

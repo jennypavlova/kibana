@@ -251,6 +251,7 @@ export function RequestFlyoutOperationDetailFlyout({
                   })}
                 >
                   <TimeseriesChart
+                    settings={{ showLegend: false }}
                     id="requestFlyoutOperationLatency"
                     height={CHART_HEIGHT}
                     fetchStatus={latencyStatus}
@@ -269,6 +270,7 @@ export function RequestFlyoutOperationDetailFlyout({
                   })}
                 >
                   <TimeseriesChart
+                    settings={{ showLegend: false }}
                     id="requestFlyoutOperationThroughput"
                     height={CHART_HEIGHT}
                     fetchStatus={throughputStatus}
@@ -287,6 +289,7 @@ export function RequestFlyoutOperationDetailFlyout({
                   })}
                 >
                   <TimeseriesChart
+                    settings={{ showLegend: false }}
                     id="requestFlyoutOperationErrorRate"
                     height={CHART_HEIGHT}
                     fetchStatus={errorRateStatus}
